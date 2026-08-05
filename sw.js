@@ -3,12 +3,12 @@
  * Bump VERSION on every change to this file, otherwise browsers keep
  * serving the old cache bucket and your fix never ships.
  */
-const VERSION = 'v1';
+const VERSION = 'v2';
 const CACHE = 'dock-' + VERSION;
 
 /* Precached so the app opens with no network at all. Keep this list short
- * and honest: anything listed here that 404s makes install() fail silently
- * and the worker never activates. */
+ * and honest: anything listed here that 404s makes install() fail, so we
+ * add entries individually and tolerate misses. */
 const SHELL = [
   './',
   './index.html',
@@ -19,10 +19,17 @@ const SHELL = [
   './manifest.json'
 ];
 
-/* Never cache: anything that talks to a backend. A dashboard showing
- * yesterday's numbers with no indication they are stale is worse than one
- * that fails visibly. */
+/* Never cached: anything that talks to a backend. A dashboard showing
+ * yesterday's numbers with no sign they are stale is worse than one that
+ * visibly fails. */
 const NEVER_CACHE = ['/api/'];
+
+/* Cache-first is only safe for files whose contents never change under a
+ * given URL. Ours are icons. Application code is deliberately NOT in here:
+ * the filenames carry no hash, so a cache-first rule would keep serving
+ * last week's app.js against this week's index.html and the two would
+ * disagree in ways that look like ghosts. */
+const IMMUTABLE = /\/icons\/|\.(png|jpg|jpeg|webp|svg|woff2?)$/i;
 
 self.addEventListener('install', e => {
   e.waitUntil(
@@ -40,6 +47,28 @@ self.addEventListener('activate', e => {
   );
 });
 
+function networkFirst(req) {
+  return fetch(req)
+    .then(res => {
+      if (res.ok && res.type === 'basic') {
+        const copy = res.clone();
+        caches.open(CACHE).then(c => c.put(req, copy));
+      }
+      return res;
+    })
+    .catch(() => caches.match(req).then(r => r || caches.match('./index.html')));
+}
+
+function cacheFirst(req) {
+  return caches.match(req).then(hit => hit || fetch(req).then(res => {
+    if (res.ok && res.type === 'basic') {
+      const copy = res.clone();
+      caches.open(CACHE).then(c => c.put(req, copy));
+    }
+    return res;
+  }));
+}
+
 self.addEventListener('fetch', e => {
   const req = e.request;
   if (req.method !== 'GET') return;
@@ -48,28 +77,5 @@ self.addEventListener('fetch', e => {
   if (url.origin !== self.location.origin) return;
   if (NEVER_CACHE.some(p => url.pathname.includes(p))) return;
 
-  /* Navigations go to the network first so a deployed fix is picked up on
-   * the next open; the cache is the offline fallback, not the default. */
-  if (req.mode === 'navigate') {
-    e.respondWith(
-      fetch(req)
-        .then(res => {
-          const copy = res.clone();
-          caches.open(CACHE).then(c => c.put(req, copy));
-          return res;
-        })
-        .catch(() => caches.match(req).then(r => r || caches.match('./index.html')))
-    );
-    return;
-  }
-
-  e.respondWith(
-    caches.match(req).then(hit => hit || fetch(req).then(res => {
-      if (res.ok && res.type === 'basic') {
-        const copy = res.clone();
-        caches.open(CACHE).then(c => c.put(req, copy));
-      }
-      return res;
-    }))
-  );
+  e.respondWith(IMMUTABLE.test(url.pathname) ? cacheFirst(req) : networkFirst(req));
 });

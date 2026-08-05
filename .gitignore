@@ -1,0 +1,8 @@
+# never commit a real deployment config
+config.local.js
+
+__pycache__/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

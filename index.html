@@ -131,9 +131,19 @@
   <main id="root"></main>
 
 <script type="module">
-  import config from './config.js';
   import { createStorage } from './core/storage.js';
   import { Shell } from './core/app.js';
+
+  /* A deployment drops in config.local.js — gitignored, never committed —
+   * and it wins. Without one you get the public config: local storage,
+   * sample data, no endpoints. Everything else on disk is identical
+   * between a private deployment and a fresh clone. */
+  let config;
+  try {
+    config = (await import('./config.local.js')).default;
+  } catch {
+    config = (await import('./config.js')).default;
+  }
 
   new Shell({
     config,

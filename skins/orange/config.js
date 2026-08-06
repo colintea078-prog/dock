@@ -16,6 +16,9 @@ export default {
     { id: 'spare',    name: '待 定' }
   ],
 
+  /* 四个站点各用哪张图，对应 assets/ 下的文件名 */
+  stopIcons: ['letter.webp', 'stop6.webp', 'stop5.webp', 'stop5.webp'],
+
   /* 日历的数据来源。
      留空 = 存在这台设备上，clone 下来不用配任何东西就能用。
      填上地址 = 走你自己的接口，字段跟着 moodPerson / moodToken。 */

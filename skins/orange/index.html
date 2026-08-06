@@ -185,12 +185,22 @@
   #title.hide{opacity:0}
 
   /* 装饰 */
-  .deco{position:absolute;pointer-events:none;opacity:.9}
-  #cloud1{width:54px;top:26vh;left:8vw;animation:drift 11s ease-in-out infinite}
-  #cloud2{width:38px;top:33vh;right:11vw;animation:drift 14s ease-in-out infinite reverse}
+  /* 拼贴。只在主页出现，跟标题一起淡。
+     每片各自慢慢飘，周期都不一样，所以不会整体一起晃。 */
+  #deco{position:absolute;inset:0;z-index:2;pointer-events:none;transition:opacity .32s ease}
+  #deco.hide{opacity:0}
+  #deco img{position:absolute;filter:drop-shadow(0 2px 6px rgba(30,60,110,.18))}
+  .d23{top:15vh;left:5vw;width:64px;opacity:.85;animation:drift 13s ease-in-out infinite}
+  .d22{top:11vh;right:2vw;width:104px;opacity:.5;animation:drift 17s ease-in-out infinite reverse}
+  .d19{top:25.5vh;left:50%;margin-left:-76px;width:152px;opacity:.5;animation:drift 21s ease-in-out infinite}
+  .d16{top:33vh;left:2vw;width:86px;opacity:.55;animation:drift 15s ease-in-out infinite reverse}
+  .d20{top:30vh;right:3vw;width:92px;opacity:.45;animation:drift 19s ease-in-out infinite}
+  .d18{top:53vh;left:4vw;width:78px;opacity:.5;animation:drift 16s ease-in-out infinite}
+  .d21{top:57vh;right:4vw;width:92px;opacity:.45;animation:drift 23s ease-in-out infinite reverse}
+  .d17{top:62vh;left:50%;margin-left:-62px;width:124px;opacity:.5;animation:drift 18s ease-in-out infinite}
   #bunnies{width:118px;top:38vh;left:6vw;opacity:.55;animation:drift 16s ease-in-out infinite}
   #stars{width:120px;top:22vh;right:5vw;opacity:.7;animation:twinkle 4.5s ease-in-out infinite}
-  @keyframes drift{0%,100%{transform:translate(0,0)}50%{transform:translate(10px,-8px)}}
+  @keyframes drift{0%,100%{transform:translate(0,0)}50%{transform:translate(7px,-9px)}}
   @keyframes twinkle{0%,100%{opacity:.35}50%{opacity:.85}}
 
   /* 洁哥 */
@@ -256,10 +266,20 @@
   <section class="panel" id="panel2"><h2></h2></section>
   <section class="panel" id="panel3"><h2></h2></section>
 
+
+  <div id="deco">
+    <img class="d23" src="./assets/deco/d23.webp?v=1" alt="">
+    <img class="d22" src="./assets/deco/d22.webp?v=1" alt="">
+    <img class="d19" src="./assets/deco/d19.webp?v=1" alt="">
+    <img class="d16" src="./assets/deco/d16.webp?v=1" alt="">
+    <img class="d20" src="./assets/deco/d20.webp?v=1" alt="">
+    <img class="d18" src="./assets/deco/d18.webp?v=1" alt="">
+    <img class="d21" src="./assets/deco/d21.webp?v=1" alt="">
+    <img class="d17" src="./assets/deco/d17.webp?v=1" alt="">
+  </div>
+
   <img id="title" src="./assets/title.webp?v=4" alt="直到大地变成一颗酸橙">
 
-  <img class="deco" id="cloud1" src="./assets/cloud.webp?v=4" alt="">
-  <img class="deco" id="cloud2" src="./assets/cloud.webp?v=4" alt="">
 
   <div id="ang"><div id="angFlip"><div id="angSprite" role="img" aria-label="安洁莉娜"></div></div></div>
 
@@ -347,18 +367,21 @@ function buildRoad() {
 const panels = [0, 1, 2, 3].map(i => document.getElementById('panel' + i));
 const panelBg = document.getElementById('panelBg');
 const titleImg = document.getElementById('title');
+const decoBox = document.getElementById('deco');
 
 function showPanel(i) {
   panels.forEach((p, k) => p.classList.toggle('on', k === i));
   panelBg.classList.toggle('on', i !== -1);   // 只在回主页时才熄
   titleImg.classList.toggle('hide', i !== -1);
+  decoBox.classList.toggle('hide', i !== -1);
 }
 
 function makeLetters() {
   STOPS.forEach((_, i) => {
     const el = document.createElement('div');
     el.className = 'letter';
-    el.innerHTML = '<img src="./assets/letter.webp?v=4" alt="">';
+    const icon = (CFG.stopIcons && CFG.stopIcons[i]) || 'letter.webp';
+    el.innerHTML = `<img src="./assets/${icon}?v=1" alt="">`;
     el.style.setProperty('--i', i);
     el.addEventListener('click', () => onLetter(i));
     stage.appendChild(el);

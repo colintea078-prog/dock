@@ -17,7 +17,7 @@ export default {
   ],
 
   /* 四个站点各用哪张图，对应 assets/ 下的文件名 */
-  stopIcons: ['letter.webp', 'stop6.webp', 'stop5.webp', 'stop5.webp'],
+  stopIcons: ['letter.webp', 'stop6.webp', 'stop5.webp', 'stop4.webp'],
 
   /* 日历的数据来源。
      留空 = 存在这台设备上，clone 下来不用配任何东西就能用。

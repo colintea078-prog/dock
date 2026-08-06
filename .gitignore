@@ -9,3 +9,4 @@ Thumbs.db
 
 # 同人素材：版权归鹰角网络，不进仓库
 skins/*/assets/
+skins/*/config.local.js

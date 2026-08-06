@@ -169,13 +169,13 @@
   <div id="panelBg"></div>
 
   <section class="panel" id="panel0">
-    <h2>打 卡</h2>
+    <h2></h2>
     <div class="checks" id="checks"></div>
-    <p class="panel-note">空着就空着，不会红，也不会催你。</p>
+    <p class="panel-note" id="habitNote"></p>
   </section>
-  <section class="panel" id="panel1"><h2>板 块 二</h2></section>
-  <section class="panel" id="panel2"><h2>板 块 三</h2></section>
-  <section class="panel" id="panel3"><h2>板 块 四</h2></section>
+  <section class="panel" id="panel1"><h2></h2></section>
+  <section class="panel" id="panel2"><h2></h2></section>
+  <section class="panel" id="panel3"><h2></h2></section>
 
   <img id="title" src="./assets/title.webp?v=4" alt="直到大地变成一颗酸橙">
 
@@ -200,6 +200,15 @@
    现在是本地实现，以后换成接口版，这里一行都不用改。 */
 import { LocalStore } from '../../core/storage.js';
 const store = new LocalStore();
+
+/* 有 config.local.js 就用它，没有就用公开那份。
+   缺哪个字段就补哪个，不用整份照抄。 */
+import baseConfig from './config.js';
+let CFG = baseConfig;
+try {
+  const local = (await import('./config.local.js')).default;
+  CFG = { ...baseConfig, ...local };
+} catch { /* 没有本地配置，用公开版 */ }
 
 const stage = document.getElementById('stage');
 const ang   = document.getElementById('ang');
@@ -394,11 +403,7 @@ async function onLetter(i) {
 
 /* ---------------------------------------------------------------- 打卡 */
 
-const HABITS = [
-  { id: 'd3',    icon: '💊', name: 'D3',   target: 2, labels: null },
-  { id: 'water', icon: '💧', name: '喝水', target: 8, labels: null },
-  { id: 'meal',  icon: '🍚', name: '吃饭', target: 3, labels: ['早', '中', '晚'] }
-];
+const HABITS = CFG.habits;
 
 /* 本地日期。绝不能拿 UTC 字符串前十位当日期，
    凌晨写的会算到前一天去。 */
@@ -483,6 +488,13 @@ function layout() {
   }
   apply();
 }
+
+/* 板块标题和那句话都从配置来 */
+CFG.panels.forEach((p, i) => {
+  const h = document.querySelector(`#panel${i} h2`);
+  if (h) h.textContent = p.name;
+});
+document.getElementById('habitNote').textContent = CFG.habitNote;
 
 makeLetters();
 face('right');

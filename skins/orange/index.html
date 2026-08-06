@@ -67,7 +67,8 @@
   @keyframes ride{from{background-position-x:0%}to{background-position-x:100%}}
 
   /* 公路 */
-  #roadWrap{position:absolute;left:0;right:0;bottom:0;height:34%;}
+  /* 贴着屏幕底边，只给 iPhone 那道home横条让出位置 */
+  #roadWrap{position:absolute;left:0;right:0;bottom:calc(env(safe-area-inset-bottom) + 4px);height:30%;}
   #road{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
   .road-line{fill:none;stroke:#fff;stroke-linecap:round}
   .road-glow{stroke-width:11;opacity:.28;filter:blur(5px)}
@@ -149,8 +150,8 @@ function buildRoad() {
   road.setAttribute('width', w);
   road.setAttribute('height', h);
 
-  /* 一条手画感的弯路：左低右高再落下来 */
-  const y = h * 0.62;
+  /* 一条手画感的弯路：左低右高再落下来。压到底边附近，信封才不会浮在半空 */
+  const y = h * 0.84;
   const d = `M ${-w * 0.04} ${y + h * 0.14}
              C ${w * 0.18} ${y - h * 0.10}, ${w * 0.34} ${y + h * 0.20}, ${w * 0.52} ${y + h * 0.02}
              S ${w * 0.86} ${y - h * 0.16}, ${w * 1.04} ${y + h * 0.06}`;
@@ -202,20 +203,23 @@ function tween(to, ms, ease) {
   });
 }
 
-/* 翻不翻由目标决定：右边的站点保持原朝向，左边的站点镜像过来。 */
-function setFlip(mirror) {
-  flip.style.transform = `scaleX(${mirror ? -1 : 1})`;
+/* 素材本身画的是朝左，所以"朝右"要镜像。默认朝右。 */
+let facing = 'right';
+function face(dir) {
+  facing = dir;
+  flip.style.transform = `scaleX(${dir === 'right' ? -1 : 1})`;
 }
 
-/* 出场：一律朝右飞出屏幕，不翻。 */
-function exitRight() {
-  setFlip(false);
-  return tween({ x: innerWidth + 280, y: pos.y - 40 }, 440, easeIn);
+/* 飞出：朝哪边就往哪边出去。 */
+function exit() {
+  const x = facing === 'right' ? innerWidth + 300 : -300;
+  return tween({ x, y: pos.y - 40 }, 440, easeIn);
 }
 
-/* 入场：一律从左边进来。 */
-function enterFromLeft(y, scale) {
-  pos.x = -280; pos.y = y; pos.s = scale;
+/* 进场：从飞出去的反方向回来，这样她一直是朝前飞的。 */
+function enter(y, scale) {
+  pos.x = facing === 'right' ? -300 : innerWidth + 300;
+  pos.y = y; pos.s = scale;
   apply();
 }
 
@@ -237,26 +241,27 @@ async function onLetter(i) {
   busy = true;
   stopBob();
 
-  if (active === i) {                       // 再点一次，飞回中间
+  const target = active === i
+    ? { ...homePoint(), s: 1 }                        // 再点一次，回中间
+    : { x: stopPts[i].x, y: stopPts[i].y - 108, s: 0.4 };
+
+  /* 先定朝向：下一站在右边就朝右，在左边就朝左。飞出和进场都跟着它。 */
+  face(target.x >= pos.x ? 'right' : 'left');
+
+  if (active === i) {
     active = -1;
     letters[i].classList.remove('up');
-    const h = homePoint();
-    await exitRight();
-    setFlip(false);
-    enterFromLeft(h.y, 1);
-    await tween({ x: h.x, y: h.y, s: 1 }, 800, easeOut);
   } else {
     letters.forEach(el => el.classList.remove('up'));
     letters[i].classList.add('up');
     active = i;
-    const p = stopPts[i];
-    const target = { x: p.x, y: p.y - 108, s: 0.4 };
-    await exitRight();
-    setFlip(target.x < innerWidth / 2);     // 左半边的站点，转个身
-    enterFromLeft(target.y, 0.4);
-    await tween(target, 800, easeOut);
-    startBob(target.y);
   }
+
+  await exit();
+  enter(target.y, target.s);
+  await tween(target, 800, easeOut);
+  if (active !== -1) startBob(target.y);
+
   busy = false;
 }
 
@@ -275,6 +280,7 @@ function layout() {
 }
 
 makeLetters();
+face('right');
 layout();
 /* 首屏排版还没完成时算出来的尺寸是 0，下一帧和图片加载完各补算一次。 */
 requestAnimationFrame(layout);

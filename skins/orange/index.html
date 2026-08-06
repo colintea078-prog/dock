@@ -59,9 +59,12 @@
     background-image:url('./assets/ride_sheet.webp?v=4');
     background-repeat:no-repeat;
     background-size:500% 100%;
-    animation:ride 1s steps(5) infinite;
+    /* jump-none 才会取到 0/25/50/75/100 这五个位置。
+       普通的 steps(5) 取的是 0/20/40/60/80，每帧都停在两帧中间，看着就是抖。
+       背景图放大到 5 倍之后，百分比是按"容器与图片的差值"算的，不是图宽。 */
+    animation:ride 1s steps(5,jump-none) infinite;
   }
-  @keyframes ride{from{background-position:0 0}to{background-position:-500% 0}}
+  @keyframes ride{from{background-position-x:0%}to{background-position-x:100%}}
 
   /* 公路 */
   #roadWrap{position:absolute;left:0;right:0;bottom:0;height:34%;}

@@ -4,8 +4,9 @@
  *   cfg.moodApi 有值  → 走接口（自己部署的那份）
  *   没值             → 存在本机（公开版，clone 下来直接能用）
  *
- * 一天一格。格子里放心情图标，经期和排卵期是格子底下的一条颜色。
- * 右上角的开关把经期那一层收起来 —— 不是每个人都需要看这个。
+ * 一天一格。格子里放心情图标，经期和排卵期是格子的底色。
+ * 经期那一层没有开关：记过经期就有，一次都没记过就整层不存在。
+ * 不需要它的人不用先被问一句"你要不要关掉这个"。
  */
 
 const WEEK = ['日', '一', '二', '三', '四', '五', '六'];
@@ -94,29 +95,32 @@ function ovulationDays(days, cycle) {
 
 export function mountCalendar(root, { cfg, store }) {
   const src = cfg.moodApi ? new ApiSource(cfg) : new LocalSource(store);
+
+  /* 抽屉挂在 body 上。放在板块里会被公路和洁哥那两层盖住 ——
+     板块本身带 z-index，里面再高的层级也跳不出这个圈。 */
+  const elSheet = document.createElement('div');
+  elSheet.className = 'sheet';
+  elSheet.hidden = true;
+  document.body.appendChild(elSheet);
   const cycle = cfg.cycleLength || 28;
   let cursor = new Date();
-  let showCycle = true;
+  let showCycle = false;      // 有经期数据才亮，没有就整层不存在
 
   root.innerHTML = `
     <div class="cal-head">
       <button class="cal-nav" data-go="-1">‹</button>
       <div class="cal-title"></div>
       <button class="cal-nav" data-go="1">›</button>
-      <button class="cal-toggle" title="经期显示"></button>
     </div>
     <div class="cal-week"></div>
     <div class="cal-grid"></div>
     <div class="cal-legend"></div>
-    <div class="sheet" hidden></div>
   `;
 
   const elTitle  = root.querySelector('.cal-title');
   const elWeek   = root.querySelector('.cal-week');
   const elGrid   = root.querySelector('.cal-grid');
   const elLegend = root.querySelector('.cal-legend');
-  const elToggle = root.querySelector('.cal-toggle');
-  const elSheet  = root.querySelector('.sheet');
 
   elWeek.innerHTML = WEEK.map(w => `<span>${w}</span>`).join('');
 
@@ -127,17 +131,7 @@ export function mountCalendar(root, { cfg, store }) {
     };
   });
 
-  elToggle.onclick = async () => {
-    showCycle = !showCycle;
-    await store.set('calendar', 'showCycle', showCycle);
-    draw();
-  };
-
   async function draw() {
-    showCycle = await store.get('calendar', 'showCycle', true);
-    elToggle.textContent = showCycle ? '🩸' : '🩶';
-    elToggle.classList.toggle('off', !showCycle);
-
     const y = cursor.getFullYear(), m = cursor.getMonth();
     elTitle.textContent = `${y} 年 ${m + 1} 月`;
 
@@ -145,6 +139,13 @@ export function mountCalendar(root, { cfg, store }) {
     const start = addDays(first, -first.getDay());          // 补齐到周日
     const end = addDays(start, 41);                          // 六行
     const days = await src.range(start, end);
+
+    /* 记过经期就一直显示这一层；一次都没记过的人（比如男生）看不到它。
+       翻到没有数据的月份也不会闪一下就消失。 */
+    const seen = Object.values(days).some(r => r.period);
+    if (seen) await store.set('calendar', 'hasCycle', true);
+    showCycle = seen || await store.get('calendar', 'hasCycle', false);
+
     const ovu = showCycle ? ovulationDays(days, cycle) : new Set();
 
     const today = new Date();

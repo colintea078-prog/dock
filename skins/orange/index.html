@@ -58,13 +58,11 @@
     flex:1;text-align:center;color:#fff;font-size:16px;font-weight:600;
     letter-spacing:2px;text-shadow:0 2px 8px rgba(30,60,110,.3);
   }
-  .cal-nav,.cal-toggle{
+  .cal-nav{
     border:0;background:rgba(255,255,255,.4);color:#2f4a6d;
     width:32px;height:32px;border-radius:50%;font-size:17px;line-height:1;
     cursor:pointer;flex:none;
   }
-  .cal-toggle{font-size:15px;margin-left:4px}
-  .cal-toggle.off{opacity:.45}
   .cal-week{
     display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:6px;
   }
@@ -73,7 +71,7 @@
   }
   .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
   .cal-cell{
-    position:relative;aspect-ratio:1/1.06;
+    position:relative;aspect-ratio:1/1.34;
     border:1px solid rgba(255,255,255,.42);border-radius:10px;
     background:rgba(255,255,255,.2);
     display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
@@ -97,18 +95,19 @@
 
   /* 当天的抽屉 */
   .sheet{
-    position:fixed;inset:0;z-index:20;background:rgba(30,50,80,.34);
-    display:flex;align-items:flex-end;justify-content:center;
+    position:fixed;inset:0;z-index:60;background:rgba(30,50,80,.38);
+    display:flex;align-items:center;justify-content:center;padding:20px;
     backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);
   }
   .sheet[hidden]{display:none}
   .sheet-card{
-    width:100%;max-width:520px;background:#f2f6fb;
-    border-radius:20px 20px 0 0;padding:20px 20px calc(env(safe-area-inset-bottom) + 20px);
-    max-height:84vh;overflow-y:auto;
+    width:100%;max-width:440px;background:#f2f6fb;
+    border-radius:20px;padding:20px;
+    max-height:78vh;overflow-y:auto;
+    box-shadow:0 18px 46px rgba(20,40,70,.3);
     animation:rise .26s cubic-bezier(.2,.9,.3,1);
   }
-  @keyframes rise{from{transform:translateY(16px);opacity:.4}to{transform:none;opacity:1}}
+  @keyframes rise{from{transform:scale(.96);opacity:.3}to{transform:none;opacity:1}}
   .sheet-date{font-size:13px;color:#5b7a9d;letter-spacing:1px;margin-bottom:14px}
   .sheet-moods{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-bottom:16px}
   .mood-pick{

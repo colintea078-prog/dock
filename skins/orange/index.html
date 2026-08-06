@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>直到大地变成一颗酸橙</title>
+<meta name="theme-color" content="#5b8ed6">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%;overflow:hidden;overscroll-behavior:none}
+  body{
+    background:linear-gradient(180deg,#4d7fc9 0%,#5b8ed6 22%,#84b3e2 55%,#bcd9ee 78%,#e4f0f8 100%);
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+    user-select:none;
+  }
+  #stage{position:fixed;inset:0}
+
+  /* 标题 */
+  #title{
+    position:absolute;left:50%;transform:translateX(-50%);
+    top:calc(env(safe-area-inset-top) + 4.5vh);
+    width:min(74vw,340px);
+    filter:drop-shadow(0 2px 10px rgba(30,60,110,.28));
+    pointer-events:none;
+  }
+
+  /* 装饰 */
+  .deco{position:absolute;pointer-events:none;opacity:.9}
+  #cloud1{width:54px;top:26vh;left:8vw;animation:drift 11s ease-in-out infinite}
+  #cloud2{width:38px;top:33vh;right:11vw;animation:drift 14s ease-in-out infinite reverse}
+  #bunnies{width:118px;top:38vh;left:6vw;opacity:.55;animation:drift 16s ease-in-out infinite}
+  #stars{width:120px;top:22vh;right:5vw;opacity:.7;animation:twinkle 4.5s ease-in-out infinite}
+  @keyframes drift{0%,100%{transform:translate(0,0)}50%{transform:translate(10px,-8px)}}
+  @keyframes twinkle{0%,100%{opacity:.35}50%{opacity:.85}}
+
+  /* 洁哥 */
+  #ang{
+    position:absolute;left:0;top:0;width:min(60vw,268px);
+    transform-origin:50% 50%;will-change:transform;
+    filter:drop-shadow(0 10px 18px rgba(30,60,110,.22));
+  }
+  #ang img{width:100%;display:block}
+  #angFlip{transform-origin:50% 50%}
+
+  /* 公路 */
+  #roadWrap{position:absolute;left:0;right:0;bottom:0;height:34%;}
+  #road{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+  .road-line{fill:none;stroke:#fff;stroke-linecap:round}
+  .road-glow{stroke-width:11;opacity:.28;filter:blur(5px)}
+  .road-main{stroke-width:3.2;opacity:.95}
+  .road-dash{stroke-width:2;opacity:.55;stroke-dasharray:2 15}
+
+  /* 信封 */
+  .letter{
+    position:absolute;width:56px;margin-left:-28px;margin-top:-52px;
+    cursor:pointer;will-change:transform;
+    transition:transform .45s cubic-bezier(.34,1.4,.5,1),filter .3s ease;
+    filter:drop-shadow(0 3px 5px rgba(30,60,110,.25));
+  }
+  .letter img{width:100%;display:block;pointer-events:none}
+  .letter.up{
+    animation:float 2.6s ease-in-out infinite;
+    filter:drop-shadow(0 10px 14px rgba(30,60,110,.3));
+  }
+  @keyframes float{
+    0%,100%{transform:translateY(-26px) rotate(-3deg)}
+    50%{transform:translateY(-36px) rotate(3deg)}
+  }
+</style>
+</head>
+<body>
+<div id="stage">
+  <img id="title" src="./assets/title.webp" alt="直到大地变成一颗酸橙">
+
+  <img class="deco" id="cloud1" src="./assets/cloud.webp" alt="">
+  <img class="deco" id="cloud2" src="./assets/cloud.webp" alt="">
+  <img class="deco" id="bunnies" src="./assets/bunnies.webp" alt="">
+  <img class="deco" id="stars" src="./assets/stars.webp" alt="">
+
+  <div id="ang"><div id="angFlip"><img src="./assets/ride.webp" alt="安洁莉娜"></div></div>
+
+  <div id="roadWrap">
+    <svg id="road" xmlns="http://www.w3.org/2000/svg">
+      <path id="pGlow" class="road-line road-glow"></path>
+      <path id="pMain" class="road-line road-main"></path>
+      <path id="pDash" class="road-line road-dash"></path>
+    </svg>
+  </div>
+</div>
+
+<script>
+"use strict";
+
+const stage = document.getElementById('stage');
+const ang   = document.getElementById('ang');
+const flip  = document.getElementById('angFlip');
+const road  = document.getElementById('road');
+const wrap  = document.getElementById('roadWrap');
+const pMain = document.getElementById('pMain');
+
+const STOPS = [0.13, 0.38, 0.63, 0.88];   // 四个站点在路上的位置
+const letters = [];
+let stopPts = [];
+let active = -1;
+let busy = false;
+
+/* 洁哥的当前状态。位置指她的中心点。 */
+let pos = { x: 0, y: 0, s: 1, dir: -1 };  // dir: -1 朝左（素材原方向），1 朝右
+
+function apply() {
+  ang.style.transform = `translate(${pos.x}px, ${pos.y}px) translate(-50%,-50%) scale(${pos.s})`;
+  flip.style.transform = `scaleX(${pos.dir === 1 ? -1 : 1})`;
+}
+
+/* ---------------------------------------------------------------- 布局 */
+
+function homePoint() {
+  return { x: innerWidth * 0.5, y: innerHeight * 0.44 };
+}
+
+function buildRoad() {
+  const w = wrap.clientWidth, h = wrap.clientHeight;
+  road.setAttribute('viewBox', `0 0 ${w} ${h}`);
+  road.setAttribute('width', w);
+  road.setAttribute('height', h);
+
+  /* 一条手画感的弯路：左低右高再落下来 */
+  const y = h * 0.62;
+  const d = `M ${-w * 0.04} ${y + h * 0.14}
+             C ${w * 0.18} ${y - h * 0.10}, ${w * 0.34} ${y + h * 0.20}, ${w * 0.52} ${y + h * 0.02}
+             S ${w * 0.86} ${y - h * 0.16}, ${w * 1.04} ${y + h * 0.06}`;
+  ['pGlow', 'pMain', 'pDash'].forEach(id => document.getElementById(id).setAttribute('d', d));
+
+  const L = pMain.getTotalLength();
+  const box = wrap.getBoundingClientRect();
+  stopPts = STOPS.map(t => {
+    const p = pMain.getPointAtLength(L * t);
+    return { x: p.x + box.left, y: p.y + box.top };
+  });
+
+  letters.forEach((el, i) => {
+    el.style.left = stopPts[i].x + 'px';
+    el.style.top  = stopPts[i].y + 'px';
+  });
+}
+
+function makeLetters() {
+  STOPS.forEach((_, i) => {
+    const el = document.createElement('div');
+    el.className = 'letter';
+    el.innerHTML = '<img src="./assets/letter.webp" alt="">';
+    el.style.setProperty('--i', i);
+    el.addEventListener('click', () => onLetter(i));
+    stage.appendChild(el);
+    letters.push(el);
+  });
+}
+
+/* ---------------------------------------------------------------- 动画 */
+
+function tweenPos(to, ms, easing) {
+  return new Promise(res => {
+    const from = { ...pos };
+    const t0 = performance.now();
+    const ease = easing || (t => t);
+    (function step(now) {
+      const k = Math.min(1, (now - t0) / ms);
+      const e = ease(k);
+      pos.x = from.x + (to.x - from.x) * e;
+      pos.y = from.y + (to.y - from.y) * e;
+      pos.s = from.s + ((to.s ?? from.s) - from.s) * e;
+      apply();
+      k < 1 ? requestAnimationFrame(step) : res();
+    })(t0);
+  });
+}
+
+const easeIn  = t => t * t * t;
+const easeOut = t => 1 - Math.pow(1 - t, 3);
+
+/* 停在信封上方时轻轻上下浮 */
+let bobTimer = null;
+function startBob(base) {
+  stopBob();
+  const t0 = performance.now();
+  (function loop(now) {
+    pos.y = base + Math.sin((now - t0) / 780) * 5;
+    apply();
+    bobTimer = requestAnimationFrame(loop);
+  })(t0);
+}
+function stopBob() { if (bobTimer) cancelAnimationFrame(bobTimer), bobTimer = null; }
+
+async function flyTo(target, scale) {
+  stopBob();
+
+  /* 一、朝右飞出屏幕 */
+  pos.dir = 1;
+  await tweenPos({ x: innerWidth + 260, y: pos.y - 40, s: pos.s }, 460, easeIn);
+
+  /* 二、从离目标近的那一侧、在公路上方的高度重新进场 */
+  const fromLeft = target.x < innerWidth * 0.5;
+  pos.dir = fromLeft ? 1 : -1;
+  pos.x = fromLeft ? -260 : innerWidth + 260;
+  pos.y = target.y;
+  pos.s = scale;
+  apply();
+
+  await tweenPos({ x: target.x, y: target.y, s: scale }, 780, easeOut);
+
+  /* 三、到站停住，落地方向朝内 */
+  startBob(target.y);
+}
+
+async function onLetter(i) {
+  if (busy) return;
+  busy = true;
+
+  if (active === i) {                       // 再点一次，回家
+    active = -1;
+    letters[i].classList.remove('up');
+    const h = homePoint();
+    stopBob();
+    pos.dir = 1;
+    await tweenPos({ x: innerWidth + 260, y: pos.y - 40 }, 420, easeIn);
+    pos.x = -300; pos.y = h.y; pos.s = 1; pos.dir = 1; apply();
+    await tweenPos({ x: h.x, y: h.y, s: 1 }, 760, easeOut);
+    pos.dir = -1; apply();
+  } else {
+    letters.forEach(el => el.classList.remove('up'));
+    letters[i].classList.add('up');
+    active = i;
+    const p = stopPts[i];
+    await flyTo({ x: p.x, y: p.y - 108 }, 0.4);
+  }
+  busy = false;
+}
+
+/* ---------------------------------------------------------------- 启动 */
+
+function layout() {
+  buildRoad();
+  if (active === -1) {
+    const h = homePoint();
+    pos.x = h.x; pos.y = h.y; pos.s = 1;
+  } else {
+    const p = stopPts[active];
+    pos.x = p.x; pos.y = p.y - 108; pos.s = 0.4;
+  }
+  apply();
+}
+
+makeLetters();
+layout();
+/* 首屏排版还没完成时算出来的尺寸是 0，下一帧和图片加载完各补算一次。 */
+requestAnimationFrame(layout);
+addEventListener('load', layout);
+addEventListener('resize', layout);
+addEventListener('orientationchange', () => setTimeout(layout, 120));
+</script>
+</body>
+</html>

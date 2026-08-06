@@ -52,6 +52,87 @@
     margin-bottom:20px;
   }
 
+  /* ---- 日历 ---- */
+  .cal-head{display:flex;align-items:center;gap:6px;margin-bottom:14px}
+  .cal-title{
+    flex:1;text-align:center;color:#fff;font-size:16px;font-weight:600;
+    letter-spacing:2px;text-shadow:0 2px 8px rgba(30,60,110,.3);
+  }
+  .cal-nav,.cal-toggle{
+    border:0;background:rgba(255,255,255,.4);color:#2f4a6d;
+    width:32px;height:32px;border-radius:50%;font-size:17px;line-height:1;
+    cursor:pointer;flex:none;
+  }
+  .cal-toggle{font-size:15px;margin-left:4px}
+  .cal-toggle.off{opacity:.45}
+  .cal-week{
+    display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:6px;
+  }
+  .cal-week span{
+    text-align:center;font-size:11px;color:rgba(255,255,255,.72);letter-spacing:1px;
+  }
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+  .cal-cell{
+    position:relative;aspect-ratio:1/1.06;
+    border:1px solid rgba(255,255,255,.42);border-radius:10px;
+    background:rgba(255,255,255,.2);
+    display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+    padding:3px 0 0;cursor:pointer;font:inherit;overflow:hidden;
+  }
+  .cal-cell.out{opacity:.34}
+  .cal-cell.today{border-color:rgba(255,255,255,.95);border-width:1.6px}
+  .cal-cell.period{background:rgba(214,140,146,.34);border-color:rgba(214,140,146,.5)}
+  .cal-cell.ovu{background:rgba(150,190,170,.28);border-color:rgba(150,190,170,.45)}
+  .cal-num{font-size:11px;color:#2f4a6d;line-height:1.2}
+  .cal-mood{width:60%;max-width:26px;margin-top:1px}
+  .cal-marks{position:absolute;bottom:3px;display:flex;gap:3px}
+  .cal-marks i{width:4px;height:4px;border-radius:50%;display:block}
+  .mk-anni{background:#e2b45c}
+  .mk-note{background:rgba(47,74,109,.55)}
+  .cal-legend{display:flex;gap:16px;justify-content:center;margin-top:12px}
+  .cal-legend span{font-size:11px;color:rgba(47,74,109,.7);display:flex;align-items:center;gap:5px}
+  .lg{width:10px;height:10px;border-radius:3px;display:inline-block}
+  .lg.period{background:rgba(214,140,146,.6)}
+  .lg.ovu{background:rgba(150,190,170,.55)}
+
+  /* 当天的抽屉 */
+  .sheet{
+    position:fixed;inset:0;z-index:20;background:rgba(30,50,80,.34);
+    display:flex;align-items:flex-end;justify-content:center;
+    backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);
+  }
+  .sheet[hidden]{display:none}
+  .sheet-card{
+    width:100%;max-width:520px;background:#f2f6fb;
+    border-radius:20px 20px 0 0;padding:20px 20px calc(env(safe-area-inset-bottom) + 20px);
+    max-height:84vh;overflow-y:auto;
+    animation:rise .26s cubic-bezier(.2,.9,.3,1);
+  }
+  @keyframes rise{from{transform:translateY(16px);opacity:.4}to{transform:none;opacity:1}}
+  .sheet-date{font-size:13px;color:#5b7a9d;letter-spacing:1px;margin-bottom:14px}
+  .sheet-moods{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-bottom:16px}
+  .mood-pick{
+    border:1px solid transparent;background:transparent;border-radius:12px;
+    padding:6px 2px;cursor:pointer;display:flex;flex-direction:column;
+    align-items:center;gap:3px;font:inherit;
+  }
+  .mood-pick img{width:28px}
+  .mood-pick span{font-size:10px;color:#5b7a9d}
+  .mood-pick.on{background:#fff;border-color:rgba(120,160,200,.45)}
+  .sheet-field{display:block;margin-bottom:14px}
+  .sheet-field span{display:block;font-size:12px;color:#5b7a9d;margin-bottom:6px}
+  .sheet-field textarea,.sheet-field input{
+    width:100%;font:inherit;font-size:14px;color:#2f4a6d;
+    border:1px solid rgba(120,160,200,.34);border-radius:12px;
+    padding:10px 12px;background:#fff;resize:vertical;
+  }
+  .sheet-row{display:flex;gap:10px}
+  .sheet-btn{
+    flex:1;font:inherit;font-size:14px;padding:11px;border-radius:12px;
+    border:0;background:#7a9ec4;color:#fff;cursor:pointer;
+  }
+  .sheet-btn.ghost{background:rgba(120,160,200,.18);color:#4a6b90}
+
   /* ---- 打卡 ---- */
   .checks{display:flex;flex-direction:column;gap:12px}
   .check{
@@ -170,8 +251,7 @@
 
   <section class="panel" id="panel0">
     <h2></h2>
-    <div class="checks" id="checks"></div>
-    <p class="panel-note" id="habitNote"></p>
+    <div id="calRoot"></div>
   </section>
   <section class="panel" id="panel1"><h2></h2></section>
   <section class="panel" id="panel2"><h2></h2></section>
@@ -204,6 +284,7 @@ const store = new LocalStore();
 /* 有 config.local.js 就用它，没有就用公开那份。
    缺哪个字段就补哪个，不用整份照抄。 */
 import baseConfig from './config.js';
+import { mountCalendar } from './calendar.js';
 let CFG = baseConfig;
 try {
   const local = (await import('./config.local.js')).default;
@@ -401,80 +482,6 @@ async function onLetter(i) {
   busy = false;
 }
 
-/* ---------------------------------------------------------------- 打卡 */
-
-const HABITS = CFG.habits;
-
-/* 本地日期。绝不能拿 UTC 字符串前十位当日期，
-   凌晨写的会算到前一天去。 */
-function dayKey(offset = 0) {
-  const d = new Date();
-  d.setDate(d.getDate() + offset);
-  const p = n => String(n).padStart(2, '0');
-  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
-}
-
-async function getDay(key) {
-  return await store.get('habit', key, {});
-}
-
-async function setCount(habitId, n) {
-  const key = dayKey();
-  const day = await getDay(key);
-  day[habitId] = n;
-  await store.set('habit', key, day);
-  await renderChecks();
-}
-
-async function renderChecks() {
-  const box = document.getElementById('checks');
-  const today = await getDay(dayKey());
-
-  /* 最近七天，用来画下面那条小条。今天在最右边。 */
-  const week = [];
-  for (let i = 6; i >= 0; i--) week.push(await getDay(dayKey(-i)));
-
-  box.innerHTML = '';
-  HABITS.forEach(h => {
-    const now = today[h.id] || 0;
-
-    const dots = document.createElement('div');
-    dots.className = 'dots';
-    for (let k = 1; k <= h.target; k++) {
-      const dot = document.createElement('div');
-      dot.className = 'dot' + (h.labels ? ' wide' : '') + (k <= now ? ' done' : '');
-      if (h.labels) dot.textContent = h.labels[k - 1];
-      /* 点第 n 个就是 n 次；再点已经满的那一个，退回去一次。 */
-      dot.onclick = () => setCount(h.id, now === k ? k - 1 : k);
-      dots.appendChild(dot);
-    }
-
-    const strip = document.createElement('div');
-    strip.className = 'week';
-    week.forEach((d, idx) => {
-      const v = d[h.id] || 0;
-      const cell = document.createElement('span');
-      const bar = document.createElement('i');
-      if (v >= h.target) bar.className = 'on';
-      cell.appendChild(bar);
-      cell.appendChild(document.createTextNode(idx === 6 ? '今天' : ''));
-      strip.appendChild(cell);
-    });
-
-    const card = document.createElement('div');
-    card.className = 'check';
-    card.innerHTML =
-      `<div class="check-top">
-         <span class="check-icon">${h.icon}</span>
-         <span class="check-name">${h.name}</span>
-         <span class="check-count">${now}/${h.target}</span>
-       </div>`;
-    card.appendChild(dots);
-    card.appendChild(strip);
-    box.appendChild(card);
-  });
-}
-
 /* ---------------------------------------------------------------- 启动 */
 
 function layout() {
@@ -494,12 +501,11 @@ CFG.panels.forEach((p, i) => {
   const h = document.querySelector(`#panel${i} h2`);
   if (h) h.textContent = p.name;
 });
-document.getElementById('habitNote').textContent = CFG.habitNote;
 
 makeLetters();
 face('right');
 layout();
-renderChecks();
+mountCalendar(document.getElementById('calRoot'), { cfg: CFG, store });
 /* 首屏排版还没完成时算出来的尺寸是 0，下一帧和图片加载完各补算一次。 */
 requestAnimationFrame(layout);
 addEventListener('load', layout);

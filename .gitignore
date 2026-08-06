@@ -7,6 +7,5 @@ __pycache__/
 .DS_Store
 Thumbs.db
 
-# 同人素材：版权归鹰角网络，不进仓库
-skins/*/assets/
+# 各自部署的配置，带接口地址和 token，不进仓库
 skins/*/config.local.js

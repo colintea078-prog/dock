@@ -9,11 +9,23 @@
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html,body{height:100%;overflow:hidden;overscroll-behavior:none}
   body{
-    background:linear-gradient(180deg,#4d7fc9 0%,#5b8ed6 22%,#84b3e2 55%,#bcd9ee 78%,#e4f0f8 100%);
+    /* 底色沿用画面顶部的蓝，图片没加载出来时不会白闪一下 */
+    background:#3f6ea8;
     font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
     user-select:none;
   }
   #stage{position:fixed;inset:0}
+
+  /* 背景图：等比裁剪填满，横图放到竖屏上会裁掉左右两边 */
+  #bg{
+    position:absolute;inset:0;z-index:-2;
+    background:url('./assets/bg.webp') center center / cover no-repeat;
+  }
+  /* 底部压一层淡雾，让白色的路和信封不至于糊在水面的碎光里 */
+  #haze{
+    position:absolute;left:0;right:0;bottom:0;height:42%;z-index:-1;pointer-events:none;
+    background:linear-gradient(180deg,rgba(190,216,236,0) 0%,rgba(196,220,238,.34) 45%,rgba(210,230,244,.62) 100%);
+  }
 
   /* 标题 */
   #title{
@@ -70,6 +82,9 @@
 </head>
 <body>
 <div id="stage">
+  <div id="bg"></div>
+  <div id="haze"></div>
+
   <img id="title" src="./assets/title.webp" alt="直到大地变成一颗酸橙">
 
   <img class="deco" id="cloud1" src="./assets/cloud.webp" alt="">

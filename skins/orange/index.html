@@ -203,11 +203,11 @@ function tween(to, ms, ease) {
   });
 }
 
-/* 素材本身画的是朝左，所以"朝右"要镜像。默认朝右。 */
+/* 素材本身画的就是朝右（脸和扶把在右，尾焰在左后方），所以朝右不翻，朝左才镜像。 */
 let facing = 'right';
 function face(dir) {
   facing = dir;
-  flip.style.transform = `scaleX(${dir === 'right' ? -1 : 1})`;
+  flip.style.transform = `scaleX(${dir === 'left' ? -1 : 1})`;
 }
 
 /* 飞出：朝哪边就往哪边出去。 */
@@ -221,6 +221,27 @@ function enter(y, scale) {
   pos.x = facing === 'right' ? -300 : innerWidth + 300;
   pos.y = y; pos.s = scale;
   apply();
+}
+
+/* 站点之间不出屏幕，直接拱一条弧跳过去。飞得越远弧越高。 */
+const easeInOut = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+
+function arcTo(to, ms) {
+  return new Promise(res => {
+    const from = { x: pos.x, y: pos.y, s: pos.s };
+    const cx = (from.x + to.x) / 2;
+    const cy = Math.min(from.y, to.y) - Math.max(52, Math.abs(to.x - from.x) * 0.32);
+    const t0 = performance.now();
+    (function step(now) {
+      const k = Math.min(1, (now - t0) / ms);
+      const e = easeInOut(k), u = 1 - e;
+      pos.x = u * u * from.x + 2 * u * e * cx + e * e * to.x;
+      pos.y = u * u * from.y + 2 * u * e * cy + e * e * to.y;
+      pos.s = from.s + (to.s - from.s) * e;
+      apply();
+      k < 1 ? requestAnimationFrame(step) : res();
+    })(t0);
+  });
 }
 
 /* 停在信封上方时轻轻上下浮 */
@@ -241,14 +262,17 @@ async function onLetter(i) {
   busy = true;
   stopBob();
 
-  const target = active === i
-    ? { ...homePoint(), s: 1 }                        // 再点一次，回中间
+  const goingHome = active === i;
+  const hopping   = !goingHome && active !== -1;      // 站点之间，直接跳
+
+  const target = goingHome
+    ? { ...homePoint(), s: 1 }
     : { x: stopPts[i].x, y: stopPts[i].y - 108, s: 0.4 };
 
-  /* 先定朝向：下一站在右边就朝右，在左边就朝左。飞出和进场都跟着它。 */
+  /* 先定朝向：下一站在她右边就朝右，在左边就朝左。飞出和进场都跟着它。 */
   face(target.x >= pos.x ? 'right' : 'left');
 
-  if (active === i) {
+  if (goingHome) {
     active = -1;
     letters[i].classList.remove('up');
   } else {
@@ -257,9 +281,13 @@ async function onLetter(i) {
     active = i;
   }
 
-  await exit();
-  enter(target.y, target.s);
-  await tween(target, 800, easeOut);
+  if (hopping) {
+    await arcTo(target, 700);
+  } else {                                            // 进出首页才飞出屏幕
+    await exit();
+    enter(target.y, target.s);
+    await tween(target, 800, easeOut);
+  }
   if (active !== -1) startBob(target.y);
 
   busy = false;

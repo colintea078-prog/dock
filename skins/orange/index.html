@@ -19,7 +19,7 @@
   /* 背景图：等比裁剪填满，横图放到竖屏上会裁掉左右两边 */
   #bg{
     position:absolute;inset:0;z-index:-2;
-    background:url('./assets/bg.webp') center center / cover no-repeat;
+    background:url('./assets/bg.webp?v=4') center center / cover no-repeat;
   }
   /* 底部压一层淡雾，让白色的路和信封不至于糊在水面的碎光里 */
   #haze{
@@ -51,8 +51,17 @@
     transform-origin:50% 50%;will-change:transform;
     filter:drop-shadow(0 10px 18px rgba(30,60,110,.22));
   }
-  #ang img{width:100%;display:block}
-  #angFlip{transform-origin:50% 50%}
+  #angFlip{transform-origin:50% 50%;transition:transform .18s ease}
+  /* 逐帧播放：一张横向雪碧图，五帧，用 steps 走。
+     不用动图 WebP —— iOS 上它时灵时不灵，这个到处都能播。 */
+  #angSprite{
+    width:100%;aspect-ratio:1/1;
+    background-image:url('./assets/ride_sheet.webp?v=4');
+    background-repeat:no-repeat;
+    background-size:500% 100%;
+    animation:ride 1s steps(5) infinite;
+  }
+  @keyframes ride{from{background-position:0 0}to{background-position:-500% 0}}
 
   /* 公路 */
   #roadWrap{position:absolute;left:0;right:0;bottom:0;height:34%;}
@@ -85,14 +94,12 @@
   <div id="bg"></div>
   <div id="haze"></div>
 
-  <img id="title" src="./assets/title.webp" alt="直到大地变成一颗酸橙">
+  <img id="title" src="./assets/title.webp?v=4" alt="直到大地变成一颗酸橙">
 
-  <img class="deco" id="cloud1" src="./assets/cloud.webp" alt="">
-  <img class="deco" id="cloud2" src="./assets/cloud.webp" alt="">
-  <img class="deco" id="bunnies" src="./assets/bunnies.webp" alt="">
-  <img class="deco" id="stars" src="./assets/stars.webp" alt="">
+  <img class="deco" id="cloud1" src="./assets/cloud.webp?v=4" alt="">
+  <img class="deco" id="cloud2" src="./assets/cloud.webp?v=4" alt="">
 
-  <div id="ang"><div id="angFlip"><img src="./assets/ride.webp" alt="安洁莉娜"></div></div>
+  <div id="ang"><div id="angFlip"><div id="angSprite" role="img" aria-label="安洁莉娜"></div></div></div>
 
   <div id="roadWrap">
     <svg id="road" xmlns="http://www.w3.org/2000/svg">
@@ -163,7 +170,7 @@ function makeLetters() {
   STOPS.forEach((_, i) => {
     const el = document.createElement('div');
     el.className = 'letter';
-    el.innerHTML = '<img src="./assets/letter.webp" alt="">';
+    el.innerHTML = '<img src="./assets/letter.webp?v=4" alt="">';
     el.style.setProperty('--i', i);
     el.addEventListener('click', () => onLetter(i));
     stage.appendChild(el);
@@ -173,26 +180,40 @@ function makeLetters() {
 
 /* ---------------------------------------------------------------- 动画 */
 
-const easeInOut = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+const easeIn  = t => t * t * t;
+const easeOut = t => 1 - Math.pow(1 - t, 3);
 
-/* 站点之间直接飞，走一条向上拱起的弧线，不出屏幕。
-   拱多高跟距离有关——飞得远，弧就高一点。 */
-function arcTo(to, scale, ms) {
+function tween(to, ms, ease) {
   return new Promise(res => {
     const from = { x: pos.x, y: pos.y, s: pos.s };
-    const cx = (from.x + to.x) / 2;
-    const cy = Math.min(from.y, to.y) - Math.max(56, Math.abs(to.x - from.x) * 0.3);
     const t0 = performance.now();
     (function step(now) {
       const k = Math.min(1, (now - t0) / ms);
-      const e = easeInOut(k), u = 1 - e;
-      pos.x = u * u * from.x + 2 * u * e * cx + e * e * to.x;
-      pos.y = u * u * from.y + 2 * u * e * cy + e * e * to.y;
-      pos.s = from.s + (scale - from.s) * e;
+      const e = ease(k);
+      pos.x = from.x + (to.x - from.x) * e;
+      pos.y = from.y + (to.y - from.y) * e;
+      pos.s = from.s + ((to.s ?? from.s) - from.s) * e;
       apply();
       k < 1 ? requestAnimationFrame(step) : res();
     })(t0);
   });
+}
+
+/* 翻不翻由目标决定：右边的站点保持原朝向，左边的站点镜像过来。 */
+function setFlip(mirror) {
+  flip.style.transform = `scaleX(${mirror ? -1 : 1})`;
+}
+
+/* 出场：一律朝右飞出屏幕，不翻。 */
+function exitRight() {
+  setFlip(false);
+  return tween({ x: innerWidth + 280, y: pos.y - 40 }, 440, easeIn);
+}
+
+/* 入场：一律从左边进来。 */
+function enterFromLeft(y, scale) {
+  pos.x = -280; pos.y = y; pos.s = scale;
+  apply();
 }
 
 /* 停在信封上方时轻轻上下浮 */
@@ -217,14 +238,20 @@ async function onLetter(i) {
     active = -1;
     letters[i].classList.remove('up');
     const h = homePoint();
-    await arcTo(h, 1, 780);
+    await exitRight();
+    setFlip(false);
+    enterFromLeft(h.y, 1);
+    await tween({ x: h.x, y: h.y, s: 1 }, 800, easeOut);
   } else {
     letters.forEach(el => el.classList.remove('up'));
     letters[i].classList.add('up');
     active = i;
     const p = stopPts[i];
-    const target = { x: p.x, y: p.y - 108 };
-    await arcTo(target, 0.4, 760);
+    const target = { x: p.x, y: p.y - 108, s: 0.4 };
+    await exitRight();
+    setFlip(target.x < innerWidth / 2);     // 左半边的站点，转个身
+    enterFromLeft(target.y, 0.4);
+    await tween(target, 800, easeOut);
     startBob(target.y);
   }
   busy = false;

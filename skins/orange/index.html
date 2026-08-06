@@ -105,11 +105,11 @@ let active = -1;
 let busy = false;
 
 /* 洁哥的当前状态。位置指她的中心点。 */
-let pos = { x: 0, y: 0, s: 1, dir: -1 };  // dir: -1 朝左（素材原方向），1 朝右
+/* 不做镜像：她朝左是素材本来的样子，翻来翻去反而乱。 */
+let pos = { x: 0, y: 0, s: 1 };
 
 function apply() {
   ang.style.transform = `translate(${pos.x}px, ${pos.y}px) translate(-50%,-50%) scale(${pos.s})`;
-  flip.style.transform = `scaleX(${pos.dir === 1 ? -1 : 1})`;
 }
 
 /* ---------------------------------------------------------------- 布局 */
@@ -158,25 +158,27 @@ function makeLetters() {
 
 /* ---------------------------------------------------------------- 动画 */
 
-function tweenPos(to, ms, easing) {
+const easeInOut = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+
+/* 站点之间直接飞，走一条向上拱起的弧线，不出屏幕。
+   拱多高跟距离有关——飞得远，弧就高一点。 */
+function arcTo(to, scale, ms) {
   return new Promise(res => {
-    const from = { ...pos };
+    const from = { x: pos.x, y: pos.y, s: pos.s };
+    const cx = (from.x + to.x) / 2;
+    const cy = Math.min(from.y, to.y) - Math.max(56, Math.abs(to.x - from.x) * 0.3);
     const t0 = performance.now();
-    const ease = easing || (t => t);
     (function step(now) {
       const k = Math.min(1, (now - t0) / ms);
-      const e = ease(k);
-      pos.x = from.x + (to.x - from.x) * e;
-      pos.y = from.y + (to.y - from.y) * e;
-      pos.s = from.s + ((to.s ?? from.s) - from.s) * e;
+      const e = easeInOut(k), u = 1 - e;
+      pos.x = u * u * from.x + 2 * u * e * cx + e * e * to.x;
+      pos.y = u * u * from.y + 2 * u * e * cy + e * e * to.y;
+      pos.s = from.s + (scale - from.s) * e;
       apply();
       k < 1 ? requestAnimationFrame(step) : res();
     })(t0);
   });
 }
-
-const easeIn  = t => t * t * t;
-const easeOut = t => 1 - Math.pow(1 - t, 3);
 
 /* 停在信封上方时轻轻上下浮 */
 let bobTimer = null;
@@ -191,47 +193,24 @@ function startBob(base) {
 }
 function stopBob() { if (bobTimer) cancelAnimationFrame(bobTimer), bobTimer = null; }
 
-async function flyTo(target, scale) {
-  stopBob();
-
-  /* 一、朝右飞出屏幕 */
-  pos.dir = 1;
-  await tweenPos({ x: innerWidth + 260, y: pos.y - 40, s: pos.s }, 460, easeIn);
-
-  /* 二、从离目标近的那一侧、在公路上方的高度重新进场 */
-  const fromLeft = target.x < innerWidth * 0.5;
-  pos.dir = fromLeft ? 1 : -1;
-  pos.x = fromLeft ? -260 : innerWidth + 260;
-  pos.y = target.y;
-  pos.s = scale;
-  apply();
-
-  await tweenPos({ x: target.x, y: target.y, s: scale }, 780, easeOut);
-
-  /* 三、到站停住，落地方向朝内 */
-  startBob(target.y);
-}
-
 async function onLetter(i) {
   if (busy) return;
   busy = true;
+  stopBob();
 
-  if (active === i) {                       // 再点一次，回家
+  if (active === i) {                       // 再点一次，飞回中间
     active = -1;
     letters[i].classList.remove('up');
     const h = homePoint();
-    stopBob();
-    pos.dir = 1;
-    await tweenPos({ x: innerWidth + 260, y: pos.y - 40 }, 420, easeIn);
-    pos.x = -300; pos.y = h.y; pos.s = 1; pos.dir = 1; apply();
-    await tweenPos({ x: h.x, y: h.y, s: 1 }, 760, easeOut);
-    pos.dir = -1; apply();
+    await arcTo(h, 1, 780);
   } else {
     letters.forEach(el => el.classList.remove('up'));
     letters[i].classList.add('up');
     active = i;
     const p = stopPts[i];
-    await flyTo({ x: p.x, y: p.y - 108 }, 0.4);
+    const target = { x: p.x, y: p.y - 108 };
+    await arcTo(target, 0.4, 760);
+    startBob(target.y);
   }
   busy = false;
 }

@@ -49,6 +49,47 @@
     color:#fff;font-size:15px;font-weight:600;letter-spacing:3px;
     opacity:.72;text-align:center;
     text-shadow:0 2px 8px rgba(30,60,110,.3);
+    margin-bottom:20px;
+  }
+
+  /* ---- 打卡 ---- */
+  .checks{display:flex;flex-direction:column;gap:12px}
+  .check{
+    background:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.66);
+    border-radius:16px;padding:14px 16px;
+    backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  }
+  .check-top{display:flex;align-items:center;gap:10px}
+  .check-icon{font-size:22px;line-height:1}
+  .check-name{font-size:15px;color:#2f4a6d;font-weight:600;flex:1}
+  .check-count{
+    font-size:13px;color:#5b7a9d;font-variant-numeric:tabular-nums;
+    background:rgba(255,255,255,.6);border-radius:20px;padding:2px 10px;
+  }
+  .dots{display:flex;gap:9px;margin-top:12px}
+  .dot{
+    width:26px;height:26px;border-radius:50%;cursor:pointer;
+    border:1.6px solid rgba(70,110,160,.4);background:rgba(255,255,255,.34);
+    transition:transform .16s cubic-bezier(.34,1.5,.5,1),background .2s ease,border-color .2s ease;
+    display:flex;align-items:center;justify-content:center;
+    font-size:13px;color:transparent;
+  }
+  .dot:active{transform:scale(.86)}
+  .dot.done{background:#7fb08a;border-color:#6f9e7a;color:#fff}
+  .dot.wide{width:auto;padding:0 12px;border-radius:14px;font-size:12.5px;color:#43648c}
+  .dot.wide.done{color:#fff}
+  .week{display:flex;gap:5px;margin-top:14px;align-items:flex-end}
+  .week span{
+    flex:1;text-align:center;font-size:10px;color:#5b7a9d;
+  }
+  .week i{
+    display:block;height:5px;border-radius:3px;margin-bottom:4px;
+    background:rgba(255,255,255,.42);
+  }
+  .week i.on{background:#7fb08a}
+  .panel-note{
+    font-size:12px;color:rgba(47,74,109,.62);line-height:1.7;
+    margin-top:18px;text-align:center;
   }
 
   /* 标题 */
@@ -127,7 +168,11 @@
 
   <div id="panelBg"></div>
 
-  <section class="panel" id="panel0"><h2>板 块 一</h2></section>
+  <section class="panel" id="panel0">
+    <h2>打 卡</h2>
+    <div class="checks" id="checks"></div>
+    <p class="panel-note">空着就空着，不会红，也不会催你。</p>
+  </section>
   <section class="panel" id="panel1"><h2>板 块 二</h2></section>
   <section class="panel" id="panel2"><h2>板 块 三</h2></section>
   <section class="panel" id="panel3"><h2>板 块 四</h2></section>
@@ -148,8 +193,13 @@
   </div>
 </div>
 
-<script>
+<script type="module">
 "use strict";
+
+/* 存储走 dock 那一层，跟别的应用同一套。
+   现在是本地实现，以后换成接口版，这里一行都不用改。 */
+import { LocalStore } from '../../core/storage.js';
+const store = new LocalStore();
 
 const stage = document.getElementById('stage');
 const ang   = document.getElementById('ang');
@@ -342,6 +392,84 @@ async function onLetter(i) {
   busy = false;
 }
 
+/* ---------------------------------------------------------------- 打卡 */
+
+const HABITS = [
+  { id: 'd3',    icon: '💊', name: 'D3',   target: 2, labels: null },
+  { id: 'water', icon: '💧', name: '喝水', target: 8, labels: null },
+  { id: 'meal',  icon: '🍚', name: '吃饭', target: 3, labels: ['早', '中', '晚'] }
+];
+
+/* 本地日期。绝不能拿 UTC 字符串前十位当日期，
+   凌晨写的会算到前一天去。 */
+function dayKey(offset = 0) {
+  const d = new Date();
+  d.setDate(d.getDate() + offset);
+  const p = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+}
+
+async function getDay(key) {
+  return await store.get('habit', key, {});
+}
+
+async function setCount(habitId, n) {
+  const key = dayKey();
+  const day = await getDay(key);
+  day[habitId] = n;
+  await store.set('habit', key, day);
+  await renderChecks();
+}
+
+async function renderChecks() {
+  const box = document.getElementById('checks');
+  const today = await getDay(dayKey());
+
+  /* 最近七天，用来画下面那条小条。今天在最右边。 */
+  const week = [];
+  for (let i = 6; i >= 0; i--) week.push(await getDay(dayKey(-i)));
+
+  box.innerHTML = '';
+  HABITS.forEach(h => {
+    const now = today[h.id] || 0;
+
+    const dots = document.createElement('div');
+    dots.className = 'dots';
+    for (let k = 1; k <= h.target; k++) {
+      const dot = document.createElement('div');
+      dot.className = 'dot' + (h.labels ? ' wide' : '') + (k <= now ? ' done' : '');
+      if (h.labels) dot.textContent = h.labels[k - 1];
+      /* 点第 n 个就是 n 次；再点已经满的那一个，退回去一次。 */
+      dot.onclick = () => setCount(h.id, now === k ? k - 1 : k);
+      dots.appendChild(dot);
+    }
+
+    const strip = document.createElement('div');
+    strip.className = 'week';
+    week.forEach((d, idx) => {
+      const v = d[h.id] || 0;
+      const cell = document.createElement('span');
+      const bar = document.createElement('i');
+      if (v >= h.target) bar.className = 'on';
+      cell.appendChild(bar);
+      cell.appendChild(document.createTextNode(idx === 6 ? '今天' : ''));
+      strip.appendChild(cell);
+    });
+
+    const card = document.createElement('div');
+    card.className = 'check';
+    card.innerHTML =
+      `<div class="check-top">
+         <span class="check-icon">${h.icon}</span>
+         <span class="check-name">${h.name}</span>
+         <span class="check-count">${now}/${h.target}</span>
+       </div>`;
+    card.appendChild(dots);
+    card.appendChild(strip);
+    box.appendChild(card);
+  });
+}
+
 /* ---------------------------------------------------------------- 启动 */
 
 function layout() {
@@ -359,6 +487,7 @@ function layout() {
 makeLetters();
 face('right');
 layout();
+renderChecks();
 /* 首屏排版还没完成时算出来的尺寸是 0，下一帧和图片加载完各补算一次。 */
 requestAnimationFrame(layout);
 addEventListener('load', layout);

@@ -5,12 +5,12 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <title>直到大地变成一颗酸橙</title>
 <meta name="theme-color" content="#5b8ed6">
-<link rel="manifest" href="./manifest.json?v=58">
+<link rel="manifest" href="./manifest.json?v=59">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="酸橙">
-<link rel="apple-touch-icon" href="./assets/icons/icon-192.png?v=58">
+<link rel="apple-touch-icon" href="./assets/icons/icon-192.png?v=59">
 <style>
   /* 拉丁字体自带，两个系统才长一样。中文仍旧交给系统。
      四款都在仓库里，换一个只用改下面 --num 里的第一个名字：
@@ -48,7 +48,7 @@
   /* 背景图：等比裁剪填满，横图放到竖屏上会裁掉左右两边 */
   #bg{
     position:absolute;inset:0;z-index:-2;
-    background:url('./assets/bg.webp?v=58') center center / cover no-repeat;
+    background:url('./assets/bg.webp?v=59') center center / cover no-repeat;
   }
   /* 底部压一层淡雾，让白色的路和信封不至于糊在水面的碎光里 */
   #haze{
@@ -258,27 +258,33 @@
     letter-spacing:.5px;
     color:#7fb4d4;
   }
+  /* 划线，不是一格一个盒子。竖线靠每格的右边框，最右一列不画；
+     横线靠下边框，最后一行不画。 */
   .cal-grid{
     display:grid;
     grid-template-columns:repeat(7,1fr);
-    gap:3px;
+    gap:0;
   }
 
   /* 每一天 */
   .cal-cell{
     position:relative;
     aspect-ratio:1/1.24;
-    border:1px solid rgba(150,200,228,.32);
-    border-radius:9px;
-    background:rgba(238,248,253,.5);
-    padding:4px 0 0;
+    border:0;
+    border-right:1px solid rgba(150,200,228,.3);
+    border-bottom:1px solid rgba(150,200,228,.3);
+    border-radius:0;
+    background:transparent;
+    padding:3px 0 0;
     display:flex;
     flex-direction:column;
     align-items:center;
-    justify-content:flex-start;
+    justify-content:flex-start;   /* 数字贴着格子顶部 */
     cursor:pointer;
     font:inherit;
   }
+  .cal-cell:nth-child(7n){border-right:0}
+  .cal-cell:nth-child(n+36){border-bottom:0}
   .cal-cell.out{opacity:.22}
 
   .cal-num{
@@ -458,7 +464,7 @@
     display:flex;align-items:center;gap:10px;
     width:100%;aspect-ratio:1000/322;text-align:left;
     border:0;border-radius:20px;overflow:hidden;
-    background:url('./assets/pack/frame.webp?v=58') center/100% 100% no-repeat;
+    background:url('./assets/pack/frame.webp?v=59') center/100% 100% no-repeat;
     padding:0 8%;cursor:pointer;
     box-shadow:0 6px 16px rgba(40,90,140,.18);
   }
@@ -488,13 +494,30 @@
   .dt-add[hidden]{display:none}
   .dt-add.dragging{transform:scale(1.12);
     box-shadow:0 12px 26px rgba(30,60,110,.4);cursor:grabbing}
+  /* 黄色帆布纽扣：布面、缝线、四个扣眼 */
   .dt-add{
     position:fixed;right:20px;bottom:calc(34vh + env(safe-area-inset-bottom));
     touch-action:none;                 /* 不然拖它会把页面一起拖 */
     transition:transform .16s ease,box-shadow .16s ease;
-    z-index:12;width:50px;height:50px;border-radius:50%;border:0;cursor:pointer;
-    background:#7a9ec4;color:#fff;font-size:26px;line-height:1;
-    box-shadow:0 8px 20px rgba(30,60,110,.3);
+    z-index:12;width:54px;height:54px;border-radius:50%;cursor:pointer;
+    border:1px solid rgba(190,150,40,.35);
+    color:#a9761a;font-size:27px;line-height:1;font-weight:700;
+    font-family:var(--num);
+    display:flex;align-items:center;justify-content:center;
+    /* 布纹：两组极细的斜纹交叉，压在黄色底上 */
+    background:
+      repeating-linear-gradient(45deg,rgba(255,255,255,.16) 0 1px,transparent 1px 3px),
+      repeating-linear-gradient(-45deg,rgba(160,120,20,.08) 0 1px,transparent 1px 3px),
+      radial-gradient(circle at 34% 30%,#ffe89a,#ffd85a 62%,#f0c341 100%);
+    box-shadow:
+      0 8px 18px rgba(150,110,20,.32),
+      inset 0 -2px 4px rgba(160,120,20,.22),
+      inset 0 2px 3px rgba(255,255,255,.5);
+  }
+  /* 缝线一圈 */
+  .dt-add::before{
+    content:"";position:absolute;inset:5px;border-radius:50%;
+    border:1.4px dashed rgba(255,255,255,.72);
   }
   .dt-seg{display:flex;gap:8px;padding-top:5px}
   .dt-seg.wrap{flex-wrap:wrap}
@@ -751,7 +774,7 @@
      不用动图 WebP —— iOS 上它时灵时不灵，这个到处都能播。 */
   #angSprite{
     width:100%;aspect-ratio:1/1;
-    background-image:url('./assets/ride_sheet.webp?v=58');
+    background-image:url('./assets/ride_sheet.webp?v=59');
     background-repeat:no-repeat;
     background-size:500% 100%;
     /* jump-none 才会取到 0/25/50/75/100 这五个位置。
@@ -815,7 +838,7 @@
 
   <div id="deco"></div>
 
-  <img id="title" src="./assets/title.webp?v=58" alt="直到大地变成一颗酸橙">
+  <img id="title" src="./assets/title.webp?v=59" alt="直到大地变成一颗酸橙">
 
 
   <div id="ang"><div id="angFlip"><div id="angSprite" role="img" aria-label="安洁莉娜"></div></div></div>
@@ -834,20 +857,20 @@
 
 /* 存储走 dock 那一层，跟别的应用同一套。
    现在是本地实现，以后换成接口版，这里一行都不用改。 */
-import { LocalStore } from '../../core/storage.js?v=58';
+import { LocalStore } from '../../core/storage.js?v=59';
 const store = new LocalStore();
 
 /* 有 config.local.js 就用它，没有就用公开那份。
    缺哪个字段就补哪个，不用整份照抄。 */
-import baseConfig from './config.js?v=58';
-import { mountCalendar } from './calendar.js?v=58';
-import { mountDates } from './dates.js?v=58';
-import { mountDeco } from './deco.js?v=58';
-import { mountLedger } from './ledger.js?v=58';
-import { mountNotes } from './notes.js?v=58';
+import baseConfig from './config.js?v=59';
+import { mountCalendar } from './calendar.js?v=59';
+import { mountDates } from './dates.js?v=59';
+import { mountDeco } from './deco.js?v=59';
+import { mountLedger } from './ledger.js?v=59';
+import { mountNotes } from './notes.js?v=59';
 let CFG = baseConfig;
 try {
-  const local = (await import('./config.local.js?v=58')).default;
+  const local = (await import('./config.local.js?v=59')).default;
   CFG = { ...baseConfig, ...local };
 } catch { /* 没有本地配置，用公开版 */ }
 
@@ -1075,7 +1098,7 @@ CFG.panels.forEach((p, i) => {
    不然改了它浏览器可能还在跑旧的。 */
 if ('serviceWorker' in navigator) {
   addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js?v=58', { updateViaCache: 'none' })
+    navigator.serviceWorker.register('./sw.js?v=59', { updateViaCache: 'none' })
       .catch(e => console.warn('sw register failed', e));
   });
 }

@@ -102,6 +102,16 @@ export function mountDates(root, { cfg, store }) {
 
   async function load() {
     items = await store.get('dates', 'items', []);
+
+    /* 头一次打开时种下配置里那几个日子。种过就记一笔 ——
+       用户删掉它们之后不该又冒出来。 */
+    const seeded = await store.get('dates', 'seeded', false);
+    if (!seeded) {
+      const seed = cfg.defaultDates || [];
+      items = items.concat(seed.map((s, n) => ({ id: Date.now() + n, repeat: true, ...s })));
+      await store.set('dates', 'seeded', true);
+      if (seed.length) await store.set('dates', 'items', items);
+    }
     draw();
   }
 

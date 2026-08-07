@@ -19,6 +19,13 @@ export default {
   /* 四个站点各用哪张图，对应 assets/ 下的文件名 */
   stopIcons: ['letter.webp', 'stop6.webp', 'stop5.webp', 'stop4.webp'],
 
+  /* 头一次打开时自带的两个日子。删掉就不会再回来 —— 只在第一次种。
+     日期取国服公测日 2019.05.01 和它往后六个月。 */
+  defaultDates: [
+    { name: '明日方舟 周年庆', date: '2019-05-01', calendar: 'solar', tag: '纪念日', repeat: true },
+    { name: '明日方舟 半周年', date: '2019-11-01', calendar: 'solar', tag: '纪念日', repeat: true }
+  ],
+
   /* 首页拼贴的默认排版。x/y 是中心点占屏幕宽高的比例，w 是宽度像素，
      o 透明度，r 旋转角度。在页面上用铅笔摆好之后点「复制排版」就能拿到这段。
      每台设备摆过之后用自己的那份，这里只是初来乍到时看到的样子。 */

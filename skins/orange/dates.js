@@ -67,6 +67,11 @@ function countdownText(days) {
 
 export function mountDates(root, { cfg, store }) {
   const TAGS = cfg.dateTags || ['生日', '纪念日', '旅行', '其他'];
+  const STYLE = cfg.tagStyle || {};
+  const ico = t => (STYLE[t] && STYLE[t].icon) || '';
+  const col = t => (STYLE[t] && STYLE[t].color) || 'rgba(255,255,255,.6)';
+  const chip = (t, cls) =>
+    `<span class="${cls}" style="--c:${col(t)}">${ico(t)}${escapeHtml(t)}</span>`;
   let filter = new Set();
   let items = [];
 
@@ -147,7 +152,8 @@ export function mountDates(root, { cfg, store }) {
       used.forEach(t => {
         const b = document.createElement('button');
         b.className = 'dt-tag' + (filter.has(t) ? ' on' : '');
-        b.textContent = t;
+        b.style.setProperty('--c', col(t));
+        b.innerHTML = ico(t) + escapeHtml(t);
         b.onclick = () => {
           filter.has(t) ? filter.delete(t) : filter.add(t);
           draw();
@@ -185,8 +191,7 @@ export function mountDates(root, { cfg, store }) {
           <span class="dt-name">${escapeHtml(it.name)}</span>
           <span class="dt-sub">${escapeHtml(sub)}${on ? ' · ' + on : ''}</span>
         </span>
-        <span class="dt-chips">${(it.tags || []).map(t =>
-          `<span class="dt-chip">${escapeHtml(t)}</span>`).join('')}</span>
+        <span class="dt-chips">${(it.tags || []).map(t => chip(t, 'dt-chip')).join('')}</span>
         <span class="dt-days">${countdownText(days)}</span>`;
       card.onclick = () => openForm(it);
       elList.appendChild(card);
@@ -230,7 +235,8 @@ export function mountDates(root, { cfg, store }) {
         <div class="sheet-field">
           <span>标签（可以选好几个）</span>
           <div class="dt-seg wrap">
-            ${TAGS.map(t => `<button class="dt-opt ${(it.tags || []).includes(t) ? 'on' : ''}" data-tag="${t}">${t}</button>`).join('')}
+            ${TAGS.map(t => `<button class="dt-opt ${(it.tags || []).includes(t) ? 'on' : ''}"
+              data-tag="${t}" style="--c:${col(t)}">${ico(t)}${escapeHtml(t)}</button>`).join('')}
           </div>
         </div>
 

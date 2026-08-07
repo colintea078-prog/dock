@@ -93,12 +93,19 @@ function ovulationDays(days, cycle) {
   return out;
 }
 
-/* 一朵小云。画成 SVG 是因为它要跟着文字颜色走，而且不用多下载一张图。 */
-function cloud(kind) {
-  return `<svg class="cal-cloud ${kind}" viewBox="0 0 30 20" fill="currentColor" aria-hidden="true">
-    <path d="M7.5 18a6 6 0 0 1-.6-11.97A7.5 7.5 0 0 1 21.3 6.6 5.7 5.7 0 0 1 22.5 18z"/>
-  </svg>`;
+/* 几个形状都画成 SVG：跟着文字颜色走，能无级缩放，也不用多下载图。 */
+const SHAPES = {
+  cloud: 'M7.5 18a6 6 0 0 1-.6-11.97A7.5 7.5 0 0 1 21.3 6.6 5.7 5.7 0 0 1 22.5 18z',
+  star:  'M15 2.5l3.6 7.6 8.4 1.1-6.2 5.7 1.6 8.2L15 21.2 7.6 25.1l1.6-8.2L3 11.2l8.4-1.1z',
+  heart: 'M15 26S3.5 18.8 3.5 11.4A6.4 6.4 0 0 1 15 7.8a6.4 6.4 0 0 1 11.5 3.6C26.5 18.8 15 26 15 26z'
+};
+
+function shape(name, cls, box) {
+  return `<svg class="${cls}" viewBox="0 0 ${box}" fill="currentColor" aria-hidden="true">
+    <path d="${SHAPES[name]}"/></svg>`;
 }
+
+const cloud = kind => shape('cloud', 'cal-cloud ' + kind, '30 20');
 
 /* ------------------------------------------------------------------ 视图 */
 
@@ -183,15 +190,19 @@ export function mountCalendar(root, { cfg, store }) {
       if (showCycle && rec.period) cell.classList.add('period');
       else if (ovu.has(k)) cell.classList.add('ovu');
 
-      /* 数字底下那一格：有心情放心情，没有心情但记了东西就浮一朵云。
-         纪念日是黄的，随手写的是蓝的。 */
-      let slot = '';
-      if (rec.mood) {
-        slot = `<img class="cal-mood" src="./assets/mood/${rec.mood}.webp?v=1" alt="">`;
-      } else if (rec.anniversary || rec.note) {
-        slot = cloud(rec.anniversary ? 'anni' : 'note');
-      }
+      /* 数字底下垫的形状：纪念日一颗星，今天一颗心，写了东西一朵云。
+         普通日子什么都不垫 —— 一屏四十二格，每格都有东西就闹了。 */
+      let back = '';
+      if (rec.anniversary)        back = shape('star',  'cal-back starry', '30 28');
+      else if (sameDay(d, today)) back = shape('heart', 'cal-back hearty', '30 30');
+      else if (rec.note)          back = shape('cloud', 'cal-back cloudy', '30 22');
+
+      /* 数字下面那一格只留给心情图标 */
+      const slot = rec.mood
+        ? `<img class="cal-mood" src="./assets/mood/${rec.mood}.webp?v=1" alt="">`
+        : '';
       cell.innerHTML = `
+        ${back}
         <span class="cal-num">${d.getDate()}</span>
         <span class="cal-slot">${slot}</span>`;
       cell.onclick = () => openSheet(k, rec);

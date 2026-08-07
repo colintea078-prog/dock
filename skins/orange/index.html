@@ -19,7 +19,7 @@
   /* 背景图：等比裁剪填满，横图放到竖屏上会裁掉左右两边 */
   #bg{
     position:absolute;inset:0;z-index:-2;
-    background:url('./assets/bg.webp?v=23') center center / cover no-repeat;
+    background:url('./assets/bg.webp?v=24') center center / cover no-repeat;
   }
   /* 底部压一层淡雾，让白色的路和信封不至于糊在水面的碎光里 */
   #haze{
@@ -51,6 +51,8 @@
     margin-bottom:18px;
   }
   .panel h2 .en{font-size:12px;letter-spacing:3.5px;opacity:.8}
+  .panel .hand{font-family:var(--hand);font-size:16px;color:#a8c8db;
+    text-align:center;display:block;margin:-8px 0 16px}
   .panel h2 .star{color:#a9cde8;font-size:12px}
 
   /* ---- 日历 ---- */
@@ -59,6 +61,11 @@
   :root{
     --sky:#6CC7E8; --ocean:#237FC5; --cloud:#FFFFFF;
     --mint:#8DDDD0; --sunny:#FFD85A; --ink:#3d6b8c;
+    /* 装饰性的英文交给系统手写体。iOS/macOS 上是 Snell Roundhand，
+       安卓退到 cursive，都不用下载字体文件。 */
+    --hand:'Snell Roundhand','Bradley Hand','Segoe Script',cursive;
+    --round:ui-rounded,'SF Pro Rounded','Hiragino Maru Gothic ProN',
+      -apple-system,'PingFang SC',system-ui,sans-serif;
   }
   .cal-card{
     position:relative;
@@ -83,12 +90,12 @@
 
   .cal-top{position:relative;padding:16px 18px 12px;text-align:center}
   .cal-mark{
-    position:absolute;left:18px;top:14px;font-size:11.5px;color:var(--sky);
-    letter-spacing:.6px;
+    position:absolute;left:18px;top:12px;font-size:15px;color:var(--sky);
+    font-family:var(--hand);letter-spacing:.3px;
   }
   .cal-foot-note{
-    position:absolute;left:18px;bottom:8px;font-size:11px;color:#a8c8db;
-    letter-spacing:.6px;
+    position:absolute;left:18px;bottom:6px;font-size:14px;color:#a8c8db;
+    font-family:var(--hand);letter-spacing:.3px;
   }
   .cal-men{font-size:13px;color:var(--ocean);letter-spacing:4px;opacity:.85}
   .cal-mon{
@@ -117,13 +124,24 @@
   }
   .cal-cell.out{opacity:.26}
   .cal-num{
-    font-size:13px;color:var(--ink);line-height:1;width:24px;height:24px;
+    font-size:13.5px;color:var(--ink);line-height:1;width:26px;height:26px;
     display:flex;align-items:center;justify-content:center;border-radius:50%;
     font-weight:500;
   }
   .cal-cell.today .cal-num{background:var(--sky);color:#fff;font-weight:700}
   .cal-cell.period .cal-num{box-shadow:inset 0 0 0 1.5px #eab4b9;color:#c9848b}
   .cal-cell.ovu .cal-num{box-shadow:inset 0 0 0 1.5px var(--mint);color:#5aa697}
+
+  /* 数字的底：普通日子什么都没有，特殊的日子垫一层形状。
+     跟事件标签用同一套颜色，扫一眼就知道那天是什么性质。 */
+  .cal-back{
+    position:absolute;top:2px;left:50%;transform:translateX(-50%);
+    width:30px;height:30px;pointer-events:none;
+  }
+  .cal-back.cloudy{color:#dcefff}
+  .cal-back.starry{color:#ffe9a8}
+  .cal-back.hearty{color:#ffd3dd}
+  .cal-num{position:relative;z-index:1}
 
   /* 云朵：有记录的日子，数字底下浮一小朵 */
   .cal-slot{height:16px;display:flex;align-items:center;justify-content:center}
@@ -138,7 +156,8 @@
   .lg.period{box-shadow:inset 0 0 0 1.5px #eab4b9}
   .lg.ovu{box-shadow:inset 0 0 0 1.5px var(--mint)}
   .cal-foot{
-    text-align:center;font-size:12px;color:#a8c8db;margin-top:12px;letter-spacing:.5px;
+    text-align:center;font-size:16px;color:#a8c8db;margin-top:12px;
+    font-family:var(--hand);letter-spacing:.3px;
   }
 
   /* 当天的抽屉 */
@@ -184,12 +203,15 @@
   /* ---- 日期备忘录 ---- */
   .dt-tags{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
   .dt-tag{
-    font:inherit;font-size:12.5px;padding:5px 13px;border-radius:20px;cursor:pointer;
-    border:1px solid rgba(255,255,255,.5);background:rgba(255,255,255,.24);color:#2f4a6d;
+    font-family:var(--round);font-size:12.5px;padding:6px 14px;border-radius:20px;
+    cursor:pointer;border:1.4px solid transparent;
+    background:var(--c,rgba(255,255,255,.5));color:#4a6b90;
+    display:inline-flex;align-items:center;gap:5px;
   }
-  .dt-tag.on{background:#fff;border-color:#fff;font-weight:600}
+  .dt-tag.on{border-color:#fff;box-shadow:0 3px 10px rgba(90,150,190,.22);font-weight:600}
   .dt-list{display:flex;flex-direction:column;gap:10px}
   .dt-card{
+    font-family:var(--round);
     display:flex;align-items:center;gap:10px;width:100%;text-align:left;font:inherit;
     background:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.66);
     border-radius:16px;padding:14px 16px;cursor:pointer;
@@ -202,8 +224,9 @@
   .dt-sub{font-size:11.5px;color:#5b7a9d}
   .dt-chips{display:flex;gap:4px;flex:none}
   .dt-chip{
-    font-size:11px;color:#4a6b90;background:rgba(255,255,255,.66);
+    font-size:11px;color:#4a6b90;background:var(--c,rgba(255,255,255,.66));
     border-radius:20px;padding:3px 9px;flex:none;
+    display:inline-flex;align-items:center;gap:4px;white-space:nowrap;
   }
   .dt-days{
     font-size:16px;font-weight:600;color:#2f4a6d;flex:none;
@@ -223,10 +246,12 @@
   .dt-seg{display:flex;gap:8px}
   .dt-seg.wrap{flex-wrap:wrap}
   .dt-opt{
-    font:inherit;font-size:13px;padding:8px 15px;border-radius:12px;cursor:pointer;
-    border:1px solid rgba(120,160,200,.34);background:#fff;color:#4a6b90;
+    font-family:var(--round);font-size:13px;padding:8px 14px;border-radius:14px;
+    cursor:pointer;border:1.4px solid transparent;
+    background:var(--c,#fff);color:#4a6b90;
+    display:inline-flex;align-items:center;gap:5px;
   }
-  .dt-opt.on{background:#7a9ec4;border-color:#7a9ec4;color:#fff}
+  .dt-opt.on{border-color:#7fb3d8;box-shadow:0 3px 10px rgba(90,150,190,.2);font-weight:600}
   .dt-opt[disabled]{opacity:.4;cursor:not-allowed}
   .dt-hint{font-size:11.5px;color:#5b7a9d;margin-top:8px;line-height:1.6}
   .dt-check{display:flex;gap:9px;align-items:flex-start;margin-bottom:16px;cursor:pointer}
@@ -348,7 +373,7 @@
      不用动图 WebP —— iOS 上它时灵时不灵，这个到处都能播。 */
   #angSprite{
     width:100%;aspect-ratio:1/1;
-    background-image:url('./assets/ride_sheet.webp?v=23');
+    background-image:url('./assets/ride_sheet.webp?v=24');
     background-repeat:no-repeat;
     background-size:500% 100%;
     /* jump-none 才会取到 0/25/50/75/100 这五个位置。
@@ -406,7 +431,7 @@
 
   <div id="deco"></div>
 
-  <img id="title" src="./assets/title.webp?v=23" alt="直到大地变成一颗酸橙">
+  <img id="title" src="./assets/title.webp?v=24" alt="直到大地变成一颗酸橙">
 
 
   <div id="ang"><div id="angFlip"><div id="angSprite" role="img" aria-label="安洁莉娜"></div></div></div>
@@ -425,18 +450,18 @@
 
 /* 存储走 dock 那一层，跟别的应用同一套。
    现在是本地实现，以后换成接口版，这里一行都不用改。 */
-import { LocalStore } from '../../core/storage.js?v=23';
+import { LocalStore } from '../../core/storage.js?v=24';
 const store = new LocalStore();
 
 /* 有 config.local.js 就用它，没有就用公开那份。
    缺哪个字段就补哪个，不用整份照抄。 */
-import baseConfig from './config.js?v=23';
-import { mountCalendar } from './calendar.js?v=23';
-import { mountDates } from './dates.js?v=23';
-import { mountDeco } from './deco.js?v=23';
+import baseConfig from './config.js?v=24';
+import { mountCalendar } from './calendar.js?v=24';
+import { mountDates } from './dates.js?v=24';
+import { mountDeco } from './deco.js?v=24';
 let CFG = baseConfig;
 try {
-  const local = (await import('./config.local.js?v=23')).default;
+  const local = (await import('./config.local.js?v=24')).default;
   CFG = { ...baseConfig, ...local };
 } catch { /* 没有本地配置，用公开版 */ }
 

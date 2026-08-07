@@ -19,7 +19,7 @@
   /* 背景图：等比裁剪填满，横图放到竖屏上会裁掉左右两边 */
   #bg{
     position:absolute;inset:0;z-index:-2;
-    background:url('./assets/bg.webp?v=36') center center / cover no-repeat;
+    background:url('./assets/bg.webp?v=37') center center / cover no-repeat;
   }
   /* 底部压一层淡雾，让白色的路和信封不至于糊在水面的碎光里 */
   #haze{
@@ -51,9 +51,11 @@
     text-shadow:0 2px 8px rgba(30,60,110,.28);
     margin-bottom:16px;
   }
+  /* 标题不抠图。白底交给正片叠底混掉 —— 白色乘上去等于不改，
+     深色的字和星星留下来。比按颜色去底干净，也没有毛边。 */
   .panel-title{
-    display:block;width:min(68vw,290px);height:auto;
-    filter:drop-shadow(0 2px 8px rgba(30,60,110,.22));
+    display:block;width:min(70vw,300px);height:auto;
+    mix-blend-mode:multiply;
   }
   .panel h2 .en{font-size:12px;letter-spacing:3.5px;opacity:.8}
   .panel .hand{font-family:var(--hand);font-size:16px;color:#a8c8db;
@@ -353,23 +355,16 @@
   /* 列表外面不再套框，框下放到每一条上 */
   .dt-frame{margin-bottom:8px}
   .dt-list{display:flex;flex-direction:column;gap:10px}
-  /* 每一条就是一整张底框，不切。
-     图是 900x290，卡片按同样的比例长，所以铺满几乎不变形 ——
-     之前切成九宫格是为了让框跟着内容长高，代价是把水彩带和星星扯歪。 */
+  /* 每一条就是那张卡片本身。图是不透明的，中间本来就有奶白的芯，
+     不用再补填充。四角圆一下，把图外面那点白边裁掉。 */
   .dt-card{
     font-family:var(--round);
     display:flex;align-items:center;gap:10px;
-    width:100%;aspect-ratio:900/290;text-align:left;
-    border:0;
-    /* 两层：上面是框，下面自己填中间。
-       填充用几团椭圆渐变，往四边淡到全透明，接上水彩带的边，
-       中间不能是一块实心色 —— 那样一眼就看出是拿颜色补的。 */
-    background:
-      url('./assets/pack/frame.webp?v=36') center/100% 100% no-repeat,
-      radial-gradient(ellipse 62% 46% at 38% 40%, rgba(255,255,255,.72), rgba(255,255,255,0) 72%),
-      radial-gradient(ellipse 58% 44% at 72% 62%, rgba(226,244,253,.66), rgba(226,244,253,0) 74%),
-      radial-gradient(ellipse 78% 62% at 50% 50%, rgba(198,232,248,.62), rgba(198,232,248,0) 76%);
-    padding:0 7% 0 9%;cursor:pointer;
+    width:100%;aspect-ratio:1000/322;text-align:left;
+    border:0;border-radius:20px;overflow:hidden;
+    background:url('./assets/pack/frame.webp?v=37') center/100% 100% no-repeat;
+    padding:0 8%;cursor:pointer;
+    box-shadow:0 6px 16px rgba(40,90,140,.18);
   }
   .dt-card.now{filter:brightness(1.06) saturate(1.1)}
   .dt-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
@@ -527,7 +522,7 @@
      不用动图 WebP —— iOS 上它时灵时不灵，这个到处都能播。 */
   #angSprite{
     width:100%;aspect-ratio:1/1;
-    background-image:url('./assets/ride_sheet.webp?v=36');
+    background-image:url('./assets/ride_sheet.webp?v=37');
     background-repeat:no-repeat;
     background-size:500% 100%;
     /* jump-none 才会取到 0/25/50/75/100 这五个位置。
@@ -585,7 +580,7 @@
 
   <div id="deco"></div>
 
-  <img id="title" src="./assets/title.webp?v=36" alt="直到大地变成一颗酸橙">
+  <img id="title" src="./assets/title.webp?v=37" alt="直到大地变成一颗酸橙">
 
 
   <div id="ang"><div id="angFlip"><div id="angSprite" role="img" aria-label="安洁莉娜"></div></div></div>
@@ -604,18 +599,18 @@
 
 /* 存储走 dock 那一层，跟别的应用同一套。
    现在是本地实现，以后换成接口版，这里一行都不用改。 */
-import { LocalStore } from '../../core/storage.js?v=36';
+import { LocalStore } from '../../core/storage.js?v=37';
 const store = new LocalStore();
 
 /* 有 config.local.js 就用它，没有就用公开那份。
    缺哪个字段就补哪个，不用整份照抄。 */
-import baseConfig from './config.js?v=36';
-import { mountCalendar } from './calendar.js?v=36';
-import { mountDates } from './dates.js?v=36';
-import { mountDeco } from './deco.js?v=36';
+import baseConfig from './config.js?v=37';
+import { mountCalendar } from './calendar.js?v=37';
+import { mountDates } from './dates.js?v=37';
+import { mountDeco } from './deco.js?v=37';
 let CFG = baseConfig;
 try {
-  const local = (await import('./config.local.js?v=36')).default;
+  const local = (await import('./config.local.js?v=37')).default;
   CFG = { ...baseConfig, ...local };
 } catch { /* 没有本地配置，用公开版 */ }
 
@@ -834,7 +829,7 @@ CFG.panels.forEach((p, i) => {
   if (!h) return;
   /* 有标题图就用图，没有就退回文字 */
   h.innerHTML = p.img
-    ? `<img class="panel-title" src="./assets/pack/${p.img}.webp?v=36" alt="${p.name}">`
+    ? `<img class="panel-title" src="./assets/pack/${p.img}.webp?v=37" alt="${p.name}">`
     : `<span>${p.name}</span>`;
 });
 

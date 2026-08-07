@@ -9,7 +9,9 @@
  * 不需要它的人不用先被问一句"你要不要关掉这个"。
  */
 
-const WEEK = ['日', '一', '二', '三', '四', '五', '六'];
+const WEEK_EN = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+const MONTH_EN = ['January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December'];
 const MOODS = [
   { id: 'happy',   name: '开心' },
   { id: 'loved',   name: '被爱' },
@@ -107,22 +109,33 @@ export function mountCalendar(root, { cfg, store }) {
   let showCycle = false;      // 有经期数据才亮，没有就整层不存在
 
   root.innerHTML = `
-    <div class="cal-head">
-      <button class="cal-nav" data-go="-1">‹</button>
-      <div class="cal-title"></div>
-      <button class="cal-nav" data-go="1">›</button>
+    <div class="cal-card">
+      <div class="cal-top">
+        <div class="cal-mon"></div>
+        <div class="cal-mtext">
+          <div class="cal-men"></div>
+          <div class="cal-myear"></div>
+        </div>
+        <button class="cal-nav" data-go="-1">‹</button>
+        <button class="cal-nav" data-go="1">›</button>
+      </div>
+      <div class="cal-body">
+        <div class="cal-week"></div>
+        <div class="cal-grid"></div>
+      </div>
     </div>
-    <div class="cal-week"></div>
-    <div class="cal-grid"></div>
     <div class="cal-legend"></div>
+    <p class="cal-foot">day by day, quietly</p>
   `;
 
-  const elTitle  = root.querySelector('.cal-title');
+  const elMon    = root.querySelector('.cal-mon');
+  const elMen    = root.querySelector('.cal-men');
+  const elYear   = root.querySelector('.cal-myear');
   const elWeek   = root.querySelector('.cal-week');
   const elGrid   = root.querySelector('.cal-grid');
   const elLegend = root.querySelector('.cal-legend');
 
-  elWeek.innerHTML = WEEK.map(w => `<span>${w}</span>`).join('');
+  elWeek.innerHTML = WEEK_EN.map(w => `<span>${w}</span>`).join('');
 
   root.querySelectorAll('.cal-nav').forEach(b => {
     b.onclick = () => {
@@ -133,7 +146,9 @@ export function mountCalendar(root, { cfg, store }) {
 
   async function draw() {
     const y = cursor.getFullYear(), m = cursor.getMonth();
-    elTitle.textContent = `${y} 年 ${m + 1} 月`;
+    elMon.textContent = m + 1;
+    elMen.textContent = MONTH_EN[m];
+    elYear.textContent = y;
 
     const first = new Date(y, m, 1);
     const start = addDays(first, -first.getDay());          // 补齐到周日

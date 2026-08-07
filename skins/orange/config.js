@@ -10,10 +10,10 @@
 export default {
   /* 四个站点，顺序就是公路上从左到右的顺序 */
   panels: [
-    { id: 'calendar', name: '日 历' },
-    { id: 'ledger',   name: '账 本' },
-    { id: 'notes',    name: '便 签' },
-    { id: 'spare',    name: '待 定' }
+    { id: 'calendar', name: '日 历', en: 'CALENDAR' },
+    { id: 'ledger',   name: '账 本', en: 'FINANCE' },
+    { id: 'notes',    name: '便 签', en: 'MEMO' },
+    { id: 'spare',    name: '待 定', en: 'SOON' }
   ],
 
   /* 四个站点各用哪张图，对应 assets/ 下的文件名 */

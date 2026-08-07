@@ -77,7 +77,7 @@ export function mountDates(root, { cfg, store }) {
 
   root.innerHTML = `
     <div class="dt-tags"></div>
-    <div class="dt-list"></div>
+    <div class="dt-frame"><div class="dt-list"></div></div>
   `;
   const elTags = root.querySelector('.dt-tags');
   const elList = root.querySelector('.dt-list');

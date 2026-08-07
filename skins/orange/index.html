@@ -19,7 +19,7 @@
   /* 背景图：等比裁剪填满，横图放到竖屏上会裁掉左右两边 */
   #bg{
     position:absolute;inset:0;z-index:-2;
-    background:url('./assets/bg.webp?v=31') center center / cover no-repeat;
+    background:url('./assets/bg.webp?v=32') center center / cover no-repeat;
   }
   /* 底部压一层淡雾，让白色的路和信封不至于糊在水面的碎光里 */
   #haze{
@@ -49,7 +49,11 @@
     display:flex;align-items:center;justify-content:center;gap:9px;
     color:rgba(255,255,255,.9);font-size:14px;font-weight:600;letter-spacing:2px;
     text-shadow:0 2px 8px rgba(30,60,110,.28);
-    margin-bottom:18px;
+    margin-bottom:16px;
+  }
+  .panel-title{
+    display:block;width:min(68vw,290px);height:auto;
+    filter:drop-shadow(0 2px 8px rgba(30,60,110,.22));
   }
   .panel h2 .en{font-size:12px;letter-spacing:3.5px;opacity:.8}
   .panel .hand{font-family:var(--hand);font-size:16px;color:#a8c8db;
@@ -342,6 +346,14 @@
     display:inline-flex;align-items:center;gap:5px;
   }
   .dt-tag.on{border-color:#fff;box-shadow:0 3px 10px rgba(90,150,190,.22);font-weight:600}
+  /* 底框跟着内容长高：切成九宫格，四角保持原样，四边拉伸。
+     整张图直接拉伸的话，角上那些小星星会被扯歪。 */
+  .dt-frame{
+    border:34px solid transparent;
+    border-image:url('./assets/pack/frame.webp?v=32') 88 96 fill / 34px stretch;
+    padding:2px;
+    margin-bottom:8px;
+  }
   .dt-list{display:flex;flex-direction:column;gap:10px}
   .dt-card{
     font-family:var(--round);
@@ -506,7 +518,7 @@
      不用动图 WebP —— iOS 上它时灵时不灵，这个到处都能播。 */
   #angSprite{
     width:100%;aspect-ratio:1/1;
-    background-image:url('./assets/ride_sheet.webp?v=31');
+    background-image:url('./assets/ride_sheet.webp?v=32');
     background-repeat:no-repeat;
     background-size:500% 100%;
     /* jump-none 才会取到 0/25/50/75/100 这五个位置。
@@ -564,7 +576,7 @@
 
   <div id="deco"></div>
 
-  <img id="title" src="./assets/title.webp?v=31" alt="直到大地变成一颗酸橙">
+  <img id="title" src="./assets/title.webp?v=32" alt="直到大地变成一颗酸橙">
 
 
   <div id="ang"><div id="angFlip"><div id="angSprite" role="img" aria-label="安洁莉娜"></div></div></div>
@@ -583,18 +595,18 @@
 
 /* 存储走 dock 那一层，跟别的应用同一套。
    现在是本地实现，以后换成接口版，这里一行都不用改。 */
-import { LocalStore } from '../../core/storage.js?v=31';
+import { LocalStore } from '../../core/storage.js?v=32';
 const store = new LocalStore();
 
 /* 有 config.local.js 就用它，没有就用公开那份。
    缺哪个字段就补哪个，不用整份照抄。 */
-import baseConfig from './config.js?v=31';
-import { mountCalendar } from './calendar.js?v=31';
-import { mountDates } from './dates.js?v=31';
-import { mountDeco } from './deco.js?v=31';
+import baseConfig from './config.js?v=32';
+import { mountCalendar } from './calendar.js?v=32';
+import { mountDates } from './dates.js?v=32';
+import { mountDeco } from './deco.js?v=32';
 let CFG = baseConfig;
 try {
-  const local = (await import('./config.local.js?v=31')).default;
+  const local = (await import('./config.local.js?v=32')).default;
   CFG = { ...baseConfig, ...local };
 } catch { /* 没有本地配置，用公开版 */ }
 
@@ -811,9 +823,10 @@ function layout() {
 CFG.panels.forEach((p, i) => {
   const h = document.querySelector(`#panel${i} h2`);
   if (!h) return;
-  h.innerHTML = '<span class="star">✦</span>' +
-    (p.en ? `<span class="en">${p.en}</span>` : '') +
-    `<span>${p.name}</span><span class="star">✦</span>`;
+  /* 有标题图就用图，没有就退回文字 */
+  h.innerHTML = p.img
+    ? `<img class="panel-title" src="./assets/pack/${p.img}.webp?v=32" alt="${p.name}">`
+    : `<span>${p.name}</span>`;
 });
 
 makeLetters();

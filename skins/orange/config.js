@@ -19,6 +19,16 @@ export default {
   /* 四个站点各用哪张图，对应 assets/ 下的文件名 */
   stopIcons: ['letter.webp', 'stop6.webp', 'stop5.webp', 'stop4.webp'],
 
+  /* 账本的分类。icon 对应 assets/cat/ 下的文件名。
+     不选也能记 —— 没选的算进「其他」，不为了分类多按一下。 */
+  ledgerCats: [
+    { id: 'food',      name: '饮食', en: 'Food',      icon: 'food' },
+    { id: 'drink',     name: '饮品', en: 'Drink',     icon: 'drink' },
+    { id: 'transport', name: '交通', en: 'Transport', icon: 'transport' },
+    { id: 'shopping',  name: '购物', en: 'Shopping',  icon: 'shopping' },
+    { id: 'other',     name: '其他', en: 'Others',    icon: 'other' }
+  ],
+
   /* 记日子时能选的标签。一条可以挂好几个，顶上的筛选也能同时选好几个。 */
   dateTags: ['生日', '纪念日', '周年庆', '节日', '聚会', '旅行', '游戏', '其他'],
 

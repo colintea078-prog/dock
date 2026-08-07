@@ -42,7 +42,7 @@
   /* 背景图：等比裁剪填满，横图放到竖屏上会裁掉左右两边 */
   #bg{
     position:absolute;inset:0;z-index:-2;
-    background:url('./assets/bg.webp?v=52') center center / cover no-repeat;
+    background:url('./assets/bg.webp?v=53') center center / cover no-repeat;
   }
   /* 底部压一层淡雾，让白色的路和信封不至于糊在水面的碎光里 */
   #haze{
@@ -420,7 +420,7 @@
     display:flex;align-items:center;gap:10px;
     width:100%;aspect-ratio:1000/322;text-align:left;
     border:0;border-radius:20px;overflow:hidden;
-    background:url('./assets/pack/frame.webp?v=52') center/100% 100% no-repeat;
+    background:url('./assets/pack/frame.webp?v=53') center/100% 100% no-repeat;
     padding:0 8%;cursor:pointer;
     box-shadow:0 6px 16px rgba(40,90,140,.18);
   }
@@ -505,6 +505,34 @@
     display:flex;justify-content:center;gap:18px;margin-top:10px;
     font-size:12px;color:#8fb8d2;
   }
+  /* 分类小结 */
+  .led-cats{
+    margin-top:14px;padding-top:12px;
+    border-top:1px dashed rgba(140,185,215,.4);
+    display:flex;flex-direction:column;gap:10px;
+  }
+  .led-cat{display:flex;align-items:center;gap:10px}
+  .led-ico{width:26px;height:26px;object-fit:contain;flex:none}
+  .led-cat-name{flex:1;font-size:14px;color:#5b7a9d}
+  .led-cat-num{font-family:var(--num);font-size:15px;color:var(--ocean);font-weight:600}
+
+  /* 表单里挑分类 */
+  .led-pick{display:flex;gap:6px;flex-wrap:wrap}
+  .led-cat-btn{
+    flex:1;min-width:58px;font:inherit;font-family:var(--round);
+    display:flex;flex-direction:column;align-items:center;gap:3px;
+    padding:8px 4px;border-radius:14px;cursor:pointer;
+    border:1.4px solid transparent;background:rgba(232,243,251,.7);
+    transition:transform .18s cubic-bezier(.34,1.4,.5,1),box-shadow .18s ease;
+  }
+  .led-cat-btn img{width:28px;height:28px;object-fit:contain}
+  .led-cat-btn span{font-size:11px;color:#5b7a9d}
+  .led-cat-btn.on{
+    background:#fff;border-color:#8ec6e6;
+    transform:translateY(-3px);
+    box-shadow:0 5px 12px rgba(60,130,180,.25);
+  }
+
   .led-week{
     margin-top:14px;padding-top:12px;border-top:1px dashed rgba(140,185,215,.4);
   }
@@ -649,7 +677,7 @@
      不用动图 WebP —— iOS 上它时灵时不灵，这个到处都能播。 */
   #angSprite{
     width:100%;aspect-ratio:1/1;
-    background-image:url('./assets/ride_sheet.webp?v=52');
+    background-image:url('./assets/ride_sheet.webp?v=53');
     background-repeat:no-repeat;
     background-size:500% 100%;
     /* jump-none 才会取到 0/25/50/75/100 这五个位置。
@@ -710,7 +738,7 @@
 
   <div id="deco"></div>
 
-  <img id="title" src="./assets/title.webp?v=52" alt="直到大地变成一颗酸橙">
+  <img id="title" src="./assets/title.webp?v=53" alt="直到大地变成一颗酸橙">
 
 
   <div id="ang"><div id="angFlip"><div id="angSprite" role="img" aria-label="安洁莉娜"></div></div></div>
@@ -729,19 +757,19 @@
 
 /* 存储走 dock 那一层，跟别的应用同一套。
    现在是本地实现，以后换成接口版，这里一行都不用改。 */
-import { LocalStore } from '../../core/storage.js?v=52';
+import { LocalStore } from '../../core/storage.js?v=53';
 const store = new LocalStore();
 
 /* 有 config.local.js 就用它，没有就用公开那份。
    缺哪个字段就补哪个，不用整份照抄。 */
-import baseConfig from './config.js?v=52';
-import { mountCalendar } from './calendar.js?v=52';
-import { mountDates } from './dates.js?v=52';
-import { mountDeco } from './deco.js?v=52';
-import { mountLedger } from './ledger.js?v=52';
+import baseConfig from './config.js?v=53';
+import { mountCalendar } from './calendar.js?v=53';
+import { mountDates } from './dates.js?v=53';
+import { mountDeco } from './deco.js?v=53';
+import { mountLedger } from './ledger.js?v=53';
 let CFG = baseConfig;
 try {
-  const local = (await import('./config.local.js?v=52')).default;
+  const local = (await import('./config.local.js?v=53')).default;
   CFG = { ...baseConfig, ...local };
 } catch { /* 没有本地配置，用公开版 */ }
 

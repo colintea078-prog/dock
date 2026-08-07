@@ -42,6 +42,10 @@ function compare(now, prev) {
 }
 
 export function mountLedger(root, { cfg, store }) {
+  const CATS = cfg.ledgerCats || [{ id: 'other', name: '其他', en: 'Others', icon: 'other' }];
+  const catOf = id => CATS.find(c => c.id === id) || CATS[CATS.length - 1];
+  const catIcon = c => `<img class="led-ico" src="./assets/cat/${c.icon}.webp?v=53" alt="">`;
+
   let items = [];
   let cursor = new Date();          // 当前看的是哪个月
 
@@ -101,6 +105,22 @@ export function mountLedger(root, { cfg, store }) {
     const days = isNow ? today.getDate() : new Date(y, m + 1, 0).getDate();
     const perDay = days ? total / days : 0;
 
+    /* 分类小结：只列这个月真花过钱的类，金额从多到少。
+       全部列出来会有一堆零，看着像没记账。 */
+    const byCat = CATS
+      .map(c => ({ c, n: sum(mine.filter(r => (r.cat || 'other') === c.id)) }))
+      .filter(x => x.n > 0)
+      .sort((a, b) => b.n - a.n);
+    const catBlock = byCat.length ? `
+      <div class="led-cats">
+        ${byCat.map(({ c, n }) => `
+          <div class="led-cat">
+            ${catIcon(c)}
+            <span class="led-cat-name">${c.en} / ${c.name}</span>
+            <span class="led-cat-num">¥ ${money(n)}</span>
+          </div>`).join('')}
+      </div>` : '';
+
     /* 本周只在看当月时才有意义 */
     let weekBlock = '';
     if (isNow) {
@@ -139,6 +159,7 @@ export function mountLedger(root, { cfg, store }) {
           <span>日均 ¥${money(perDay)}</span>
         </div>
 
+        ${catBlock}
         ${weekBlock}
       </div>`;
 
@@ -175,7 +196,8 @@ export function mountLedger(root, { cfg, store }) {
           </div>
           ${rows.map(r => `
             <button class="led-row" data-id="${r.id}">
-              <span class="led-note">${escapeHtml(r.note || '——')}</span>
+              ${catIcon(catOf(r.cat))}
+              <span class="led-note">${escapeHtml(r.note || catOf(r.cat).name)}</span>
               <span class="led-amt">¥ ${money(r.amount)}</span>
             </button>`).join('')}
         </div>`;
@@ -191,7 +213,7 @@ export function mountLedger(root, { cfg, store }) {
   /* --------------------------------------------------------- 记一笔 */
 
   function openForm(existing) {
-    const r = existing || { id: Date.now(), date: key(new Date()), amount: '', note: '' };
+    const r = existing || { id: Date.now(), date: key(new Date()), amount: '', note: '', cat: '' };
 
     elSheet.hidden = false;
     elSheet.innerHTML = `
@@ -210,6 +232,16 @@ export function mountLedger(root, { cfg, store }) {
                  placeholder="可以不写">
         </label>
 
+        <div class="sheet-field">
+          <span>算哪一类（不选就是其他）</span>
+          <div class="led-pick">
+            ${CATS.map(c => `
+              <button class="led-cat-btn ${r.cat === c.id ? 'on' : ''}" data-cat="${c.id}">
+                ${catIcon(c)}<span>${c.name}</span>
+              </button>`).join('')}
+          </div>
+        </div>
+
         <label class="sheet-field">
           <span>哪一天</span>
           <input id="ledDate" type="date" value="${r.date}">
@@ -221,6 +253,15 @@ export function mountLedger(root, { cfg, store }) {
           <button class="sheet-btn" id="ledSave">存下来</button>
         </div>
       </div>`;
+
+    let cat = r.cat || '';
+    elSheet.querySelectorAll('[data-cat]').forEach(b => {
+      b.onclick = () => {
+        cat = cat === b.dataset.cat ? '' : b.dataset.cat;    // 再点一次取消
+        elSheet.querySelectorAll('[data-cat]').forEach(x =>
+          x.classList.toggle('on', x.dataset.cat === cat));
+      };
+    });
 
     const amt = elSheet.querySelector('#ledAmt');
     setTimeout(() => amt.focus(), 60);
@@ -242,7 +283,8 @@ export function mountLedger(root, { cfg, store }) {
         id: r.id,
         date: elSheet.querySelector('#ledDate').value,
         amount: Math.round(value * 100) / 100,
-        note: elSheet.querySelector('#ledNote').value.trim()
+        note: elSheet.querySelector('#ledNote').value.trim(),
+        cat: cat || 'other'
       };
       const i = items.findIndex(x => x.id === rec.id);
       if (i >= 0) items[i] = rec; else items.push(rec);

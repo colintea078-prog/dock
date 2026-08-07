@@ -19,7 +19,7 @@
   /* 背景图：等比裁剪填满，横图放到竖屏上会裁掉左右两边 */
   #bg{
     position:absolute;inset:0;z-index:-2;
-    background:url('./assets/bg.webp?v=25') center center / cover no-repeat;
+    background:url('./assets/bg.webp?v=26') center center / cover no-repeat;
   }
   /* 底部压一层淡雾，让白色的路和信封不至于糊在水面的碎光里 */
   #haze{
@@ -33,7 +33,7 @@
   #panelBg{
     position:absolute;inset:0;z-index:1;
     opacity:0;pointer-events:none;transition:opacity .38s ease;
-    background:linear-gradient(180deg,#cfe6f7 0%,#e2f0fa 34%,#eef7fd 68%,#f8fcff 100%);
+    background:linear-gradient(180deg,#4d7fc9 0%,#5b8ed6 22%,#84b3e2 55%,#bcd9ee 78%,#e4f0f8 100%);
   }
   #panelBg.on{opacity:1}
 
@@ -47,13 +47,14 @@
   .panel.on{opacity:1;pointer-events:auto}
   .panel h2{
     display:flex;align-items:center;justify-content:center;gap:9px;
-    color:#6f9fc4;font-size:14px;font-weight:600;letter-spacing:2px;
+    color:rgba(255,255,255,.9);font-size:14px;font-weight:600;letter-spacing:2px;
+    text-shadow:0 2px 8px rgba(30,60,110,.28);
     margin-bottom:18px;
   }
   .panel h2 .en{font-size:12px;letter-spacing:3.5px;opacity:.8}
   .panel .hand{font-family:var(--hand);font-size:16px;color:#a8c8db;
     text-align:center;display:block;margin:-8px 0 16px}
-  .panel h2 .star{color:#a9cde8;font-size:12px}
+  .panel h2 .star{color:#ffe6a8;font-size:12px}
 
   /* ---- 日历 ---- 手帐贴纸版 */
   :root{
@@ -295,8 +296,9 @@
     display:flex;
     align-items:center;
     gap:5px;
-    color:#91bad3;
+    color:rgba(255,255,255,.82);
     font-size:11px;
+    text-shadow:0 1px 6px rgba(30,60,110,.3);
   }
   .lg{
     width:12px;
@@ -312,8 +314,9 @@
     margin-top:12px;
     font-family:var(--hand);
     font-size:17px;
-    color:#9fc7dc;
+    color:rgba(255,255,255,.85);
     letter-spacing:.5px;
+    text-shadow:0 1px 8px rgba(30,60,110,.3);
   }
   .cal-foot::before{content:"✦ ";color:var(--sunny)}
   .cal-foot::after{content:" ☁"}
@@ -351,7 +354,7 @@
     font-variant-numeric:tabular-nums;min-width:62px;text-align:right;
   }
   .dt-empty{
-    color:rgba(47,74,109,.62);font-size:13.5px;text-align:center;
+    color:rgba(255,255,255,.75);font-size:13.5px;text-align:center;
     line-height:2;padding:36px 0;
   }
   .dt-add[hidden]{display:none}
@@ -491,7 +494,7 @@
      不用动图 WebP —— iOS 上它时灵时不灵，这个到处都能播。 */
   #angSprite{
     width:100%;aspect-ratio:1/1;
-    background-image:url('./assets/ride_sheet.webp?v=25');
+    background-image:url('./assets/ride_sheet.webp?v=26');
     background-repeat:no-repeat;
     background-size:500% 100%;
     /* jump-none 才会取到 0/25/50/75/100 这五个位置。
@@ -549,7 +552,7 @@
 
   <div id="deco"></div>
 
-  <img id="title" src="./assets/title.webp?v=25" alt="直到大地变成一颗酸橙">
+  <img id="title" src="./assets/title.webp?v=26" alt="直到大地变成一颗酸橙">
 
 
   <div id="ang"><div id="angFlip"><div id="angSprite" role="img" aria-label="安洁莉娜"></div></div></div>
@@ -568,18 +571,18 @@
 
 /* 存储走 dock 那一层，跟别的应用同一套。
    现在是本地实现，以后换成接口版，这里一行都不用改。 */
-import { LocalStore } from '../../core/storage.js?v=25';
+import { LocalStore } from '../../core/storage.js?v=26';
 const store = new LocalStore();
 
 /* 有 config.local.js 就用它，没有就用公开那份。
    缺哪个字段就补哪个，不用整份照抄。 */
-import baseConfig from './config.js?v=25';
-import { mountCalendar } from './calendar.js?v=25';
-import { mountDates } from './dates.js?v=25';
-import { mountDeco } from './deco.js?v=25';
+import baseConfig from './config.js?v=26';
+import { mountCalendar } from './calendar.js?v=26';
+import { mountDates } from './dates.js?v=26';
+import { mountDeco } from './deco.js?v=26';
 let CFG = baseConfig;
 try {
-  const local = (await import('./config.local.js?v=25')).default;
+  const local = (await import('./config.local.js?v=26')).default;
   CFG = { ...baseConfig, ...local };
 } catch { /* 没有本地配置，用公开版 */ }
 

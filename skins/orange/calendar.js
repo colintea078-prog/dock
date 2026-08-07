@@ -125,11 +125,9 @@ export function mountCalendar(root, { cfg, store }) {
   root.innerHTML = `
     <div class="cal-card">
       <div class="cal-top">
-        <div class="cal-mark">✿ Sunny Day</div>
         <div class="cal-men"></div>
         <div class="cal-mon"></div>
         <div class="cal-myear"></div>
-        <div class="cal-foot-note">little memories</div>
         <button class="cal-nav" data-go="-1">‹</button>
         <button class="cal-nav" data-go="1">›</button>
       </div>
@@ -139,7 +137,6 @@ export function mountCalendar(root, { cfg, store }) {
       </div>
     </div>
     <div class="cal-legend"></div>
-    <p class="cal-foot">day by day, quietly</p>
   `;
 
   const elMon    = root.querySelector('.cal-mon');

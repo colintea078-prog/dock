@@ -19,7 +19,7 @@
   /* 背景图：等比裁剪填满，横图放到竖屏上会裁掉左右两边 */
   #bg{
     position:absolute;inset:0;z-index:-2;
-    background:url('./assets/bg.webp?v=27') center center / cover no-repeat;
+    background:url('./assets/bg.webp?v=28') center center / cover no-repeat;
   }
   /* 底部压一层淡雾，让白色的路和信封不至于糊在水面的碎光里 */
   #haze{
@@ -109,46 +109,13 @@
     filter:blur(7px);
   }
 
-  /* 右下角那枚小贴纸 */
-  .cal-card::after{
-    content:"✦  ☁  ✿";
-    position:absolute;
-    right:16px;
-    bottom:-2px;
-    font-family:var(--hand);
-    font-size:17px;
-    color:rgba(255,255,255,.75);
-    transform:rotate(-8deg);
-    pointer-events:none;
-  }
 
   /* 顶部月份区域，坐在水彩上，字是白的 */
   .cal-top{
     position:relative;
-    padding:18px 44px 16px;
+    padding:18px 56px 16px;
     text-align:center;
   }
-  .cal-mark{
-    position:absolute;
-    left:8px;
-    top:8px;
-    color:rgba(255,255,255,.85);
-    font-family:var(--hand);
-    font-size:14px;
-    transform:rotate(-5deg);
-    letter-spacing:.5px;
-  }
-  .cal-mark::before{content:"✦ ";color:var(--sunny)}
-  .cal-foot-note{
-    position:absolute;
-    right:14px;
-    top:52px;
-    font-family:var(--hand);
-    font-size:14px;
-    color:rgba(255,255,255,.8);
-    transform:rotate(-4deg);
-  }
-  .cal-foot-note::before{content:"☁ "}
 
   .cal-men{
     font-family:var(--num);
@@ -180,26 +147,31 @@
     position:absolute;
     top:50%;
     transform:translateY(-50%);
-    width:32px;
-    height:32px;
+    width:44px;
+    height:44px;
     border:0;
     border-radius:50%;
-    background:rgba(255,255,255,.3);
-    color:#fff;
-    font-size:19px;
+    background:linear-gradient(150deg,#ffe27a,var(--sunny));
+    color:#c98a12;
+    font-size:26px;
+    font-weight:700;
     line-height:1;
-    font-family:var(--hand);
+    display:flex;
+    align-items:center;
+    justify-content:center;
     cursor:pointer;
+    box-shadow:0 4px 12px rgba(190,140,20,.32);
   }
   .cal-nav::after{
     content:"";
     position:absolute;
-    inset:3px;
+    inset:4px;
     border-radius:50%;
-    border:1px dashed rgba(255,255,255,.5);
+    border:1.4px dashed rgba(255,255,255,.72);
   }
-  .cal-nav[data-go="-1"]{left:6px}
-  .cal-nav[data-go="1"]{right:6px}
+  .cal-nav:active{transform:translateY(-50%) scale(.92)}
+  .cal-nav[data-go="-1"]{left:4px}
+  .cal-nav[data-go="1"]{right:4px}
 
   /* 日期区：一整块白纸嵌在水彩里 */
   .cal-body{
@@ -318,18 +290,6 @@
   .lg.period{box-shadow:inset 0 0 0 2px #efb3c2}
   .lg.ovu{box-shadow:inset 0 0 0 2px var(--mint)}
 
-  /* 底部手写文字 */
-  .cal-foot{
-    text-align:center;
-    margin-top:12px;
-    font-family:var(--hand);
-    font-size:17px;
-    color:rgba(255,255,255,.85);
-    letter-spacing:.5px;
-    text-shadow:0 1px 8px rgba(30,60,110,.3);
-  }
-  .cal-foot::before{content:"✦ ";color:var(--sunny)}
-  .cal-foot::after{content:" ☁"}
 
   /* ---- 日期备忘录 ---- */
   .dt-tags{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
@@ -504,7 +464,7 @@
      不用动图 WebP —— iOS 上它时灵时不灵，这个到处都能播。 */
   #angSprite{
     width:100%;aspect-ratio:1/1;
-    background-image:url('./assets/ride_sheet.webp?v=27');
+    background-image:url('./assets/ride_sheet.webp?v=28');
     background-repeat:no-repeat;
     background-size:500% 100%;
     /* jump-none 才会取到 0/25/50/75/100 这五个位置。
@@ -562,7 +522,7 @@
 
   <div id="deco"></div>
 
-  <img id="title" src="./assets/title.webp?v=27" alt="直到大地变成一颗酸橙">
+  <img id="title" src="./assets/title.webp?v=28" alt="直到大地变成一颗酸橙">
 
 
   <div id="ang"><div id="angFlip"><div id="angSprite" role="img" aria-label="安洁莉娜"></div></div></div>
@@ -581,18 +541,18 @@
 
 /* 存储走 dock 那一层，跟别的应用同一套。
    现在是本地实现，以后换成接口版，这里一行都不用改。 */
-import { LocalStore } from '../../core/storage.js?v=27';
+import { LocalStore } from '../../core/storage.js?v=28';
 const store = new LocalStore();
 
 /* 有 config.local.js 就用它，没有就用公开那份。
    缺哪个字段就补哪个，不用整份照抄。 */
-import baseConfig from './config.js?v=27';
-import { mountCalendar } from './calendar.js?v=27';
-import { mountDates } from './dates.js?v=27';
-import { mountDeco } from './deco.js?v=27';
+import baseConfig from './config.js?v=28';
+import { mountCalendar } from './calendar.js?v=28';
+import { mountDates } from './dates.js?v=28';
+import { mountDeco } from './deco.js?v=28';
 let CFG = baseConfig;
 try {
-  const local = (await import('./config.local.js?v=27')).default;
+  const local = (await import('./config.local.js?v=28')).default;
   CFG = { ...baseConfig, ...local };
 } catch { /* 没有本地配置，用公开版 */ }
 

@@ -19,7 +19,7 @@
   /* 背景图：等比裁剪填满，横图放到竖屏上会裁掉左右两边 */
   #bg{
     position:absolute;inset:0;z-index:-2;
-    background:url('./assets/bg.webp?v=4') center center / cover no-repeat;
+    background:url('./assets/bg.webp?v=20') center center / cover no-repeat;
   }
   /* 底部压一层淡雾，让白色的路和信封不至于糊在水面的碎光里 */
   #haze{
@@ -299,7 +299,7 @@
      不用动图 WebP —— iOS 上它时灵时不灵，这个到处都能播。 */
   #angSprite{
     width:100%;aspect-ratio:1/1;
-    background-image:url('./assets/ride_sheet.webp?v=4');
+    background-image:url('./assets/ride_sheet.webp?v=20');
     background-repeat:no-repeat;
     background-size:500% 100%;
     /* jump-none 才会取到 0/25/50/75/100 这五个位置。
@@ -357,7 +357,7 @@
 
   <div id="deco"></div>
 
-  <img id="title" src="./assets/title.webp?v=4" alt="直到大地变成一颗酸橙">
+  <img id="title" src="./assets/title.webp?v=20" alt="直到大地变成一颗酸橙">
 
 
   <div id="ang"><div id="angFlip"><div id="angSprite" role="img" aria-label="安洁莉娜"></div></div></div>
@@ -376,18 +376,18 @@
 
 /* 存储走 dock 那一层，跟别的应用同一套。
    现在是本地实现，以后换成接口版，这里一行都不用改。 */
-import { LocalStore } from '../../core/storage.js';
+import { LocalStore } from '../../core/storage.js?v=20';
 const store = new LocalStore();
 
 /* 有 config.local.js 就用它，没有就用公开那份。
    缺哪个字段就补哪个，不用整份照抄。 */
-import baseConfig from './config.js';
-import { mountCalendar } from './calendar.js';
-import { mountDates } from './dates.js';
-import { mountDeco } from './deco.js';
+import baseConfig from './config.js?v=20';
+import { mountCalendar } from './calendar.js?v=20';
+import { mountDates } from './dates.js?v=20';
+import { mountDeco } from './deco.js?v=20';
 let CFG = baseConfig;
 try {
-  const local = (await import('./config.local.js')).default;
+  const local = (await import('./config.local.js?v=20')).default;
   CFG = { ...baseConfig, ...local };
 } catch { /* 没有本地配置，用公开版 */ }
 

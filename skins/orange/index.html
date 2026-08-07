@@ -5,12 +5,12 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <title>直到大地变成一颗酸橙</title>
 <meta name="theme-color" content="#5b8ed6">
-<link rel="manifest" href="./manifest.json?v=54">
+<link rel="manifest" href="./manifest.json?v=55">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="酸橙">
-<link rel="apple-touch-icon" href="./assets/icons/icon-192.png?v=54">
+<link rel="apple-touch-icon" href="./assets/icons/icon-192.png?v=55">
 <style>
   /* 拉丁字体自带，两个系统才长一样。中文仍旧交给系统。
      四款都在仓库里，换一个只用改下面 --num 里的第一个名字：
@@ -48,7 +48,7 @@
   /* 背景图：等比裁剪填满，横图放到竖屏上会裁掉左右两边 */
   #bg{
     position:absolute;inset:0;z-index:-2;
-    background:url('./assets/bg.webp?v=54') center center / cover no-repeat;
+    background:url('./assets/bg.webp?v=55') center center / cover no-repeat;
   }
   /* 底部压一层淡雾，让白色的路和信封不至于糊在水面的碎光里 */
   #haze{
@@ -426,7 +426,7 @@
     display:flex;align-items:center;gap:10px;
     width:100%;aspect-ratio:1000/322;text-align:left;
     border:0;border-radius:20px;overflow:hidden;
-    background:url('./assets/pack/frame.webp?v=54') center/100% 100% no-repeat;
+    background:url('./assets/pack/frame.webp?v=55') center/100% 100% no-repeat;
     padding:0 8%;cursor:pointer;
     box-shadow:0 6px 16px rgba(40,90,140,.18);
   }
@@ -568,6 +568,42 @@
   .led-amt{font-family:var(--num);font-size:15px;color:#2f4a6d;font-weight:600;flex:none}
   .led-input{font-family:var(--num) !important;font-size:26px !important;text-align:right}
 
+  /* ---- 备忘录 ---- */
+  .nt-list{display:flex;flex-direction:column;gap:14px}
+  .nt-card{
+    display:flex;flex-direction:column;gap:6px;width:100%;text-align:left;
+    font-family:var(--round);cursor:pointer;
+    border:0;border-radius:4px 16px 4px 16px;
+    padding:15px 17px 13px;
+    transform:rotate(var(--tilt,0deg));
+    box-shadow:0 6px 16px rgba(50,110,160,.22);
+    transition:transform .18s ease,box-shadow .18s ease;
+  }
+  .nt-card:active{transform:rotate(var(--tilt,0deg)) scale(.985)}
+  /* 五种便签纸，循环用 */
+  .nt-card.p0{background:linear-gradient(160deg,#fffdf3,#fff6d9)}
+  .nt-card.p1{background:linear-gradient(160deg,#f3fbff,#dcf0fb)}
+  .nt-card.p2{background:linear-gradient(160deg,#fff6f8,#ffe4ea)}
+  .nt-card.p3{background:linear-gradient(160deg,#f4fdf8,#dcf3e6)}
+  .nt-card.p4{background:linear-gradient(160deg,#fbf7ff,#eae2fa)}
+  .nt-title{font-size:15.5px;font-weight:600;color:#3a5b7a;line-height:1.4}
+  .nt-peek{
+    font-size:12.5px;color:#7a95ad;line-height:1.6;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+    overflow:hidden;
+  }
+  .nt-foot{display:flex;align-items:center;gap:7px;margin-top:2px}
+  .nt-date{font-family:var(--num);font-size:12px;color:#9db4c8;flex:1}
+  .nt-tag{
+    font-size:10.5px;color:#6b8aa5;background:rgba(255,255,255,.72);
+    border-radius:20px;padding:2px 9px;
+  }
+  .nt-full{
+    font-size:14.5px;color:#3a5b7a;line-height:1.9;
+    white-space:pre-wrap;word-break:break-word;
+    margin-bottom:16px;
+  }
+
   /* ---- 打卡 ---- */
   .checks{display:flex;flex-direction:column;gap:12px}
   .check{
@@ -683,7 +719,7 @@
      不用动图 WebP —— iOS 上它时灵时不灵，这个到处都能播。 */
   #angSprite{
     width:100%;aspect-ratio:1/1;
-    background-image:url('./assets/ride_sheet.webp?v=54');
+    background-image:url('./assets/ride_sheet.webp?v=55');
     background-repeat:no-repeat;
     background-size:500% 100%;
     /* jump-none 才会取到 0/25/50/75/100 这五个位置。
@@ -739,12 +775,15 @@
     <h2></h2>
     <div id="ledRoot"></div>
   </section>
-  <section class="panel" id="panel3"><h2></h2></section>
+  <section class="panel" id="panel3">
+    <h2></h2>
+    <div id="ntRoot"></div>
+  </section>
 
 
   <div id="deco"></div>
 
-  <img id="title" src="./assets/title.webp?v=54" alt="直到大地变成一颗酸橙">
+  <img id="title" src="./assets/title.webp?v=55" alt="直到大地变成一颗酸橙">
 
 
   <div id="ang"><div id="angFlip"><div id="angSprite" role="img" aria-label="安洁莉娜"></div></div></div>
@@ -763,19 +802,20 @@
 
 /* 存储走 dock 那一层，跟别的应用同一套。
    现在是本地实现，以后换成接口版，这里一行都不用改。 */
-import { LocalStore } from '../../core/storage.js?v=54';
+import { LocalStore } from '../../core/storage.js?v=55';
 const store = new LocalStore();
 
 /* 有 config.local.js 就用它，没有就用公开那份。
    缺哪个字段就补哪个，不用整份照抄。 */
-import baseConfig from './config.js?v=54';
-import { mountCalendar } from './calendar.js?v=54';
-import { mountDates } from './dates.js?v=54';
-import { mountDeco } from './deco.js?v=54';
-import { mountLedger } from './ledger.js?v=54';
+import baseConfig from './config.js?v=55';
+import { mountCalendar } from './calendar.js?v=55';
+import { mountDates } from './dates.js?v=55';
+import { mountDeco } from './deco.js?v=55';
+import { mountLedger } from './ledger.js?v=55';
+import { mountNotes } from './notes.js?v=55';
 let CFG = baseConfig;
 try {
-  const local = (await import('./config.local.js?v=54')).default;
+  const local = (await import('./config.local.js?v=55')).default;
   CFG = { ...baseConfig, ...local };
 } catch { /* 没有本地配置，用公开版 */ }
 
@@ -1003,7 +1043,7 @@ CFG.panels.forEach((p, i) => {
    不然改了它浏览器可能还在跑旧的。 */
 if ('serviceWorker' in navigator) {
   addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js?v=54', { updateViaCache: 'none' })
+    navigator.serviceWorker.register('./sw.js?v=55', { updateViaCache: 'none' })
       .catch(e => console.warn('sw register failed', e));
   });
 }
@@ -1014,6 +1054,7 @@ layout();
 mountCalendar(document.getElementById('calRoot'), { cfg: CFG, store });
 mountDates(document.getElementById('dtRoot'), { cfg: CFG, store });
 mountLedger(document.getElementById('ledRoot'), { cfg: CFG, store });
+mountNotes(document.getElementById('ntRoot'), { cfg: CFG, store });
 const deco = mountDeco(decoBox, { cfg: CFG, store });
 /* 首屏排版还没完成时算出来的尺寸是 0，下一帧和图片加载完各补算一次。 */
 requestAnimationFrame(layout);

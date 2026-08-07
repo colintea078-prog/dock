@@ -42,7 +42,7 @@
   /* 背景图：等比裁剪填满，横图放到竖屏上会裁掉左右两边 */
   #bg{
     position:absolute;inset:0;z-index:-2;
-    background:url('./assets/bg.webp?v=50') center center / cover no-repeat;
+    background:url('./assets/bg.webp?v=51') center center / cover no-repeat;
   }
   /* 底部压一层淡雾，让白色的路和信封不至于糊在水面的碎光里 */
   #haze{
@@ -123,7 +123,7 @@
     /* 数字和星期用系统手写体。iOS 自带 Noteworthy / Chalkboard，
        安卓退回圆体，都不用下载字体文件。 */
     /* Quicksand 放第一位，两个系统才一致；后面几个是它没加载出来时的退路 */
-    --num:'Grandstander','Noteworthy','Chalkboard SE',var(--round);
+    --num:'Gaegu','Noteworthy','Chalkboard SE',var(--round);
   }
 
   /* 外面那一圈水彩。多层渐变叠出深浅不匀的蓝，边缘留白发虚。 */
@@ -420,7 +420,7 @@
     display:flex;align-items:center;gap:10px;
     width:100%;aspect-ratio:1000/322;text-align:left;
     border:0;border-radius:20px;overflow:hidden;
-    background:url('./assets/pack/frame.webp?v=50') center/100% 100% no-repeat;
+    background:url('./assets/pack/frame.webp?v=51') center/100% 100% no-repeat;
     padding:0 8%;cursor:pointer;
     box-shadow:0 6px 16px rgba(40,90,140,.18);
   }
@@ -649,7 +649,7 @@
      不用动图 WebP —— iOS 上它时灵时不灵，这个到处都能播。 */
   #angSprite{
     width:100%;aspect-ratio:1/1;
-    background-image:url('./assets/ride_sheet.webp?v=50');
+    background-image:url('./assets/ride_sheet.webp?v=51');
     background-repeat:no-repeat;
     background-size:500% 100%;
     /* jump-none 才会取到 0/25/50/75/100 这五个位置。
@@ -710,7 +710,7 @@
 
   <div id="deco"></div>
 
-  <img id="title" src="./assets/title.webp?v=50" alt="直到大地变成一颗酸橙">
+  <img id="title" src="./assets/title.webp?v=51" alt="直到大地变成一颗酸橙">
 
 
   <div id="ang"><div id="angFlip"><div id="angSprite" role="img" aria-label="安洁莉娜"></div></div></div>
@@ -729,19 +729,19 @@
 
 /* 存储走 dock 那一层，跟别的应用同一套。
    现在是本地实现，以后换成接口版，这里一行都不用改。 */
-import { LocalStore } from '../../core/storage.js?v=50';
+import { LocalStore } from '../../core/storage.js?v=51';
 const store = new LocalStore();
 
 /* 有 config.local.js 就用它，没有就用公开那份。
    缺哪个字段就补哪个，不用整份照抄。 */
-import baseConfig from './config.js?v=50';
-import { mountCalendar } from './calendar.js?v=50';
-import { mountDates } from './dates.js?v=50';
-import { mountDeco } from './deco.js?v=50';
-import { mountLedger } from './ledger.js?v=50';
+import baseConfig from './config.js?v=51';
+import { mountCalendar } from './calendar.js?v=51';
+import { mountDates } from './dates.js?v=51';
+import { mountDeco } from './deco.js?v=51';
+import { mountLedger } from './ledger.js?v=51';
 let CFG = baseConfig;
 try {
-  const local = (await import('./config.local.js?v=50')).default;
+  const local = (await import('./config.local.js?v=51')).default;
   CFG = { ...baseConfig, ...local };
 } catch { /* 没有本地配置，用公开版 */ }
 

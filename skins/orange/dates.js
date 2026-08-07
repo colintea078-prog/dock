@@ -147,8 +147,9 @@ export function mountDates(root, { cfg, store }) {
     elTags.innerHTML = '';
     if (used.length > 1) {
       const all = document.createElement('button');
-      all.className = 'dt-tag pic' + (filter.size === 0 ? ' on' : '');
-      all.innerHTML = `<img class="round" src="./assets/pack/tag_all.webp?v=39" alt="全部">`;
+      /* 全部还是文字按钮 —— 那张红贴纸跟旁边一排水彩色差太大，太抢眼 */
+      all.className = 'dt-tag' + (filter.size === 0 ? ' on' : '');
+      all.textContent = '全部';
       all.onclick = () => { filter.clear(); draw(); };
       elTags.appendChild(all);
       used.forEach(t => {

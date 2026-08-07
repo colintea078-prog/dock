@@ -19,11 +19,14 @@ export default {
   /* 四个站点各用哪张图，对应 assets/ 下的文件名 */
   stopIcons: ['letter.webp', 'stop6.webp', 'stop5.webp', 'stop4.webp'],
 
+  /* 记日子时能选的标签。一条可以挂好几个，顶上的筛选也能同时选好几个。 */
+  dateTags: ['生日', '纪念日', '周年庆', '节日', '聚会', '旅行', '游戏', '其他'],
+
   /* 头一次打开时自带的两个日子。删掉就不会再回来 —— 只在第一次种。
      日期取国服公测日 2019.05.01 和它往后六个月。 */
   defaultDates: [
-    { name: '明日方舟 周年庆', date: '2019-05-01', calendar: 'solar', tag: '纪念日', repeat: true },
-    { name: '明日方舟 半周年', date: '2019-11-01', calendar: 'solar', tag: '纪念日', repeat: true }
+    { name: '明日方舟 周年庆', date: '2019-05-01', calendar: 'solar', tags: ['周年庆', '游戏'], repeat: true },
+    { name: '明日方舟 半周年', date: '2019-11-01', calendar: 'solar', tags: ['周年庆', '游戏'], repeat: true }
   ],
 
   /* 首页拼贴的默认排版。x/y 是中心点占屏幕宽高的比例，w 是宽度像素，

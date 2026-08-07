@@ -67,7 +67,7 @@ function countdownText(days) {
 
 export function mountDates(root, { cfg, store }) {
   const TAGS = cfg.dateTags || ['生日', '纪念日', '旅行', '其他'];
-  let filter = null;
+  let filter = new Set();
   let items = [];
 
   root.innerHTML = `
@@ -103,15 +103,29 @@ export function mountDates(root, { cfg, store }) {
   async function load() {
     items = await store.get('dates', 'items', []);
 
-    /* 头一次打开时种下配置里那几个日子。种过就记一笔 ——
-       用户删掉它们之后不该又冒出来。 */
-    const seeded = await store.get('dates', 'seeded', false);
-    if (!seeded) {
-      const seed = cfg.defaultDates || [];
-      items = items.concat(seed.map((s, n) => ({ id: Date.now() + n, repeat: true, ...s })));
-      await store.set('dates', 'seeded', true);
-      if (seed.length) await store.set('dates', 'items', items);
+    /* 老数据：单个 tag 升级成 tags 数组 */
+    let migrated = false;
+    items.forEach(it => {
+      if (!Array.isArray(it.tags)) {
+        it.tags = it.tag ? [it.tag] : [];
+        delete it.tag;
+        migrated = true;
+      }
+    });
+
+    /* 头一次打开时种下配置里那几个日子。
+       只有真种下去了才记这一笔 —— 之前那版不管种没种都记，
+       结果配置还没加载好的那次把记号占了，后面再也种不上。 */
+    const seed = cfg.defaultDates || [];
+    const seeded = await store.get('dates', 'seedMark', false);
+    if (!seeded && seed.length) {
+      items = items.concat(seed.map((x, n) => ({
+        id: Date.now() + n, repeat: true, tags: [], ...x
+      })));
+      await store.set('dates', 'seedMark', true);
+      migrated = true;
     }
+    if (migrated) await store.set('dates', 'items', items);
     draw();
   }
 
@@ -121,20 +135,23 @@ export function mountDates(root, { cfg, store }) {
   }
 
   function draw() {
-    /* 标签行：只列真正用到的，加一个"全部" */
-    const used = [...new Set(items.map(i => i.tag).filter(Boolean))];
+    /* 标签行：只列真正用到的。可以同时选中好几个，选中的是"或"的关系。 */
+    const used = [...new Set(items.flatMap(i => i.tags || []))];
     elTags.innerHTML = '';
     if (used.length > 1) {
       const all = document.createElement('button');
-      all.className = 'dt-tag' + (filter === null ? ' on' : '');
+      all.className = 'dt-tag' + (filter.size === 0 ? ' on' : '');
       all.textContent = '全部';
-      all.onclick = () => { filter = null; draw(); };
+      all.onclick = () => { filter.clear(); draw(); };
       elTags.appendChild(all);
       used.forEach(t => {
         const b = document.createElement('button');
-        b.className = 'dt-tag' + (filter === t ? ' on' : '');
+        b.className = 'dt-tag' + (filter.has(t) ? ' on' : '');
         b.textContent = t;
-        b.onclick = () => { filter = filter === t ? null : t; draw(); };
+        b.onclick = () => {
+          filter.has(t) ? filter.delete(t) : filter.add(t);
+          draw();
+        };
         elTags.appendChild(b);
       });
     }
@@ -142,7 +159,8 @@ export function mountDates(root, { cfg, store }) {
     const today = midnight(new Date());
     const rows = items
       .map(it => ({ it, ...nextOccurrence(it, today) }))
-      .filter(r => filter === null || r.it.tag === filter)
+      .filter(r => filter.size === 0 ||
+                   (r.it.tags || []).some(t => filter.has(t)))
       .sort((a, b) => {
         const av = a.days === null ? 1e9 : (a.days < 0 ? 1e8 - a.days : a.days);
         const bv = b.days === null ? 1e9 : (b.days < 0 ? 1e8 - b.days : b.days);
@@ -167,7 +185,8 @@ export function mountDates(root, { cfg, store }) {
           <span class="dt-name">${escapeHtml(it.name)}</span>
           <span class="dt-sub">${escapeHtml(sub)}${on ? ' · ' + on : ''}</span>
         </span>
-        ${it.tag ? `<span class="dt-chip">${escapeHtml(it.tag)}</span>` : ''}
+        <span class="dt-chips">${(it.tags || []).map(t =>
+          `<span class="dt-chip">${escapeHtml(t)}</span>`).join('')}</span>
         <span class="dt-days">${countdownText(days)}</span>`;
       card.onclick = () => openForm(it);
       elList.appendChild(card);
@@ -179,7 +198,7 @@ export function mountDates(root, { cfg, store }) {
   function openForm(existing) {
     const it = existing || {
       id: Date.now(), name: '', date: key(new Date()),
-      calendar: 'solar', tag: TAGS[0], repeat: true
+      calendar: 'solar', tags: [], repeat: true
     };
     const lunarOk = lunarSupported();
 
@@ -209,9 +228,9 @@ export function mountDates(root, { cfg, store }) {
         </div>
 
         <div class="sheet-field">
-          <span>标签</span>
+          <span>标签（可以选好几个）</span>
           <div class="dt-seg wrap">
-            ${TAGS.map(t => `<button class="dt-opt ${it.tag === t ? 'on' : ''}" data-tag="${t}">${t}</button>`).join('')}
+            ${TAGS.map(t => `<button class="dt-opt ${(it.tags || []).includes(t) ? 'on' : ''}" data-tag="${t}">${t}</button>`).join('')}
           </div>
         </div>
 
@@ -227,7 +246,8 @@ export function mountDates(root, { cfg, store }) {
         </div>
       </div>`;
 
-    let cal = it.calendar, tag = it.tag;
+    let cal = it.calendar;
+    const tags = new Set(it.tags || []);
     const hint = elSheet.querySelector('#dtLunarHint');
 
     function refreshHint() {
@@ -247,8 +267,9 @@ export function mountDates(root, { cfg, store }) {
     });
     elSheet.querySelectorAll('[data-tag]').forEach(b => {
       b.onclick = () => {
-        tag = b.dataset.tag;
-        elSheet.querySelectorAll('[data-tag]').forEach(x => x.classList.toggle('on', x.dataset.tag === tag));
+        const t = b.dataset.tag;
+        tags.has(t) ? tags.delete(t) : tags.add(t);
+        b.classList.toggle('on', tags.has(t));
       };
     });
     elSheet.querySelector('#dtDate').oninput = refreshHint;
@@ -272,7 +293,7 @@ export function mountDates(root, { cfg, store }) {
         name,
         date: elSheet.querySelector('#dtDate').value,
         calendar: cal,
-        tag,
+        tags: [...tags],
         repeat: elSheet.querySelector('#dtRepeat').checked
       };
       const i = items.findIndex(x => x.id === rec.id);

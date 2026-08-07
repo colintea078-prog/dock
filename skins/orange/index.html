@@ -132,6 +132,57 @@
   }
   .sheet-btn.ghost{background:rgba(120,160,200,.18);color:#4a6b90}
 
+  /* ---- 日期备忘录 ---- */
+  .dt-tags{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+  .dt-tag{
+    font:inherit;font-size:12.5px;padding:5px 13px;border-radius:20px;cursor:pointer;
+    border:1px solid rgba(255,255,255,.5);background:rgba(255,255,255,.24);color:#2f4a6d;
+  }
+  .dt-tag.on{background:#fff;border-color:#fff;font-weight:600}
+  .dt-list{display:flex;flex-direction:column;gap:10px}
+  .dt-card{
+    display:flex;align-items:center;gap:10px;width:100%;text-align:left;font:inherit;
+    background:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.66);
+    border-radius:16px;padding:14px 16px;cursor:pointer;
+    backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  }
+  .dt-card.now{background:rgba(255,255,255,.78);border-color:#fff}
+  .dt-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+  .dt-name{font-size:15px;color:#2f4a6d;font-weight:600;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .dt-sub{font-size:11.5px;color:#5b7a9d}
+  .dt-chip{
+    font-size:11px;color:#4a6b90;background:rgba(255,255,255,.66);
+    border-radius:20px;padding:3px 9px;flex:none;
+  }
+  .dt-days{
+    font-size:16px;font-weight:600;color:#2f4a6d;flex:none;
+    font-variant-numeric:tabular-nums;min-width:62px;text-align:right;
+  }
+  .dt-empty{
+    color:rgba(47,74,109,.62);font-size:13.5px;text-align:center;
+    line-height:2;padding:36px 0;
+  }
+  .dt-add[hidden]{display:none}
+  .dt-add{
+    position:fixed;right:20px;bottom:calc(34vh + env(safe-area-inset-bottom));
+    z-index:12;width:50px;height:50px;border-radius:50%;border:0;cursor:pointer;
+    background:#7a9ec4;color:#fff;font-size:26px;line-height:1;
+    box-shadow:0 8px 20px rgba(30,60,110,.3);
+  }
+  .dt-seg{display:flex;gap:8px}
+  .dt-seg.wrap{flex-wrap:wrap}
+  .dt-opt{
+    font:inherit;font-size:13px;padding:8px 15px;border-radius:12px;cursor:pointer;
+    border:1px solid rgba(120,160,200,.34);background:#fff;color:#4a6b90;
+  }
+  .dt-opt.on{background:#7a9ec4;border-color:#7a9ec4;color:#fff}
+  .dt-opt[disabled]{opacity:.4;cursor:not-allowed}
+  .dt-hint{font-size:11.5px;color:#5b7a9d;margin-top:8px;line-height:1.6}
+  .dt-check{display:flex;gap:9px;align-items:flex-start;margin-bottom:16px;cursor:pointer}
+  .dt-check input{width:17px;height:17px;margin-top:2px;flex:none}
+  .dt-check span{font-size:12.5px;color:#5b7a9d;line-height:1.6}
+
   /* ---- 打卡 ---- */
   .checks{display:flex;flex-direction:column;gap:12px}
   .check{
@@ -262,7 +313,10 @@
     <h2></h2>
     <div id="calRoot"></div>
   </section>
-  <section class="panel" id="panel1"><h2></h2></section>
+  <section class="panel" id="panel1">
+    <h2></h2>
+    <div id="dtRoot"></div>
+  </section>
   <section class="panel" id="panel2"><h2></h2></section>
   <section class="panel" id="panel3"><h2></h2></section>
 
@@ -304,6 +358,7 @@ const store = new LocalStore();
    缺哪个字段就补哪个，不用整份照抄。 */
 import baseConfig from './config.js';
 import { mountCalendar } from './calendar.js';
+import { mountDates } from './dates.js';
 let CFG = baseConfig;
 try {
   const local = (await import('./config.local.js')).default;
@@ -528,6 +583,7 @@ makeLetters();
 face('right');
 layout();
 mountCalendar(document.getElementById('calRoot'), { cfg: CFG, store });
+mountDates(document.getElementById('dtRoot'), { cfg: CFG, store });
 /* 首屏排版还没完成时算出来的尺寸是 0，下一帧和图片加载完各补算一次。 */
 requestAnimationFrame(layout);
 addEventListener('load', layout);

@@ -1,5 +1,5 @@
-import { escapeHtml } from './util.js?v=63';
-import { makeFab } from './fab.js?v=63';
+import { escapeHtml } from './util.js?v=64';
+import { makeFab } from './fab.js?v=64';
 
 /* 备忘录。一列便签纸。
  *

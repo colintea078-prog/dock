@@ -19,7 +19,7 @@
   /* 背景图：等比裁剪填满，横图放到竖屏上会裁掉左右两边 */
   #bg{
     position:absolute;inset:0;z-index:-2;
-    background:url('./assets/bg.webp?v=39') center center / cover no-repeat;
+    background:url('./assets/bg.webp?v=40') center center / cover no-repeat;
   }
   /* 底部压一层淡雾，让白色的路和信封不至于糊在水面的碎光里 */
   #haze{
@@ -341,7 +341,7 @@
   .sheet-btn.ghost{background:rgba(120,160,200,.18);color:#4a6b90}
 
   /* ---- 日期备忘录 ---- */
-  .dt-tags{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+  .dt-tags{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 16px;padding-top:4px}
   .dt-tag{
     font-family:var(--round);font-size:12.5px;padding:6px 14px;border-radius:20px;
     cursor:pointer;border:1.4px solid transparent;
@@ -349,13 +349,17 @@
     display:inline-flex;align-items:center;gap:5px;
   }
   .dt-tag.on{border-color:#fff;box-shadow:0 3px 10px rgba(90,150,190,.22);font-weight:600}
-  /* 贴纸版：按钮本身不画任何东西，图就是按钮 */
+  /* 贴纸版：按钮本身不画任何东西，图就是按钮。
+     选中不靠调透明度 —— 压暗了就看不清写的什么。改成浮起来。 */
   .dt-tag.pic{
     padding:0;border:0;background:none;box-shadow:none;
-    opacity:.55;transition:opacity .2s ease,transform .2s ease;
+    opacity:.94;transition:transform .2s cubic-bezier(.34,1.4,.5,1),
+      filter .2s ease,opacity .2s ease;
   }
-  .dt-tag.pic.on{opacity:1;transform:translateY(-1px);
-    filter:drop-shadow(0 3px 7px rgba(40,90,140,.3))}
+  .dt-tag.pic.on{
+    opacity:1;transform:translateY(-5px) scale(1.04);
+    filter:drop-shadow(0 6px 10px rgba(30,80,130,.38));
+  }
   .dt-tag.pic img{height:38px;width:auto;display:block}
   .dt-tag.pic img.round{height:44px}
   /* 底框跟着内容长高：切成九宫格，四角保持原样，四边拉伸。
@@ -372,7 +376,7 @@
     display:flex;align-items:center;gap:10px;
     width:100%;aspect-ratio:1000/322;text-align:left;
     border:0;border-radius:20px;overflow:hidden;
-    background:url('./assets/pack/frame.webp?v=39') center/100% 100% no-repeat;
+    background:url('./assets/pack/frame.webp?v=40') center/100% 100% no-repeat;
     padding:0 8%;cursor:pointer;
     box-shadow:0 6px 16px rgba(40,90,140,.18);
   }
@@ -406,7 +410,7 @@
     background:#7a9ec4;color:#fff;font-size:26px;line-height:1;
     box-shadow:0 8px 20px rgba(30,60,110,.3);
   }
-  .dt-seg{display:flex;gap:8px}
+  .dt-seg{display:flex;gap:8px;padding-top:5px}
   .dt-seg.wrap{flex-wrap:wrap}
   .dt-opt{
     font-family:var(--round);font-size:13px;padding:8px 14px;border-radius:14px;
@@ -416,10 +420,10 @@
   }
   .dt-opt.on{border-color:#7fb3d8;box-shadow:0 3px 10px rgba(90,150,190,.2);font-weight:600}
   /* 表单里的标签也用贴纸，没选中的压暗 */
-  .dt-opt.pic{padding:0;border:0;background:none;opacity:.45;
-    transition:opacity .2s ease,transform .2s ease}
-  .dt-opt.pic.on{opacity:1;transform:translateY(-1px);box-shadow:none;
-    filter:drop-shadow(0 3px 7px rgba(40,90,140,.28))}
+  .dt-opt.pic{padding:0;border:0;background:none;box-shadow:none;opacity:.94;
+    transition:transform .2s cubic-bezier(.34,1.4,.5,1),filter .2s ease,opacity .2s ease}
+  .dt-opt.pic.on{opacity:1;transform:translateY(-5px) scale(1.04);box-shadow:none;
+    filter:drop-shadow(0 6px 10px rgba(30,80,130,.35))}
   .dt-opt.pic img{height:36px;width:auto;display:block}
   .dt-opt[disabled]{opacity:.4;cursor:not-allowed}
   .dt-hint{font-size:11.5px;color:#5b7a9d;margin-top:8px;line-height:1.6}
@@ -542,7 +546,7 @@
      不用动图 WebP —— iOS 上它时灵时不灵，这个到处都能播。 */
   #angSprite{
     width:100%;aspect-ratio:1/1;
-    background-image:url('./assets/ride_sheet.webp?v=39');
+    background-image:url('./assets/ride_sheet.webp?v=40');
     background-repeat:no-repeat;
     background-size:500% 100%;
     /* jump-none 才会取到 0/25/50/75/100 这五个位置。
@@ -600,7 +604,7 @@
 
   <div id="deco"></div>
 
-  <img id="title" src="./assets/title.webp?v=39" alt="直到大地变成一颗酸橙">
+  <img id="title" src="./assets/title.webp?v=40" alt="直到大地变成一颗酸橙">
 
 
   <div id="ang"><div id="angFlip"><div id="angSprite" role="img" aria-label="安洁莉娜"></div></div></div>
@@ -619,18 +623,18 @@
 
 /* 存储走 dock 那一层，跟别的应用同一套。
    现在是本地实现，以后换成接口版，这里一行都不用改。 */
-import { LocalStore } from '../../core/storage.js?v=39';
+import { LocalStore } from '../../core/storage.js?v=40';
 const store = new LocalStore();
 
 /* 有 config.local.js 就用它，没有就用公开那份。
    缺哪个字段就补哪个，不用整份照抄。 */
-import baseConfig from './config.js?v=39';
-import { mountCalendar } from './calendar.js?v=39';
-import { mountDates } from './dates.js?v=39';
-import { mountDeco } from './deco.js?v=39';
+import baseConfig from './config.js?v=40';
+import { mountCalendar } from './calendar.js?v=40';
+import { mountDates } from './dates.js?v=40';
+import { mountDeco } from './deco.js?v=40';
 let CFG = baseConfig;
 try {
-  const local = (await import('./config.local.js?v=39')).default;
+  const local = (await import('./config.local.js?v=40')).default;
   CFG = { ...baseConfig, ...local };
 } catch { /* 没有本地配置，用公开版 */ }
 

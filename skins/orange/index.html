@@ -19,12 +19,13 @@
   /* 背景图：等比裁剪填满，横图放到竖屏上会裁掉左右两边 */
   #bg{
     position:absolute;inset:0;z-index:-2;
-    background:url('./assets/bg.webp?v=45') center center / cover no-repeat;
+    background:url('./assets/bg.webp?v=46') center center / cover no-repeat;
   }
   /* 底部压一层淡雾，让白色的路和信封不至于糊在水面的碎光里 */
   #haze{
     position:absolute;left:0;right:0;bottom:0;height:42%;z-index:-1;pointer-events:none;
     background:linear-gradient(180deg,rgba(190,216,236,0) 0%,rgba(196,220,238,.34) 45%,rgba(210,230,244,.62) 100%);
+    transition:opacity .38s ease;
   }
 
   /* 板块的底：一层不透明的渐变，进了任何板块就一直亮着。
@@ -35,19 +36,22 @@
     opacity:0;pointer-events:none;transition:opacity .38s ease;
     /* 背景不自己画，直接把下面那张画糊掉 —— backdrop-filter 模糊的是
        自己身下的东西。这样板块和主页永远是同一张背景，不会对不上。 */
-    background:linear-gradient(180deg,rgba(214,234,248,.16) 0%,rgba(228,242,252,.22) 50%,rgba(240,248,253,.26) 100%);
+    background:linear-gradient(180deg,rgba(214,234,248,.08) 0%,rgba(228,242,252,.12) 50%,rgba(240,248,253,.16) 100%);
     /* 上下两头把这一层自己淡掉，蒙版和模糊一起收 ——
        整块铺到边会有一条硬边，看着像贴了张膜。 */
     -webkit-mask-image:linear-gradient(180deg,transparent 0,#000 9%,#000 88%,transparent 100%);
     mask-image:linear-gradient(180deg,transparent 0,#000 9%,#000 88%,transparent 100%);
-    backdrop-filter:blur(9px) saturate(1.04);
-    -webkit-backdrop-filter:blur(9px) saturate(1.04);
+    backdrop-filter:blur(4px) saturate(1.03);
+    -webkit-backdrop-filter:blur(4px) saturate(1.03);
   }
   /* 浏览器不支持背景模糊时，蒙版加厚一点，字才看得清 */
   @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
     #panelBg{background:linear-gradient(180deg,rgba(206,229,246,.62) 0%,rgba(228,242,252,.7) 100%)}
   }
   #panelBg.on{opacity:1}
+  /* 板块开着的时候把底部那层雾收掉 —— 它是给公路用的，
+     铺在板块下面只是又压厚一层。 */
+  body.in-panel #haze{opacity:0}
 
   /* 板块内容层，自己不带背景 */
   .panel{
@@ -388,7 +392,7 @@
     display:flex;align-items:center;gap:10px;
     width:100%;aspect-ratio:1000/322;text-align:left;
     border:0;border-radius:20px;overflow:hidden;
-    background:url('./assets/pack/frame.webp?v=45') center/100% 100% no-repeat;
+    background:url('./assets/pack/frame.webp?v=46') center/100% 100% no-repeat;
     padding:0 8%;cursor:pointer;
     box-shadow:0 6px 16px rgba(40,90,140,.18);
   }
@@ -617,7 +621,7 @@
      不用动图 WebP —— iOS 上它时灵时不灵，这个到处都能播。 */
   #angSprite{
     width:100%;aspect-ratio:1/1;
-    background-image:url('./assets/ride_sheet.webp?v=45');
+    background-image:url('./assets/ride_sheet.webp?v=46');
     background-repeat:no-repeat;
     background-size:500% 100%;
     /* jump-none 才会取到 0/25/50/75/100 这五个位置。
@@ -678,7 +682,7 @@
 
   <div id="deco"></div>
 
-  <img id="title" src="./assets/title.webp?v=45" alt="直到大地变成一颗酸橙">
+  <img id="title" src="./assets/title.webp?v=46" alt="直到大地变成一颗酸橙">
 
 
   <div id="ang"><div id="angFlip"><div id="angSprite" role="img" aria-label="安洁莉娜"></div></div></div>
@@ -697,19 +701,19 @@
 
 /* 存储走 dock 那一层，跟别的应用同一套。
    现在是本地实现，以后换成接口版，这里一行都不用改。 */
-import { LocalStore } from '../../core/storage.js?v=45';
+import { LocalStore } from '../../core/storage.js?v=46';
 const store = new LocalStore();
 
 /* 有 config.local.js 就用它，没有就用公开那份。
    缺哪个字段就补哪个，不用整份照抄。 */
-import baseConfig from './config.js?v=45';
-import { mountCalendar } from './calendar.js?v=45';
-import { mountDates } from './dates.js?v=45';
-import { mountDeco } from './deco.js?v=45';
-import { mountLedger } from './ledger.js?v=45';
+import baseConfig from './config.js?v=46';
+import { mountCalendar } from './calendar.js?v=46';
+import { mountDates } from './dates.js?v=46';
+import { mountDeco } from './deco.js?v=46';
+import { mountLedger } from './ledger.js?v=46';
 let CFG = baseConfig;
 try {
-  const local = (await import('./config.local.js?v=45')).default;
+  const local = (await import('./config.local.js?v=46')).default;
   CFG = { ...baseConfig, ...local };
 } catch { /* 没有本地配置，用公开版 */ }
 
@@ -775,6 +779,7 @@ const decoBox = document.getElementById('deco');
 function showPanel(i) {
   panels.forEach((p, k) => p.classList.toggle('on', k === i));
   panelBg.classList.toggle('on', i !== -1);   // 只在回主页时才熄
+  document.body.classList.toggle('in-panel', i !== -1);
   titleImg.classList.toggle('hide', i !== -1);
   decoBox.classList.toggle('hide', i !== -1);
   if (typeof deco !== 'undefined') deco.setVisible(i === -1);

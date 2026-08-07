@@ -9,7 +9,7 @@
  * 不需要它的人不用先被问一句"你要不要关掉这个"。
  */
 
-import { occursOn } from './dates.js?v=60';
+import { occursOn } from './dates.js?v=61';
 
 const WEEK_EN = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
 const MONTH_EN = ['January', 'February', 'March', 'April', 'May', 'June',
@@ -227,14 +227,14 @@ export function mountCalendar(root, { cfg, store }) {
         const tag = (hits[0].tags || [])[0];
         const st = TAGSTYLE[tag];
         flag = st && st.img
-          ? `<img class="cal-ev" src="./assets/pack/${st.img}.webp?v=60" alt="">`
+          ? `<img class="cal-ev" src="./assets/pack/${st.img}.webp?v=61" alt="">`
           : '<i class="cal-ev dot"></i>';
       }
 
       /* 心情缩到左上角，数字下面那一条留给标签 —— 标签是横的，
          占满格宽才认得出写的什么。 */
       const moodPip = rec.mood
-        ? `<img class="cal-mood" src="./assets/mood/${rec.mood}.webp?v=60" alt="">`
+        ? `<img class="cal-mood" src="./assets/mood/${rec.mood}.webp?v=61" alt="">`
         : '';
       cell.innerHTML = `
         ${moodPip}
@@ -252,13 +252,19 @@ export function mountCalendar(root, { cfg, store }) {
 
   /* --------------------------------------------------------- 当天的抽屉 */
 
-  /* 弹窗顶上那行：这天在倒计时里记着什么 */
+  /* 弹窗顶上那行：这天在倒计时里记着什么。
+     纪念日这一栏原来在这儿收，现在归倒计时管了 ——
+     同一件事有两个地方能记，早晚对不上。 */
   function evLine(k) {
     const day = new Date(k + 'T00:00:00');
     const hits = events.filter(ev => occursOn(ev, day));
     if (!hits.length) return '';
-    return `<div class="cal-evline">${hits.map(h =>
-      `<span>${h.name}</span>`).join('')}</div>`;
+    return `<div class="cal-evline">${hits.map(h => {
+      const st = TAGSTYLE[(h.tags || [])[0]];
+      const pic = st && st.img
+        ? `<img src="./assets/pack/${st.img}.webp?v=61" alt="">` : '';
+      return `<span>${pic}${h.name}</span>`;
+    }).join('')}</div>`;
   }
 
   function openSheet(k, rec) {
@@ -271,17 +277,13 @@ export function mountCalendar(root, { cfg, store }) {
         <div class="sheet-moods">
           ${MOODS.map(mo => `
             <button class="mood-pick ${picked === mo.id ? 'on' : ''}" data-mood="${mo.id}">
-              <img src="./assets/mood/${mo.id}.webp?v=60" alt="">
+              <img src="./assets/mood/${mo.id}.webp?v=61" alt="">
               <span>${mo.name}</span>
             </button>`).join('')}
         </div>
         <label class="sheet-field">
           <span>这天</span>
           <textarea id="sheetNote" rows="4" placeholder="想写就写，不写也行">${rec.note || ''}</textarea>
-        </label>
-        <label class="sheet-field">
-          <span>纪念日</span>
-          <input id="sheetAnni" type="text" value="${rec.anniversary || ''}" placeholder="留空就是没有">
         </label>
         <div class="sheet-row">
           <button class="sheet-btn ghost" id="sheetCancel">关掉</button>
@@ -304,8 +306,7 @@ export function mountCalendar(root, { cfg, store }) {
     elSheet.querySelector('#sheetSave').onclick = async () => {
       await src.save(k, {
         mood: mood || null,
-        note: elSheet.querySelector('#sheetNote').value.trim() || null,
-        anniversary: elSheet.querySelector('#sheetAnni').value.trim() || null
+        note: elSheet.querySelector('#sheetNote').value.trim() || null
       });
       elSheet.hidden = true;
       draw();

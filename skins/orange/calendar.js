@@ -9,6 +9,8 @@
  * 不需要它的人不用先被问一句"你要不要关掉这个"。
  */
 
+import { occursOn } from './dates.js?v=57';
+
 const WEEK_EN = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
 const MONTH_EN = ['January', 'February', 'March', 'April', 'May', 'June',
   'July', 'August', 'September', 'October', 'November', 'December'];
@@ -110,6 +112,10 @@ const cloud = kind => shape('cloud', 'cal-cloud ' + kind, '30 20');
 /* ------------------------------------------------------------------ 视图 */
 
 export function mountCalendar(root, { cfg, store }) {
+  /* 倒计时那边记的日子，在日历上也标出来。
+     两块用的是同一份数据，判断哪天命中的逻辑也是从那边借的。 */
+  const TAGSTYLE = cfg.tagStyle || {};
+  let events = [];
   const src = cfg.moodApi ? new ApiSource(cfg) : new LocalSource(store);
 
   /* 抽屉挂在 body 上。放在板块里会被公路和洁哥那两层盖住 ——
@@ -174,6 +180,7 @@ export function mountCalendar(root, { cfg, store }) {
     const start = addDays(first, -first.getDay());          // 补齐到周日
     const end = addDays(start, 41);                          // 六行
     const days = await src.range(start, end);
+    events = await store.get('dates', 'items', []);
 
     /* 记过经期就一直显示这一层；一次都没记过的人（比如男生）看不到它。
        翻到没有数据的月份也不会闪一下就消失。 */
@@ -203,11 +210,23 @@ export function mountCalendar(root, { cfg, store }) {
       else if (sameDay(d, today)) back = shape('heart', 'cal-back hearty', '30 30');
       else if (rec.note)          back = shape('cloud', 'cal-back cloudy', '30 22');
 
+      /* 这天有没有倒计时里记的事。有就在右上角贴一枚小标签。 */
+      const hits = events.filter(ev => occursOn(ev, d));
+      let flag = '';
+      if (hits.length) {
+        const tag = (hits[0].tags || [])[0];
+        const st = TAGSTYLE[tag];
+        flag = st && st.img
+          ? `<img class="cal-ev" src="./assets/pack/${st.img}.webp?v=57" alt="">`
+          : '<i class="cal-ev dot"></i>';
+      }
+
       /* 数字下面那一格只留给心情图标 */
       const slot = rec.mood
         ? `<img class="cal-mood" src="./assets/mood/${rec.mood}.webp?v=1" alt="">`
         : '';
       cell.innerHTML = `
+        ${flag}
         ${back}
         <span class="cal-num">${d.getDate()}</span>
         <span class="cal-slot">${slot}</span>`;
@@ -222,12 +241,22 @@ export function mountCalendar(root, { cfg, store }) {
 
   /* --------------------------------------------------------- 当天的抽屉 */
 
+  /* 弹窗顶上那行：这天在倒计时里记着什么 */
+  function evLine(k) {
+    const day = new Date(k + 'T00:00:00');
+    const hits = events.filter(ev => occursOn(ev, day));
+    if (!hits.length) return '';
+    return `<div class="cal-evline">${hits.map(h =>
+      `<span>${h.name}</span>`).join('')}</div>`;
+  }
+
   function openSheet(k, rec) {
     const picked = rec.mood || '';
     elSheet.hidden = false;
     elSheet.innerHTML = `
       <div class="sheet-card">
         <div class="sheet-date">${k}</div>
+        ${evLine(k)}
         <div class="sheet-moods">
           ${MOODS.map(mo => `
             <button class="mood-pick ${picked === mo.id ? 'on' : ''}" data-mood="${mo.id}">

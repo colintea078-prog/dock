@@ -5,12 +5,12 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <title>直到大地变成一颗酸橙</title>
 <meta name="theme-color" content="#5b8ed6">
-<link rel="manifest" href="./manifest.json?v=56">
+<link rel="manifest" href="./manifest.json?v=57">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="酸橙">
-<link rel="apple-touch-icon" href="./assets/icons/icon-192.png?v=56">
+<link rel="apple-touch-icon" href="./assets/icons/icon-192.png?v=57">
 <style>
   /* 拉丁字体自带，两个系统才长一样。中文仍旧交给系统。
      四款都在仓库里，换一个只用改下面 --num 里的第一个名字：
@@ -48,7 +48,7 @@
   /* 背景图：等比裁剪填满，横图放到竖屏上会裁掉左右两边 */
   #bg{
     position:absolute;inset:0;z-index:-2;
-    background:url('./assets/bg.webp?v=56') center center / cover no-repeat;
+    background:url('./assets/bg.webp?v=57') center center / cover no-repeat;
   }
   /* 底部压一层淡雾，让白色的路和信封不至于糊在水面的碎光里 */
   #haze{
@@ -308,6 +308,24 @@
     box-shadow:inset 0 0 0 2px rgba(141,216,208,.9);
   }
 
+  /* 倒计时里记的事，贴在格子右上角 */
+  .cal-ev{
+    position:absolute;top:0;right:1px;z-index:3;
+    height:13px;width:auto;pointer-events:none;
+    filter:drop-shadow(0 1px 2px rgba(40,90,140,.28));
+  }
+  .cal-ev.dot{
+    height:6px;width:6px;border-radius:50%;
+    background:#f0a94f;top:3px;right:4px;
+  }
+  .cal-evline{
+    display:flex;gap:6px;flex-wrap:wrap;margin:-8px 0 14px;
+  }
+  .cal-evline span{
+    font-size:12px;color:#4a6b90;background:#eaf4fc;
+    border-radius:20px;padding:3px 11px;
+  }
+
   .cal-back{
     position:absolute;
     top:3px;
@@ -435,7 +453,7 @@
     display:flex;align-items:center;gap:10px;
     width:100%;aspect-ratio:1000/322;text-align:left;
     border:0;border-radius:20px;overflow:hidden;
-    background:url('./assets/pack/frame.webp?v=56') center/100% 100% no-repeat;
+    background:url('./assets/pack/frame.webp?v=57') center/100% 100% no-repeat;
     padding:0 8%;cursor:pointer;
     box-shadow:0 6px 16px rgba(40,90,140,.18);
   }
@@ -728,7 +746,7 @@
      不用动图 WebP —— iOS 上它时灵时不灵，这个到处都能播。 */
   #angSprite{
     width:100%;aspect-ratio:1/1;
-    background-image:url('./assets/ride_sheet.webp?v=56');
+    background-image:url('./assets/ride_sheet.webp?v=57');
     background-repeat:no-repeat;
     background-size:500% 100%;
     /* jump-none 才会取到 0/25/50/75/100 这五个位置。
@@ -792,7 +810,7 @@
 
   <div id="deco"></div>
 
-  <img id="title" src="./assets/title.webp?v=56" alt="直到大地变成一颗酸橙">
+  <img id="title" src="./assets/title.webp?v=57" alt="直到大地变成一颗酸橙">
 
 
   <div id="ang"><div id="angFlip"><div id="angSprite" role="img" aria-label="安洁莉娜"></div></div></div>
@@ -811,20 +829,20 @@
 
 /* 存储走 dock 那一层，跟别的应用同一套。
    现在是本地实现，以后换成接口版，这里一行都不用改。 */
-import { LocalStore } from '../../core/storage.js?v=56';
+import { LocalStore } from '../../core/storage.js?v=57';
 const store = new LocalStore();
 
 /* 有 config.local.js 就用它，没有就用公开那份。
    缺哪个字段就补哪个，不用整份照抄。 */
-import baseConfig from './config.js?v=56';
-import { mountCalendar } from './calendar.js?v=56';
-import { mountDates } from './dates.js?v=56';
-import { mountDeco } from './deco.js?v=56';
-import { mountLedger } from './ledger.js?v=56';
-import { mountNotes } from './notes.js?v=56';
+import baseConfig from './config.js?v=57';
+import { mountCalendar } from './calendar.js?v=57';
+import { mountDates } from './dates.js?v=57';
+import { mountDeco } from './deco.js?v=57';
+import { mountLedger } from './ledger.js?v=57';
+import { mountNotes } from './notes.js?v=57';
 let CFG = baseConfig;
 try {
-  const local = (await import('./config.local.js?v=56')).default;
+  const local = (await import('./config.local.js?v=57')).default;
   CFG = { ...baseConfig, ...local };
 } catch { /* 没有本地配置，用公开版 */ }
 
@@ -1052,7 +1070,7 @@ CFG.panels.forEach((p, i) => {
    不然改了它浏览器可能还在跑旧的。 */
 if ('serviceWorker' in navigator) {
   addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js?v=56', { updateViaCache: 'none' })
+    navigator.serviceWorker.register('./sw.js?v=57', { updateViaCache: 'none' })
       .catch(e => console.warn('sw register failed', e));
   });
 }

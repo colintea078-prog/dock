@@ -64,6 +64,22 @@ function countdownText(days) {
   return '已过 ' + (-days) + ' 天';
 }
 
+/* 某一天是不是这条记的日子。
+   日历那边要在格子上标事件，判断逻辑只写这一份 ——
+   农历、每年重复、只过一次，三种规则各写一遍迟早会对不上。 */
+export function occursOn(item, day) {
+  const src = new Date(item.date + 'T00:00:00');
+
+  if (!item.repeat) {
+    return key(day) === item.date;
+  }
+  if (item.calendar === 'lunar') {
+    const t = lunarOf(src);
+    return !!t && lunarOf(day) === t;
+  }
+  return day.getMonth() === src.getMonth() && day.getDate() === src.getDate();
+}
+
 /* ------------------------------------------------------------------ 视图 */
 
 export function mountDates(root, { cfg, store }) {

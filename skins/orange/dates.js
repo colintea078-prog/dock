@@ -182,10 +182,20 @@ export function mountDates(root, { cfg, store }) {
     rows.forEach(({ it, days, when }) => {
       const card = document.createElement('button');
       card.className = 'dt-card' + (days === 0 ? ' now' : '');
-      const sub = it.calendar === 'lunar'
-        ? `农历 ${lunarOf(new Date(it.date + 'T00:00:00')) || ''}`
-        : it.date;
+      /* 副标题只说一件事。
+         每年过的阳历日子 → 就是那一天，不用重复写哪年开始的；
+         农历 → 说农历几月几，再补一句今年落在阳历哪天；
+         只过一次的 → 说那天的完整日期。 */
       const on = when ? `${when.getMonth() + 1}月${when.getDate()}日` : '';
+      let sub;
+      if (!it.repeat) {
+        sub = it.date;
+      } else if (it.calendar === 'lunar') {
+        const l = lunarOf(new Date(it.date + 'T00:00:00'));
+        sub = `农历${l || ''}${on ? ' · 今年 ' + on : ''}`;
+      } else {
+        sub = `每年 ${on}`;
+      }
       card.innerHTML = `
         <span class="dt-main">
           <span class="dt-name">${escapeHtml(it.name)}</span>

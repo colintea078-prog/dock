@@ -9,7 +9,7 @@
  * 不需要它的人不用先被问一句"你要不要关掉这个"。
  */
 
-import { occursOn } from './dates.js?v=57';
+import { occursOn } from './dates.js?v=60';
 
 const WEEK_EN = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
 const MONTH_EN = ['January', 'February', 'March', 'April', 'May', 'June',
@@ -227,14 +227,14 @@ export function mountCalendar(root, { cfg, store }) {
         const tag = (hits[0].tags || [])[0];
         const st = TAGSTYLE[tag];
         flag = st && st.img
-          ? `<img class="cal-ev" src="./assets/pack/${st.img}.webp?v=57" alt="">`
+          ? `<img class="cal-ev" src="./assets/pack/${st.img}.webp?v=60" alt="">`
           : '<i class="cal-ev dot"></i>';
       }
 
       /* 心情缩到左上角，数字下面那一条留给标签 —— 标签是横的，
          占满格宽才认得出写的什么。 */
       const moodPip = rec.mood
-        ? `<img class="cal-mood" src="./assets/mood/${rec.mood}.webp?v=1" alt="">`
+        ? `<img class="cal-mood" src="./assets/mood/${rec.mood}.webp?v=60" alt="">`
         : '';
       cell.innerHTML = `
         ${moodPip}
@@ -271,7 +271,7 @@ export function mountCalendar(root, { cfg, store }) {
         <div class="sheet-moods">
           ${MOODS.map(mo => `
             <button class="mood-pick ${picked === mo.id ? 'on' : ''}" data-mood="${mo.id}">
-              <img src="./assets/mood/${mo.id}.webp?v=1" alt="">
+              <img src="./assets/mood/${mo.id}.webp?v=60" alt="">
               <span>${mo.name}</span>
             </button>`).join('')}
         </div>

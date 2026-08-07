@@ -15,9 +15,14 @@
 
 ## 字体
 
-`skins/orange/assets/fonts/quicksand-latin.woff2` 是 **Quicksand**，
-作者 Andrew Paglinawan，授权 **SIL Open Font License 1.1**，可自由使用与再分发。
-仓库里这一份只包含拉丁字符子集。
+`skins/orange/assets/fonts/` 下的字体全部采用 **SIL Open Font License 1.1**，
+可自由使用与再分发。仓库里的每一份都只包含拉丁字符子集。
+
+- **Fredoka** — Milena Brandão、Hafontia
+- **Grandstander** — TypeTogether
+- **Gaegu** — Hanken Design
+- **Baloo 2** — Ek Type
+- **Quicksand** — Andrew Paglinawan
 
 ---
 

@@ -96,12 +96,12 @@
   /* 当天的抽屉 */
   .sheet{
     position:fixed;inset:0;z-index:60;background:rgba(30,50,80,.38);
-    display:flex;align-items:center;justify-content:center;padding:20px;
+    display:flex;align-items:center;justify-content:center;padding:16px;
     backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);
   }
   .sheet[hidden]{display:none}
   .sheet-card{
-    width:100%;max-width:440px;background:#f2f6fb;
+    width:100%;max-width:min(440px,calc(100vw - 32px));background:#f2f6fb;
     border-radius:20px;padding:20px;
     max-height:78vh;overflow-y:auto;
     box-shadow:0 18px 46px rgba(20,40,70,.3);
@@ -121,7 +121,8 @@
   .sheet-field{display:block;margin-bottom:14px}
   .sheet-field span{display:block;font-size:12px;color:#5b7a9d;margin-bottom:6px}
   .sheet-field textarea,.sheet-field input{
-    width:100%;font:inherit;font-size:14px;color:#2f4a6d;
+    width:100%;min-width:0;max-width:100%;font:inherit;font-size:16px;color:#2f4a6d;
+    -webkit-appearance:none;appearance:none;
     border:1px solid rgba(120,160,200,.34);border-radius:12px;
     padding:10px 12px;background:#fff;resize:vertical;
   }
@@ -240,15 +241,48 @@
      每片各自慢慢飘，周期都不一样，所以不会整体一起晃。 */
   #deco{position:absolute;inset:0;z-index:2;pointer-events:none;transition:opacity .32s ease}
   #deco.hide{opacity:0}
-  #deco img{position:absolute;filter:drop-shadow(0 2px 6px rgba(30,60,110,.18))}
-  .d23{top:15vh;left:5vw;width:64px;opacity:.85;animation:drift 13s ease-in-out infinite}
-  .d22{top:11vh;right:2vw;width:104px;opacity:.5;animation:drift 17s ease-in-out infinite reverse}
-  .d19{top:25.5vh;left:50%;margin-left:-76px;width:152px;opacity:.5;animation:drift 21s ease-in-out infinite}
-  .d16{top:33vh;left:2vw;width:86px;opacity:.55;animation:drift 15s ease-in-out infinite reverse}
-  .d20{top:30vh;right:3vw;width:92px;opacity:.45;animation:drift 19s ease-in-out infinite}
-  .d18{top:53vh;left:4vw;width:78px;opacity:.5;animation:drift 16s ease-in-out infinite}
-  .d21{top:57vh;right:4vw;width:92px;opacity:.45;animation:drift 23s ease-in-out infinite reverse}
-  .d17{top:62vh;left:50%;margin-left:-62px;width:124px;opacity:.5;animation:drift 18s ease-in-out infinite}
+  #deco .dc{
+    position:absolute;transform-origin:50% 50%;
+    filter:drop-shadow(0 2px 6px rgba(30,60,110,.18));
+    animation:drift 17s ease-in-out infinite;
+  }
+
+  /* 编辑排版的时候：飘停下来，每片描个边，信封让开不接点击 */
+  body.editing #deco{pointer-events:auto}
+  body.editing .dc{animation:none;outline:1px dashed rgba(255,255,255,.75);
+    outline-offset:3px;cursor:grab;touch-action:none}
+  body.editing .dc.picked{outline:2px solid #fff;outline-offset:4px}
+  body.editing .letter{pointer-events:none}
+
+  .dc-pen{
+    position:fixed;left:18px;bottom:calc(34vh + env(safe-area-inset-bottom));
+    z-index:12;width:38px;height:38px;border-radius:50%;border:0;cursor:pointer;
+    background:rgba(255,255,255,.55);color:#2f4a6d;font-size:17px;line-height:1;
+    box-shadow:0 4px 12px rgba(30,60,110,.22);
+  }
+  .dc-pen[hidden]{display:none}
+  .dc-bar{
+    position:fixed;left:10px;right:10px;bottom:calc(env(safe-area-inset-bottom) + 10px);
+    z-index:70;display:flex;gap:6px;flex-wrap:wrap;justify-content:center;
+    background:rgba(20,40,70,.72);border-radius:16px;padding:10px;
+    backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  }
+  .dc-bar[hidden]{display:none}
+  .dc-bar button{
+    font:inherit;font-size:13px;padding:8px 13px;border-radius:11px;cursor:pointer;
+    border:0;background:rgba(255,255,255,.86);color:#2f4a6d;
+  }
+  .dc-bar button.prim{background:#7a9ec4;color:#fff}
+  .dc-grid{
+    display:grid;grid-template-columns:repeat(4,1fr);gap:8px;
+    max-height:52vh;overflow-y:auto;margin-bottom:14px;
+  }
+  .dc-cell{
+    aspect-ratio:1/1;border:1px solid rgba(120,160,200,.28);border-radius:12px;
+    background:#dfe9f3;cursor:pointer;display:flex;align-items:center;
+    justify-content:center;padding:6px;
+  }
+  .dc-cell img{max-width:100%;max-height:100%}
   #bunnies{width:118px;top:38vh;left:6vw;opacity:.55;animation:drift 16s ease-in-out infinite}
   #stars{width:120px;top:22vh;right:5vw;opacity:.7;animation:twinkle 4.5s ease-in-out infinite}
   @keyframes drift{0%,100%{transform:translate(0,0)}50%{transform:translate(7px,-9px)}}
@@ -321,16 +355,7 @@
   <section class="panel" id="panel3"><h2></h2></section>
 
 
-  <div id="deco">
-    <img class="d23" src="./assets/deco/d23.webp?v=1" alt="">
-    <img class="d22" src="./assets/deco/d22.webp?v=1" alt="">
-    <img class="d19" src="./assets/deco/d19.webp?v=1" alt="">
-    <img class="d16" src="./assets/deco/d16.webp?v=1" alt="">
-    <img class="d20" src="./assets/deco/d20.webp?v=1" alt="">
-    <img class="d18" src="./assets/deco/d18.webp?v=1" alt="">
-    <img class="d21" src="./assets/deco/d21.webp?v=1" alt="">
-    <img class="d17" src="./assets/deco/d17.webp?v=1" alt="">
-  </div>
+  <div id="deco"></div>
 
   <img id="title" src="./assets/title.webp?v=4" alt="直到大地变成一颗酸橙">
 
@@ -359,6 +384,7 @@ const store = new LocalStore();
 import baseConfig from './config.js';
 import { mountCalendar } from './calendar.js';
 import { mountDates } from './dates.js';
+import { mountDeco } from './deco.js';
 let CFG = baseConfig;
 try {
   const local = (await import('./config.local.js')).default;
@@ -429,6 +455,7 @@ function showPanel(i) {
   panelBg.classList.toggle('on', i !== -1);   // 只在回主页时才熄
   titleImg.classList.toggle('hide', i !== -1);
   decoBox.classList.toggle('hide', i !== -1);
+  if (typeof deco !== 'undefined') deco.setVisible(i === -1);
 }
 
 function makeLetters() {
@@ -584,6 +611,7 @@ face('right');
 layout();
 mountCalendar(document.getElementById('calRoot'), { cfg: CFG, store });
 mountDates(document.getElementById('dtRoot'), { cfg: CFG, store });
+const deco = mountDeco(decoBox, { store });
 /* 首屏排版还没完成时算出来的尺寸是 0，下一帧和图片加载完各补算一次。 */
 requestAnimationFrame(layout);
 addEventListener('load', layout);

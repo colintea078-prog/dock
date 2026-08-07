@@ -199,7 +199,7 @@ export function mountDates(root, { cfg, store }) {
       card.innerHTML = `
         <span class="dt-main">
           <span class="dt-name">${escapeHtml(it.name)}</span>
-          <span class="dt-sub">${escapeHtml(sub)}${on ? ' · ' + on : ''}</span>
+          <span class="dt-sub">${escapeHtml(sub)}</span>
         </span>
         <span class="dt-chips">${(it.tags || []).map(t => chip(t, 'dt-chip')).join('')}</span>
         <span class="dt-days">${countdownText(days)}</span>`;

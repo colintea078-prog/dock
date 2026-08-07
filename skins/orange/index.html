@@ -19,7 +19,7 @@
   /* 背景图：等比裁剪填满，横图放到竖屏上会裁掉左右两边 */
   #bg{
     position:absolute;inset:0;z-index:-2;
-    background:url('./assets/bg.webp?v=43') center center / cover no-repeat;
+    background:url('./assets/bg.webp?v=44') center center / cover no-repeat;
   }
   /* 底部压一层淡雾，让白色的路和信封不至于糊在水面的碎光里 */
   #haze{
@@ -35,13 +35,17 @@
     opacity:0;pointer-events:none;transition:opacity .38s ease;
     /* 背景不自己画，直接把下面那张画糊掉 —— backdrop-filter 模糊的是
        自己身下的东西。这样板块和主页永远是同一张背景，不会对不上。 */
-    background:linear-gradient(180deg,rgba(214,234,248,.52) 0%,rgba(228,242,252,.6) 55%,rgba(240,248,253,.66) 100%);
-    backdrop-filter:blur(18px) saturate(1.06);
-    -webkit-backdrop-filter:blur(18px) saturate(1.06);
+    background:linear-gradient(180deg,rgba(214,234,248,.26) 0%,rgba(228,242,252,.32) 50%,rgba(240,248,253,.36) 100%);
+    /* 上下两头把这一层自己淡掉，蒙版和模糊一起收 ——
+       整块铺到边会有一条硬边，看着像贴了张膜。 */
+    -webkit-mask-image:linear-gradient(180deg,transparent 0,#000 9%,#000 88%,transparent 100%);
+    mask-image:linear-gradient(180deg,transparent 0,#000 9%,#000 88%,transparent 100%);
+    backdrop-filter:blur(14px) saturate(1.05);
+    -webkit-backdrop-filter:blur(14px) saturate(1.05);
   }
   /* 浏览器不支持背景模糊时，蒙版加厚一点，字才看得清 */
   @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
-    #panelBg{background:linear-gradient(180deg,rgba(206,229,246,.9) 0%,rgba(228,242,252,.94) 100%)}
+    #panelBg{background:linear-gradient(180deg,rgba(206,229,246,.72) 0%,rgba(228,242,252,.8) 100%)}
   }
   #panelBg.on{opacity:1}
 
@@ -384,7 +388,7 @@
     display:flex;align-items:center;gap:10px;
     width:100%;aspect-ratio:1000/322;text-align:left;
     border:0;border-radius:20px;overflow:hidden;
-    background:url('./assets/pack/frame.webp?v=43') center/100% 100% no-repeat;
+    background:url('./assets/pack/frame.webp?v=44') center/100% 100% no-repeat;
     padding:0 8%;cursor:pointer;
     box-shadow:0 6px 16px rgba(40,90,140,.18);
   }
@@ -613,7 +617,7 @@
      不用动图 WebP —— iOS 上它时灵时不灵，这个到处都能播。 */
   #angSprite{
     width:100%;aspect-ratio:1/1;
-    background-image:url('./assets/ride_sheet.webp?v=43');
+    background-image:url('./assets/ride_sheet.webp?v=44');
     background-repeat:no-repeat;
     background-size:500% 100%;
     /* jump-none 才会取到 0/25/50/75/100 这五个位置。
@@ -674,7 +678,7 @@
 
   <div id="deco"></div>
 
-  <img id="title" src="./assets/title.webp?v=43" alt="直到大地变成一颗酸橙">
+  <img id="title" src="./assets/title.webp?v=44" alt="直到大地变成一颗酸橙">
 
 
   <div id="ang"><div id="angFlip"><div id="angSprite" role="img" aria-label="安洁莉娜"></div></div></div>
@@ -693,19 +697,19 @@
 
 /* 存储走 dock 那一层，跟别的应用同一套。
    现在是本地实现，以后换成接口版，这里一行都不用改。 */
-import { LocalStore } from '../../core/storage.js?v=43';
+import { LocalStore } from '../../core/storage.js?v=44';
 const store = new LocalStore();
 
 /* 有 config.local.js 就用它，没有就用公开那份。
    缺哪个字段就补哪个，不用整份照抄。 */
-import baseConfig from './config.js?v=43';
-import { mountCalendar } from './calendar.js?v=43';
-import { mountDates } from './dates.js?v=43';
-import { mountDeco } from './deco.js?v=43';
-import { mountLedger } from './ledger.js?v=43';
+import baseConfig from './config.js?v=44';
+import { mountCalendar } from './calendar.js?v=44';
+import { mountDates } from './dates.js?v=44';
+import { mountDeco } from './deco.js?v=44';
+import { mountLedger } from './ledger.js?v=44';
 let CFG = baseConfig;
 try {
-  const local = (await import('./config.local.js?v=43')).default;
+  const local = (await import('./config.local.js?v=44')).default;
   CFG = { ...baseConfig, ...local };
 } catch { /* 没有本地配置，用公开版 */ }
 

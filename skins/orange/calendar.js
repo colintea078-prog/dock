@@ -93,6 +93,13 @@ function ovulationDays(days, cycle) {
   return out;
 }
 
+/* 一朵小云。画成 SVG 是因为它要跟着文字颜色走，而且不用多下载一张图。 */
+function cloud(kind) {
+  return `<svg class="cal-cloud ${kind}" viewBox="0 0 30 20" fill="currentColor" aria-hidden="true">
+    <path d="M7.5 18a6 6 0 0 1-.6-11.97A7.5 7.5 0 0 1 21.3 6.6 5.7 5.7 0 0 1 22.5 18z"/>
+  </svg>`;
+}
+
 /* ------------------------------------------------------------------ 视图 */
 
 export function mountCalendar(root, { cfg, store }) {
@@ -111,11 +118,11 @@ export function mountCalendar(root, { cfg, store }) {
   root.innerHTML = `
     <div class="cal-card">
       <div class="cal-top">
+        <div class="cal-mark">✿ Sunny Day</div>
+        <div class="cal-men"></div>
         <div class="cal-mon"></div>
-        <div class="cal-mtext">
-          <div class="cal-men"></div>
-          <div class="cal-myear"></div>
-        </div>
+        <div class="cal-myear"></div>
+        <div class="cal-foot-note">little memories</div>
         <button class="cal-nav" data-go="-1">‹</button>
         <button class="cal-nav" data-go="1">›</button>
       </div>
@@ -176,13 +183,17 @@ export function mountCalendar(root, { cfg, store }) {
       if (showCycle && rec.period) cell.classList.add('period');
       else if (ovu.has(k)) cell.classList.add('ovu');
 
+      /* 数字底下那一格：有心情放心情，没有心情但记了东西就浮一朵云。
+         纪念日是黄的，随手写的是蓝的。 */
+      let slot = '';
+      if (rec.mood) {
+        slot = `<img class="cal-mood" src="./assets/mood/${rec.mood}.webp?v=1" alt="">`;
+      } else if (rec.anniversary || rec.note) {
+        slot = cloud(rec.anniversary ? 'anni' : 'note');
+      }
       cell.innerHTML = `
         <span class="cal-num">${d.getDate()}</span>
-        ${rec.mood ? `<img class="cal-mood" src="./assets/mood/${rec.mood}.webp?v=1" alt="">` : ''}
-        <span class="cal-marks">
-          ${rec.anniversary ? '<i class="mk-anni"></i>' : ''}
-          ${rec.note ? '<i class="mk-note"></i>' : ''}
-        </span>`;
+        <span class="cal-slot">${slot}</span>`;
       cell.onclick = () => openSheet(k, rec);
       elGrid.appendChild(cell);
     }

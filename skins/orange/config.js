@@ -22,16 +22,17 @@ export default {
   /* 记日子时能选的标签。一条可以挂好几个，顶上的筛选也能同时选好几个。 */
   dateTags: ['生日', '纪念日', '周年庆', '节日', '聚会', '旅行', '游戏', '其他'],
 
-  /* 每个标签的颜色和小图标。加新标签就在这儿补一条，没补的用默认的白底。 */
+  /* 每个标签的贴纸。贴纸上自带文字，所以界面上不再另写一遍。
+     color 是万一图没加载出来时的底色。 */
   tagStyle: {
-    '生日':   { icon: '🎂', color: '#ffe0e8' },
-    '纪念日': { icon: '💗', color: '#ffe9f0' },
-    '周年庆': { icon: '✨', color: '#ffefc4' },
-    '节日':   { icon: '🎏', color: '#d9f5ee' },
-    '聚会':   { icon: '👯', color: '#dcefff' },
-    '旅行':   { icon: '✈️', color: '#ffe6d2' },
-    '游戏':   { icon: '🎮', color: '#e8e2fb' },
-    '其他':   { icon: '☁️', color: '#eef4f9' }
+    '生日':   { img: 'tag_birthday',  color: '#ffe0e8' },
+    '纪念日': { img: 'tag_anniv',     color: '#e6f3dc' },
+    '周年庆': { img: 'tag_yearly',    color: '#ffefc4' },
+    '节日':   { img: 'tag_festival',  color: '#d9ecfb' },
+    '聚会':   { img: 'tag_party',     color: '#ffe2ea' },
+    '旅行':   { img: 'tag_trip',      color: '#ffe6d2' },
+    '游戏':   { img: 'tag_game',      color: '#fff2c9' },
+    '其他':   { img: 'tag_other',     color: '#efe6d8' }
   },
 
   /* 头一次打开时自带的两个日子。删掉就不会再回来 —— 只在第一次种。

@@ -68,10 +68,12 @@ function countdownText(days) {
 export function mountDates(root, { cfg, store }) {
   const TAGS = cfg.dateTags || ['生日', '纪念日', '旅行', '其他'];
   const STYLE = cfg.tagStyle || {};
-  const ico = t => (STYLE[t] && STYLE[t].icon) || '';
+  const img = t => (STYLE[t] && STYLE[t].img) || '';
   const col = t => (STYLE[t] && STYLE[t].color) || 'rgba(255,255,255,.6)';
-  const chip = (t, cls) =>
-    `<span class="${cls}" style="--c:${col(t)}">${ico(t)}${escapeHtml(t)}</span>`;
+  /* 有贴纸就贴贴纸 —— 贴纸上写着字，不用再写一遍。没有就退回带底色的文字。 */
+  const sticker = (t, cls) => img(t)
+    ? `<img class="${cls} pic" src="./assets/pack/${img(t)}.webp?v=39" alt="${escapeHtml(t)}">`
+    : `<span class="${cls}" style="--c:${col(t)}">${escapeHtml(t)}</span>`;
   let filter = new Set();
   let items = [];
 
@@ -145,15 +147,20 @@ export function mountDates(root, { cfg, store }) {
     elTags.innerHTML = '';
     if (used.length > 1) {
       const all = document.createElement('button');
-      all.className = 'dt-tag' + (filter.size === 0 ? ' on' : '');
-      all.textContent = '全部';
+      all.className = 'dt-tag pic' + (filter.size === 0 ? ' on' : '');
+      all.innerHTML = `<img class="round" src="./assets/pack/tag_all.webp?v=39" alt="全部">`;
       all.onclick = () => { filter.clear(); draw(); };
       elTags.appendChild(all);
       used.forEach(t => {
         const b = document.createElement('button');
         b.className = 'dt-tag' + (filter.has(t) ? ' on' : '');
-        b.style.setProperty('--c', col(t));
-        b.innerHTML = ico(t) + escapeHtml(t);
+        if (img(t)) {
+          b.classList.add('pic');
+          b.innerHTML = `<img src="./assets/pack/${img(t)}.webp?v=39" alt="${escapeHtml(t)}">`;
+        } else {
+          b.style.setProperty('--c', col(t));
+          b.textContent = t;
+        }
         b.onclick = () => {
           filter.has(t) ? filter.delete(t) : filter.add(t);
           draw();
@@ -201,7 +208,7 @@ export function mountDates(root, { cfg, store }) {
           <span class="dt-name">${escapeHtml(it.name)}</span>
           <span class="dt-sub">${escapeHtml(sub)}</span>
         </span>
-        <span class="dt-chips">${(it.tags || []).map(t => chip(t, 'dt-chip')).join('')}</span>
+        <span class="dt-chips">${(it.tags || []).map(t => sticker(t, 'dt-chip')).join('')}</span>
         <span class="dt-days">${countdownText(days)}</span>`;
       card.onclick = () => openForm(it);
       elList.appendChild(card);
@@ -245,8 +252,13 @@ export function mountDates(root, { cfg, store }) {
         <div class="sheet-field">
           <span>标签（可以选好几个）</span>
           <div class="dt-seg wrap">
-            ${TAGS.map(t => `<button class="dt-opt ${(it.tags || []).includes(t) ? 'on' : ''}"
-              data-tag="${t}" style="--c:${col(t)}">${ico(t)}${escapeHtml(t)}</button>`).join('')}
+            ${TAGS.map(t => {
+              const on = (it.tags || []).includes(t) ? 'on' : '';
+              return img(t)
+                ? `<button class="dt-opt pic ${on}" data-tag="${t}">
+                     <img src="./assets/pack/${img(t)}.webp?v=39" alt="${escapeHtml(t)}"></button>`
+                : `<button class="dt-opt ${on}" data-tag="${t}" style="--c:${col(t)}">${escapeHtml(t)}</button>`;
+            }).join('')}
           </div>
         </div>
 

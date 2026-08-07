@@ -6,6 +6,18 @@
 <title>直到大地变成一颗酸橙</title>
 <meta name="theme-color" content="#5b8ed6">
 <style>
+  /* 自带一个拉丁字体，iOS 和安卓才会长一样。
+     只装拉丁部分（27KB），中文仍旧交给系统 —— 完整中文字库两三兆，
+     只截取界面用字又会让你自己写的备注掉回系统字体，一屏两种更难看。
+     Quicksand，SIL Open Font License 1.1。 */
+  @font-face{
+    font-family:'Quicksand';
+    src:url('./assets/fonts/quicksand-latin.woff2') format('woff2');
+    font-weight:400 700;
+    font-style:normal;
+    font-display:swap;
+  }
+
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html,body{height:100%;overflow:hidden;overscroll-behavior:none}
   body{
@@ -19,7 +31,7 @@
   /* 背景图：等比裁剪填满，横图放到竖屏上会裁掉左右两边 */
   #bg{
     position:absolute;inset:0;z-index:-2;
-    background:url('./assets/bg.webp?v=46') center center / cover no-repeat;
+    background:url('./assets/bg.webp?v=47') center center / cover no-repeat;
   }
   /* 底部压一层淡雾，让白色的路和信封不至于糊在水面的碎光里 */
   #haze{
@@ -95,7 +107,8 @@
       -apple-system,'PingFang SC',system-ui,sans-serif;
     /* 数字和星期用系统手写体。iOS 自带 Noteworthy / Chalkboard，
        安卓退回圆体，都不用下载字体文件。 */
-    --num:'Noteworthy','Chalkboard SE','Marker Felt',var(--round);
+    /* Quicksand 放第一位，两个系统才一致；后面几个是它没加载出来时的退路 */
+    --num:'Quicksand','Noteworthy','Chalkboard SE','Marker Felt',var(--round);
   }
 
   /* 外面那一圈水彩。多层渐变叠出深浅不匀的蓝，边缘留白发虚。 */
@@ -392,7 +405,7 @@
     display:flex;align-items:center;gap:10px;
     width:100%;aspect-ratio:1000/322;text-align:left;
     border:0;border-radius:20px;overflow:hidden;
-    background:url('./assets/pack/frame.webp?v=46') center/100% 100% no-repeat;
+    background:url('./assets/pack/frame.webp?v=47') center/100% 100% no-repeat;
     padding:0 8%;cursor:pointer;
     box-shadow:0 6px 16px rgba(40,90,140,.18);
   }
@@ -621,7 +634,7 @@
      不用动图 WebP —— iOS 上它时灵时不灵，这个到处都能播。 */
   #angSprite{
     width:100%;aspect-ratio:1/1;
-    background-image:url('./assets/ride_sheet.webp?v=46');
+    background-image:url('./assets/ride_sheet.webp?v=47');
     background-repeat:no-repeat;
     background-size:500% 100%;
     /* jump-none 才会取到 0/25/50/75/100 这五个位置。
@@ -682,7 +695,7 @@
 
   <div id="deco"></div>
 
-  <img id="title" src="./assets/title.webp?v=46" alt="直到大地变成一颗酸橙">
+  <img id="title" src="./assets/title.webp?v=47" alt="直到大地变成一颗酸橙">
 
 
   <div id="ang"><div id="angFlip"><div id="angSprite" role="img" aria-label="安洁莉娜"></div></div></div>
@@ -701,19 +714,19 @@
 
 /* 存储走 dock 那一层，跟别的应用同一套。
    现在是本地实现，以后换成接口版，这里一行都不用改。 */
-import { LocalStore } from '../../core/storage.js?v=46';
+import { LocalStore } from '../../core/storage.js?v=47';
 const store = new LocalStore();
 
 /* 有 config.local.js 就用它，没有就用公开那份。
    缺哪个字段就补哪个，不用整份照抄。 */
-import baseConfig from './config.js?v=46';
-import { mountCalendar } from './calendar.js?v=46';
-import { mountDates } from './dates.js?v=46';
-import { mountDeco } from './deco.js?v=46';
-import { mountLedger } from './ledger.js?v=46';
+import baseConfig from './config.js?v=47';
+import { mountCalendar } from './calendar.js?v=47';
+import { mountDates } from './dates.js?v=47';
+import { mountDeco } from './deco.js?v=47';
+import { mountLedger } from './ledger.js?v=47';
 let CFG = baseConfig;
 try {
-  const local = (await import('./config.local.js?v=46')).default;
+  const local = (await import('./config.local.js?v=47')).default;
   CFG = { ...baseConfig, ...local };
 } catch { /* 没有本地配置，用公开版 */ }
 

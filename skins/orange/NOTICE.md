@@ -13,6 +13,12 @@
 
 如果权利方希望移除，提一个 issue 即可，我会立刻删掉。
 
+## 字体
+
+`skins/orange/assets/fonts/quicksand-latin.woff2` 是 **Quicksand**，
+作者 Andrew Paglinawan，授权 **SIL Open Font License 1.1**，可自由使用与再分发。
+仓库里这一份只包含拉丁字符子集。
+
 ---
 
 # About the artwork in this skin

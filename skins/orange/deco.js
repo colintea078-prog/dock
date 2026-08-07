@@ -26,7 +26,7 @@ const DEFAULT_LAYOUT = [
   { a: 'u17', x: 0.50, y: 0.66, w: 124, o: .50, r: 0 }
 ];
 
-export function mountDeco(box, { store }) {
+export function mountDeco(box, { cfg, store }) {
   let layout = [];
   let editing = false;
   let picked = -1;
@@ -170,7 +170,11 @@ export function mountDeco(box, { store }) {
 
   (async () => {
     layout = await store.get('deco', 'layout', null);
-    if (!Array.isArray(layout) || !layout.length) layout = DEFAULT_LAYOUT.map(p => ({ ...p }));
+    if (!Array.isArray(layout) || !layout.length) {
+      const base = (cfg && Array.isArray(cfg.decoLayout) && cfg.decoLayout.length)
+        ? cfg.decoLayout : DEFAULT_LAYOUT;
+      layout = base.map(p => ({ ...p }));
+    }
     render();
   })();
 

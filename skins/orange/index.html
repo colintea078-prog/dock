@@ -611,7 +611,7 @@ face('right');
 layout();
 mountCalendar(document.getElementById('calRoot'), { cfg: CFG, store });
 mountDates(document.getElementById('dtRoot'), { cfg: CFG, store });
-const deco = mountDeco(decoBox, { store });
+const deco = mountDeco(decoBox, { cfg: CFG, store });
 /* 首屏排版还没完成时算出来的尺寸是 0，下一帧和图片加载完各补算一次。 */
 requestAnimationFrame(layout);
 addEventListener('load', layout);

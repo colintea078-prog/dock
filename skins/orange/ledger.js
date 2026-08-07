@@ -1,3 +1,4 @@
+import { makeFab } from './fab.js?v=42';
 /* 账本。只记支出。
  *
  * 记账最大的敌人是麻烦：多一步选择就会有一天懒得记，断一次就断了。
@@ -57,20 +58,12 @@ export function mountLedger(root, { cfg, store }) {
   elSheet.hidden = true;
   document.body.appendChild(elSheet);
 
-  const elAdd = document.createElement('button');
-  elAdd.className = 'dt-add';
-  elAdd.setAttribute('aria-label', '记一笔');
-  elAdd.textContent = '＋';
-  elAdd.hidden = true;
-  elAdd.onclick = () => openForm(null);
-  document.body.appendChild(elAdd);
-
-  const panel = root.closest('.panel');
-  if (panel) {
-    const sync = () => { elAdd.hidden = !panel.classList.contains('on'); };
-    new MutationObserver(sync).observe(panel, { attributes: true, attributeFilter: ['class'] });
-    sync();
-  }
+  makeFab({
+    label: '记一笔',
+    onTap: () => openForm(null),
+    store,
+    panel: root.closest('.panel')
+  });
 
   const inMonth = (r, d) => {
     const x = parse(r.date);

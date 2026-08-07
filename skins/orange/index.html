@@ -19,7 +19,7 @@
   /* 背景图：等比裁剪填满，横图放到竖屏上会裁掉左右两边 */
   #bg{
     position:absolute;inset:0;z-index:-2;
-    background:url('./assets/bg.webp?v=41') center center / cover no-repeat;
+    background:url('./assets/bg.webp?v=42') center center / cover no-repeat;
   }
   /* 底部压一层淡雾，让白色的路和信封不至于糊在水面的碎光里 */
   #haze{
@@ -376,7 +376,7 @@
     display:flex;align-items:center;gap:10px;
     width:100%;aspect-ratio:1000/322;text-align:left;
     border:0;border-radius:20px;overflow:hidden;
-    background:url('./assets/pack/frame.webp?v=41') center/100% 100% no-repeat;
+    background:url('./assets/pack/frame.webp?v=42') center/100% 100% no-repeat;
     padding:0 8%;cursor:pointer;
     box-shadow:0 6px 16px rgba(40,90,140,.18);
   }
@@ -404,8 +404,12 @@
     line-height:2;padding:36px 0;
   }
   .dt-add[hidden]{display:none}
+  .dt-add.dragging{transform:scale(1.12);
+    box-shadow:0 12px 26px rgba(30,60,110,.4);cursor:grabbing}
   .dt-add{
     position:fixed;right:20px;bottom:calc(34vh + env(safe-area-inset-bottom));
+    touch-action:none;                 /* 不然拖它会把页面一起拖 */
+    transition:transform .16s ease,box-shadow .16s ease;
     z-index:12;width:50px;height:50px;border-radius:50%;border:0;cursor:pointer;
     background:#7a9ec4;color:#fff;font-size:26px;line-height:1;
     box-shadow:0 8px 20px rgba(30,60,110,.3);
@@ -601,7 +605,7 @@
      不用动图 WebP —— iOS 上它时灵时不灵，这个到处都能播。 */
   #angSprite{
     width:100%;aspect-ratio:1/1;
-    background-image:url('./assets/ride_sheet.webp?v=41');
+    background-image:url('./assets/ride_sheet.webp?v=42');
     background-repeat:no-repeat;
     background-size:500% 100%;
     /* jump-none 才会取到 0/25/50/75/100 这五个位置。
@@ -662,7 +666,7 @@
 
   <div id="deco"></div>
 
-  <img id="title" src="./assets/title.webp?v=41" alt="直到大地变成一颗酸橙">
+  <img id="title" src="./assets/title.webp?v=42" alt="直到大地变成一颗酸橙">
 
 
   <div id="ang"><div id="angFlip"><div id="angSprite" role="img" aria-label="安洁莉娜"></div></div></div>
@@ -681,19 +685,19 @@
 
 /* 存储走 dock 那一层，跟别的应用同一套。
    现在是本地实现，以后换成接口版，这里一行都不用改。 */
-import { LocalStore } from '../../core/storage.js?v=41';
+import { LocalStore } from '../../core/storage.js?v=42';
 const store = new LocalStore();
 
 /* 有 config.local.js 就用它，没有就用公开那份。
    缺哪个字段就补哪个，不用整份照抄。 */
-import baseConfig from './config.js?v=41';
-import { mountCalendar } from './calendar.js?v=41';
-import { mountDates } from './dates.js?v=41';
-import { mountDeco } from './deco.js?v=41';
-import { mountLedger } from './ledger.js?v=41';
+import baseConfig from './config.js?v=42';
+import { mountCalendar } from './calendar.js?v=42';
+import { mountDates } from './dates.js?v=42';
+import { mountDeco } from './deco.js?v=42';
+import { mountLedger } from './ledger.js?v=42';
 let CFG = baseConfig;
 try {
-  const local = (await import('./config.local.js?v=41')).default;
+  const local = (await import('./config.local.js?v=42')).default;
   CFG = { ...baseConfig, ...local };
 } catch { /* 没有本地配置，用公开版 */ }
 

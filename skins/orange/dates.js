@@ -1,3 +1,4 @@
+import { makeFab } from './fab.js?v=42';
 /* 日期备忘录。
  *
  * 每条记一件事：名字、发生那天的阳历日期、按阳历还是阴历过、一个标签。
@@ -91,21 +92,12 @@ export function mountDates(root, { cfg, store }) {
   elSheet.hidden = true;
   document.body.appendChild(elSheet);
 
-  const elAdd = document.createElement('button');
-  elAdd.className = 'dt-add';
-  elAdd.setAttribute('aria-label', '添加');
-  elAdd.textContent = '＋';
-  elAdd.hidden = true;
-  elAdd.onclick = () => openForm(null);
-  document.body.appendChild(elAdd);
-
-  /* 加号只在这个板块打开时出现 */
-  const panel = root.closest('.panel');
-  if (panel) {
-    const sync = () => { elAdd.hidden = !panel.classList.contains('on'); };
-    new MutationObserver(sync).observe(panel, { attributes: true, attributeFilter: ['class'] });
-    sync();
-  }
+  makeFab({
+    label: '添加',
+    onTap: () => openForm(null),
+    store,
+    panel: root.closest('.panel')
+  });
 
   async function load() {
     items = await store.get('dates', 'items', []);

@@ -119,6 +119,8 @@ export function mountCalendar(root, { cfg, store }) {
   elSheet.hidden = true;
   document.body.appendChild(elSheet);
   const cycle = cfg.cycleLength || 28;
+  /* 配置里关掉的话，这一层连算都不算 */
+  const cycleOn = cfg.cycle === true;
   let cursor = new Date();
   let showCycle = false;      // 有经期数据才亮，没有就整层不存在
 
@@ -130,6 +132,7 @@ export function mountCalendar(root, { cfg, store }) {
         <div class="cal-myear"></div>
         <button class="cal-nav" data-go="-1">‹</button>
         <button class="cal-nav" data-go="1">›</button>
+        <button class="cal-today" hidden>今天</button>
       </div>
       <div class="cal-body">
         <div class="cal-week"></div>
@@ -148,6 +151,9 @@ export function mountCalendar(root, { cfg, store }) {
 
   elWeek.innerHTML = WEEK_EN.map(w => `<span>${w}</span>`).join('');
 
+  const elToday = root.querySelector('.cal-today');
+  elToday.onclick = () => { cursor = new Date(); draw(); };
+
   root.querySelectorAll('.cal-nav').forEach(b => {
     b.onclick = () => {
       cursor = new Date(cursor.getFullYear(), cursor.getMonth() + Number(b.dataset.go), 1);
@@ -157,6 +163,9 @@ export function mountCalendar(root, { cfg, store }) {
 
   async function draw() {
     const y = cursor.getFullYear(), m = cursor.getMonth();
+    /* 翻走了才给「今天」这个按钮 —— 已经在当月时它只是噪音 */
+    const now = new Date();
+    elToday.hidden = (y === now.getFullYear() && m === now.getMonth());
     elMon.textContent = m + 1;
     elMen.textContent = MONTH_EN[m];
     elYear.textContent = y;
@@ -168,9 +177,9 @@ export function mountCalendar(root, { cfg, store }) {
 
     /* 记过经期就一直显示这一层；一次都没记过的人（比如男生）看不到它。
        翻到没有数据的月份也不会闪一下就消失。 */
-    const seen = Object.values(days).some(r => r.period);
+    const seen = cycleOn && Object.values(days).some(r => r.period);
     if (seen) await store.set('calendar', 'hasCycle', true);
-    showCycle = seen || await store.get('calendar', 'hasCycle', false);
+    showCycle = cycleOn && (seen || await store.get('calendar', 'hasCycle', false));
 
     const ovu = showCycle ? ovulationDays(days, cycle) : new Set();
 

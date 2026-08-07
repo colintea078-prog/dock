@@ -88,6 +88,11 @@ export default {
   moodPerson: null,
   moodToken: null,
 
+  /* 经期那一层要不要存在。
+     false = 连代码都不跑，公开版就是一个干净的心情日历。
+     true  = 有经期记录时显示粉圈、薄荷圈和排卵期推算。 */
+  cycle: false,
+
   /* 排卵期是从上一次经期开始日往后推算的，周期长度写在这里。
      数据够多之后可以改成自动算平均。 */
   cycleLength: 28

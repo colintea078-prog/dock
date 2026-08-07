@@ -19,7 +19,7 @@
   /* 背景图：等比裁剪填满，横图放到竖屏上会裁掉左右两边 */
   #bg{
     position:absolute;inset:0;z-index:-2;
-    background:url('./assets/bg.webp?v=32') center center / cover no-repeat;
+    background:url('./assets/bg.webp?v=33') center center / cover no-repeat;
   }
   /* 底部压一层淡雾，让白色的路和信封不至于糊在水面的碎光里 */
   #haze{
@@ -348,10 +348,13 @@
   .dt-tag.on{border-color:#fff;box-shadow:0 3px 10px rgba(90,150,190,.22);font-weight:600}
   /* 底框跟着内容长高：切成九宫格，四角保持原样，四边拉伸。
      整张图直接拉伸的话，角上那些小星星会被扯歪。 */
+  /* 底框。这张图左右是宽水彩带、上下只有一条细线，四边不对称，
+     所以九宫格的切法也得跟着不对称：左右切厚、上下切薄。 */
   .dt-frame{
-    border:34px solid transparent;
-    border-image:url('./assets/pack/frame.webp?v=32') 88 96 fill / 34px stretch;
-    padding:2px;
+    border-style:solid;
+    border-width:13px 56px;
+    border-image:url('./assets/pack/frame.webp?v=33') 40 170 fill / 13px 56px stretch;
+    padding:2px 0;
     margin-bottom:8px;
   }
   .dt-list{display:flex;flex-direction:column;gap:10px}
@@ -518,7 +521,7 @@
      不用动图 WebP —— iOS 上它时灵时不灵，这个到处都能播。 */
   #angSprite{
     width:100%;aspect-ratio:1/1;
-    background-image:url('./assets/ride_sheet.webp?v=32');
+    background-image:url('./assets/ride_sheet.webp?v=33');
     background-repeat:no-repeat;
     background-size:500% 100%;
     /* jump-none 才会取到 0/25/50/75/100 这五个位置。
@@ -576,7 +579,7 @@
 
   <div id="deco"></div>
 
-  <img id="title" src="./assets/title.webp?v=32" alt="直到大地变成一颗酸橙">
+  <img id="title" src="./assets/title.webp?v=33" alt="直到大地变成一颗酸橙">
 
 
   <div id="ang"><div id="angFlip"><div id="angSprite" role="img" aria-label="安洁莉娜"></div></div></div>
@@ -595,18 +598,18 @@
 
 /* 存储走 dock 那一层，跟别的应用同一套。
    现在是本地实现，以后换成接口版，这里一行都不用改。 */
-import { LocalStore } from '../../core/storage.js?v=32';
+import { LocalStore } from '../../core/storage.js?v=33';
 const store = new LocalStore();
 
 /* 有 config.local.js 就用它，没有就用公开那份。
    缺哪个字段就补哪个，不用整份照抄。 */
-import baseConfig from './config.js?v=32';
-import { mountCalendar } from './calendar.js?v=32';
-import { mountDates } from './dates.js?v=32';
-import { mountDeco } from './deco.js?v=32';
+import baseConfig from './config.js?v=33';
+import { mountCalendar } from './calendar.js?v=33';
+import { mountDates } from './dates.js?v=33';
+import { mountDeco } from './deco.js?v=33';
 let CFG = baseConfig;
 try {
-  const local = (await import('./config.local.js?v=32')).default;
+  const local = (await import('./config.local.js?v=33')).default;
   CFG = { ...baseConfig, ...local };
 } catch { /* 没有本地配置，用公开版 */ }
 
@@ -825,7 +828,7 @@ CFG.panels.forEach((p, i) => {
   if (!h) return;
   /* 有标题图就用图，没有就退回文字 */
   h.innerHTML = p.img
-    ? `<img class="panel-title" src="./assets/pack/${p.img}.webp?v=32" alt="${p.name}">`
+    ? `<img class="panel-title" src="./assets/pack/${p.img}.webp?v=33" alt="${p.name}">`
     : `<span>${p.name}</span>`;
 });
 

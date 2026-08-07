@@ -157,6 +157,16 @@ export function mountCalendar(root, { cfg, store }) {
 
   elWeek.innerHTML = WEEK_EN.map(w => `<span>${w}</span>`).join('');
 
+  /* 倒计时那边改了就重画。另外切回这一页时也重读一次，
+     数据万一是别处改的（比如换了台设备同步过来）也能跟上。 */
+  addEventListener('dock:dates', () => draw());
+  const panel = root.closest('.panel');
+  if (panel) {
+    new MutationObserver(() => {
+      if (panel.classList.contains('on')) draw();
+    }).observe(panel, { attributes: true, attributeFilter: ['class'] });
+  }
+
   const elToday = root.querySelector('.cal-today');
   elToday.onclick = () => { cursor = new Date(); draw(); };
 
@@ -221,15 +231,16 @@ export function mountCalendar(root, { cfg, store }) {
           : '<i class="cal-ev dot"></i>';
       }
 
-      /* 数字下面那一格只留给心情图标 */
-      const slot = rec.mood
+      /* 心情缩到左上角，数字下面那一条留给标签 —— 标签是横的，
+         占满格宽才认得出写的什么。 */
+      const moodPip = rec.mood
         ? `<img class="cal-mood" src="./assets/mood/${rec.mood}.webp?v=1" alt="">`
         : '';
       cell.innerHTML = `
-        ${flag}
+        ${moodPip}
         ${back}
         <span class="cal-num">${d.getDate()}</span>
-        <span class="cal-slot">${slot}</span>`;
+        <span class="cal-slot">${flag}</span>`;
       cell.onclick = () => openSheet(k, rec);
       elGrid.appendChild(cell);
     }

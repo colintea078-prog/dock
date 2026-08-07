@@ -147,6 +147,8 @@ export function mountDates(root, { cfg, store }) {
   async function persist() {
     await store.set('dates', 'items', items);
     draw();
+    /* 日历那边也在用这份数据，存完喊一声，省得要刷新页面才看得到 */
+    dispatchEvent(new CustomEvent('dock:dates'));
   }
 
   function draw() {

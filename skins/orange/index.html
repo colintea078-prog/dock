@@ -19,7 +19,7 @@
   /* 背景图：等比裁剪填满，横图放到竖屏上会裁掉左右两边 */
   #bg{
     position:absolute;inset:0;z-index:-2;
-    background:url('./assets/bg.webp?v=28') center center / cover no-repeat;
+    background:url('./assets/bg.webp?v=29') center center / cover no-repeat;
   }
   /* 底部压一层淡雾，让白色的路和信封不至于糊在水面的碎光里 */
   #haze{
@@ -291,6 +291,48 @@
   .lg.ovu{box-shadow:inset 0 0 0 2px var(--mint)}
 
 
+  /* 弹窗。挂在 body 上，居中，层级要高过公路和洁哥。 */
+  .sheet{
+    position:fixed;inset:0;z-index:60;background:rgba(30,50,80,.38);
+    display:flex;align-items:center;justify-content:center;padding:16px;
+    backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);
+  }
+  .sheet[hidden]{display:none}
+  .sheet-card{
+    width:100%;max-width:min(440px,calc(100vw - 32px));background:#fbfdff;
+    border-radius:20px;padding:20px;
+    max-height:78vh;overflow-y:auto;
+    box-shadow:0 18px 46px rgba(20,40,70,.3);
+    animation:rise .26s cubic-bezier(.2,.9,.3,1);
+    font-family:var(--round);
+  }
+  @keyframes rise{from{transform:scale(.96);opacity:.3}to{transform:none;opacity:1}}
+  .sheet-date{font-size:13px;color:#5b7a9d;letter-spacing:1px;margin-bottom:14px}
+  .sheet-moods{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-bottom:16px}
+  .mood-pick{
+    border:1px solid transparent;background:transparent;border-radius:12px;
+    padding:6px 2px;cursor:pointer;display:flex;flex-direction:column;
+    align-items:center;gap:3px;font:inherit;
+  }
+  .mood-pick img{width:28px}
+  .mood-pick span{font-size:10px;color:#5b7a9d}
+  .mood-pick.on{background:#fff;border-color:rgba(120,160,200,.45)}
+  .sheet-field{display:block;margin-bottom:14px}
+  .sheet-field span{display:block;font-size:12px;color:#5b7a9d;margin-bottom:6px}
+  /* 输入框字号不能小于 16 —— 小了 iOS 一点就把整页放大 */
+  .sheet-field textarea,.sheet-field input{
+    width:100%;min-width:0;max-width:100%;font:inherit;font-size:16px;color:#2f4a6d;
+    -webkit-appearance:none;appearance:none;
+    border:1px solid rgba(120,160,200,.34);border-radius:12px;
+    padding:10px 12px;background:#fff;resize:vertical;
+  }
+  .sheet-row{display:flex;gap:10px}
+  .sheet-btn{
+    flex:1;font:inherit;font-size:14px;padding:11px;border-radius:12px;
+    border:0;background:#7a9ec4;color:#fff;cursor:pointer;
+  }
+  .sheet-btn.ghost{background:rgba(120,160,200,.18);color:#4a6b90}
+
   /* ---- 日期备忘录 ---- */
   .dt-tags{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
   .dt-tag{
@@ -464,7 +506,7 @@
      不用动图 WebP —— iOS 上它时灵时不灵，这个到处都能播。 */
   #angSprite{
     width:100%;aspect-ratio:1/1;
-    background-image:url('./assets/ride_sheet.webp?v=28');
+    background-image:url('./assets/ride_sheet.webp?v=29');
     background-repeat:no-repeat;
     background-size:500% 100%;
     /* jump-none 才会取到 0/25/50/75/100 这五个位置。
@@ -522,7 +564,7 @@
 
   <div id="deco"></div>
 
-  <img id="title" src="./assets/title.webp?v=28" alt="直到大地变成一颗酸橙">
+  <img id="title" src="./assets/title.webp?v=29" alt="直到大地变成一颗酸橙">
 
 
   <div id="ang"><div id="angFlip"><div id="angSprite" role="img" aria-label="安洁莉娜"></div></div></div>
@@ -541,18 +583,18 @@
 
 /* 存储走 dock 那一层，跟别的应用同一套。
    现在是本地实现，以后换成接口版，这里一行都不用改。 */
-import { LocalStore } from '../../core/storage.js?v=28';
+import { LocalStore } from '../../core/storage.js?v=29';
 const store = new LocalStore();
 
 /* 有 config.local.js 就用它，没有就用公开那份。
    缺哪个字段就补哪个，不用整份照抄。 */
-import baseConfig from './config.js?v=28';
-import { mountCalendar } from './calendar.js?v=28';
-import { mountDates } from './dates.js?v=28';
-import { mountDeco } from './deco.js?v=28';
+import baseConfig from './config.js?v=29';
+import { mountCalendar } from './calendar.js?v=29';
+import { mountDates } from './dates.js?v=29';
+import { mountDeco } from './deco.js?v=29';
 let CFG = baseConfig;
 try {
-  const local = (await import('./config.local.js?v=28')).default;
+  const local = (await import('./config.local.js?v=29')).default;
   CFG = { ...baseConfig, ...local };
 } catch { /* 没有本地配置，用公开版 */ }
 

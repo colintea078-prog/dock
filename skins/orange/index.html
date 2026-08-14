@@ -5,12 +5,12 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <title>直到大地变成一颗酸橙</title>
 <meta name="theme-color" content="#5b8ed6">
-<link rel="manifest" href="./manifest.json?v=66">
+<link rel="manifest" href="./manifest.json?v=67">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="酸橙">
-<link rel="apple-touch-icon" href="./assets/icons/icon-192.png?v=66">
+<link rel="apple-touch-icon" href="./assets/icons/icon-192.png?v=67">
 <style>
   /* 拉丁字体自带，两个系统才长一样。中文仍旧交给系统。
      四款都在仓库里，换一个只用改下面 --num 里的第一个名字：
@@ -48,7 +48,7 @@
   /* 背景图：等比裁剪填满，横图放到竖屏上会裁掉左右两边 */
   #bg{
     position:absolute;inset:0;z-index:-2;
-    background:url('./assets/bg.webp?v=66') center center / cover no-repeat;
+    background:url('./assets/bg.webp?v=67') center center / cover no-repeat;
   }
   /* 底部压一层淡雾，让白色的路和信封不至于糊在水面的碎光里 */
   #haze{
@@ -161,25 +161,25 @@
   .cal-men{
     font-family:var(--num);
     font-size:26px;
-    color:var(--ocean);
+    color:var(--sunny);
     letter-spacing:5px;
     line-height:1.1;
-    text-shadow:0 1px 0 rgba(255,255,255,.6);
+    text-shadow:0 1px 2px rgba(150,110,20,.35);
   }
   .cal-mon{
     font-family:var(--num);
     font-size:62px;
     line-height:.95;
-    color:var(--ocean);
+    color:var(--sunny);
     font-weight:700;
     letter-spacing:2px;
-    text-shadow:0 2px 0 rgba(255,255,255,.55);
+    text-shadow:0 2px 3px rgba(150,110,20,.35);
   }
   .cal-myear{
     margin-top:2px;
     font-family:var(--num);
     font-size:15px;
-    color:#6f9fc4;
+    color:#f3cf72;
     letter-spacing:4px;
   }
 
@@ -226,7 +226,10 @@
   /* 日期区：一整块白纸嵌在水彩里 */
   .cal-body{
     padding:14px 10px 26px;
-    background:#fdfeff;
+    /* 白纸也透一点，让下面那片天透上来一层 */
+    background:rgba(255,255,255,.58);
+    backdrop-filter:blur(6px);
+    -webkit-backdrop-filter:blur(6px);
     border-radius:20px;
     box-shadow:0 2px 10px rgba(70,130,170,.12);
   }
@@ -332,7 +335,7 @@
     height:32px;
     z-index:1;
   }
-  .cal-back.cloudy{color:#dff4ff}
+  .cal-back.cloudy{color:#ffd3e0}
   .cal-back.starry{color:#ffe7a0}
   .cal-back.hearty{color:#ffd8e1}
 
@@ -431,7 +434,7 @@
     display:flex;align-items:center;gap:10px;
     width:100%;aspect-ratio:1000/322;text-align:left;
     border:0;border-radius:20px;overflow:hidden;
-    background:url('./assets/pack/frame.webp?v=66') center/100% 100% no-repeat;
+    background:url('./assets/pack/frame.webp?v=67') center/100% 100% no-repeat;
     padding:0 8%;cursor:pointer;
     box-shadow:0 6px 16px rgba(40,90,140,.18);
   }
@@ -741,7 +744,7 @@
      不用动图 WebP —— iOS 上它时灵时不灵，这个到处都能播。 */
   #angSprite{
     width:100%;aspect-ratio:1/1;
-    background-image:url('./assets/ride_sheet.webp?v=66');
+    background-image:url('./assets/ride_sheet.webp?v=67');
     background-repeat:no-repeat;
     background-size:500% 100%;
     /* jump-none 才会取到 0/25/50/75/100 这五个位置。
@@ -805,7 +808,7 @@
 
   <div id="deco"></div>
 
-  <img id="title" src="./assets/title.webp?v=66" alt="直到大地变成一颗酸橙">
+  <img id="title" src="./assets/title.webp?v=67" alt="直到大地变成一颗酸橙">
 
 
   <div id="ang"><div id="angFlip"><div id="angSprite" role="img" aria-label="安洁莉娜"></div></div></div>
@@ -824,20 +827,20 @@
 
 /* 存储走 dock 那一层，跟别的应用同一套。
    现在是本地实现，以后换成接口版，这里一行都不用改。 */
-import { LocalStore } from '../../core/storage.js?v=66';
+import { LocalStore } from '../../core/storage.js?v=67';
 const store = new LocalStore();
 
 /* 有 config.local.js 就用它，没有就用公开那份。
    缺哪个字段就补哪个，不用整份照抄。 */
-import baseConfig from './config.js?v=66';
-import { mountCalendar } from './calendar.js?v=66';
-import { mountDates } from './dates.js?v=66';
-import { mountDeco } from './deco.js?v=66';
-import { mountLedger } from './ledger.js?v=66';
-import { mountNotes } from './notes.js?v=66';
+import baseConfig from './config.js?v=67';
+import { mountCalendar } from './calendar.js?v=67';
+import { mountDates } from './dates.js?v=67';
+import { mountDeco } from './deco.js?v=67';
+import { mountLedger } from './ledger.js?v=67';
+import { mountNotes } from './notes.js?v=67';
 let CFG = baseConfig;
 try {
-  const local = (await import('./config.local.js?v=66')).default;
+  const local = (await import('./config.local.js?v=67')).default;
   CFG = { ...baseConfig, ...local };
 } catch { /* 没有本地配置，用公开版 */ }
 
@@ -914,7 +917,7 @@ function makeLetters() {
     const el = document.createElement('div');
     el.className = 'letter';
     const icon = (CFG.stopIcons && CFG.stopIcons[i]) || 'letter.webp';
-    el.innerHTML = `<img src="./assets/${icon}?v=66" alt="">`;
+    el.innerHTML = `<img src="./assets/${icon}?v=67" alt="">`;
     el.style.setProperty('--i', i);
     el.addEventListener('click', () => onLetter(i));
     stage.appendChild(el);
@@ -1065,7 +1068,7 @@ CFG.panels.forEach((p, i) => {
    不然改了它浏览器可能还在跑旧的。 */
 if ('serviceWorker' in navigator) {
   addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js?v=66', { updateViaCache: 'none' })
+    navigator.serviceWorker.register('./sw.js?v=67', { updateViaCache: 'none' })
       .catch(e => console.warn('sw register failed', e));
   });
 }

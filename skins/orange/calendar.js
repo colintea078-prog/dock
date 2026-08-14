@@ -9,7 +9,7 @@
  * 不需要它的人不用先被问一句"你要不要关掉这个"。
  */
 
-import { occursOn } from './dates.js?v=64';
+import { occursOn } from './dates.js?v=65';
 
 const WEEK_EN = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
 const MONTH_EN = ['January', 'February', 'March', 'April', 'May', 'June',
@@ -145,7 +145,6 @@ export function mountCalendar(root, { cfg, store }) {
         <div class="cal-grid"></div>
       </div>
     </div>
-    <div class="cal-legend"></div>
   `;
 
   const elMon    = root.querySelector('.cal-mon');
@@ -153,7 +152,6 @@ export function mountCalendar(root, { cfg, store }) {
   const elYear   = root.querySelector('.cal-myear');
   const elWeek   = root.querySelector('.cal-week');
   const elGrid   = root.querySelector('.cal-grid');
-  const elLegend = root.querySelector('.cal-legend');
 
   elWeek.innerHTML = WEEK_EN.map(w => `<span>${w}</span>`).join('');
 
@@ -213,11 +211,10 @@ export function mountCalendar(root, { cfg, store }) {
       if (showCycle && rec.period) cell.classList.add('period');
       else if (ovu.has(k)) cell.classList.add('ovu');
 
-      /* 数字底下垫的形状：纪念日一颗星，今天一颗心，写了东西一朵云。
+      /* 数字底下垫的形状：纪念日一颗星，写了东西一朵云。今天不用垫 —— 整格已经是浅蓝的。
          普通日子什么都不垫 —— 一屏四十二格，每格都有东西就闹了。 */
       let back = '';
       if (rec.anniversary)        back = shape('star',  'cal-back starry', '30 28');
-      else if (sameDay(d, today)) back = shape('heart', 'cal-back hearty', '30 30');
       else if (rec.note)          back = shape('cloud', 'cal-back cloudy', '30 22');
 
       /* 这天有没有倒计时里记的事。有就在右上角贴一枚小标签。 */
@@ -227,14 +224,14 @@ export function mountCalendar(root, { cfg, store }) {
         const tag = (hits[0].tags || [])[0];
         const st = TAGSTYLE[tag];
         flag = st && st.img
-          ? `<img class="cal-ev" src="./assets/pack/${st.img}.webp?v=64" alt="">`
+          ? `<img class="cal-ev" src="./assets/pack/${st.img}.webp?v=65" alt="">`
           : '<i class="cal-ev dot"></i>';
       }
 
       /* 心情缩到左上角，数字下面那一条留给标签 —— 标签是横的，
          占满格宽才认得出写的什么。 */
       const moodPip = rec.mood
-        ? `<img class="cal-mood" src="./assets/mood/${rec.mood}.webp?v=64" alt="">`
+        ? `<img class="cal-mood" src="./assets/mood/${rec.mood}.webp?v=65" alt="">`
         : '';
       cell.innerHTML = `
         ${moodPip}
@@ -245,9 +242,6 @@ export function mountCalendar(root, { cfg, store }) {
       elGrid.appendChild(cell);
     }
 
-    elLegend.innerHTML = showCycle
-      ? '<span><i class="lg period"></i>经期</span><span><i class="lg ovu"></i>排卵期（推算）</span>'
-      : '';
   }
 
   /* --------------------------------------------------------- 当天的抽屉 */
@@ -262,7 +256,7 @@ export function mountCalendar(root, { cfg, store }) {
     return `<div class="cal-evline">${hits.map(h => {
       const st = TAGSTYLE[(h.tags || [])[0]];
       const pic = st && st.img
-        ? `<img src="./assets/pack/${st.img}.webp?v=64" alt="">` : '';
+        ? `<img src="./assets/pack/${st.img}.webp?v=65" alt="">` : '';
       return `<span>${pic}${h.name}</span>`;
     }).join('')}</div>`;
   }
@@ -277,7 +271,7 @@ export function mountCalendar(root, { cfg, store }) {
         <div class="sheet-moods">
           ${MOODS.map(mo => `
             <button class="mood-pick ${picked === mo.id ? 'on' : ''}" data-mood="${mo.id}">
-              <img src="./assets/mood/${mo.id}.webp?v=64" alt="">
+              <img src="./assets/mood/${mo.id}.webp?v=65" alt="">
               <span>${mo.name}</span>
             </button>`).join('')}
         </div>

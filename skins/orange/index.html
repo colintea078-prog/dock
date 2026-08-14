@@ -5,12 +5,12 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <title>直到大地变成一颗酸橙</title>
 <meta name="theme-color" content="#5b8ed6">
-<link rel="manifest" href="./manifest.json?v=64">
+<link rel="manifest" href="./manifest.json?v=65">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="酸橙">
-<link rel="apple-touch-icon" href="./assets/icons/icon-192.png?v=64">
+<link rel="apple-touch-icon" href="./assets/icons/icon-192.png?v=65">
 <style>
   /* 拉丁字体自带，两个系统才长一样。中文仍旧交给系统。
      四款都在仓库里，换一个只用改下面 --num 里的第一个名字：
@@ -48,7 +48,7 @@
   /* 背景图：等比裁剪填满，横图放到竖屏上会裁掉左右两边 */
   #bg{
     position:absolute;inset:0;z-index:-2;
-    background:url('./assets/bg.webp?v=64') center center / cover no-repeat;
+    background:url('./assets/bg.webp?v=65') center center / cover no-repeat;
   }
   /* 底部压一层淡雾，让白色的路和信封不至于糊在水面的碎光里 */
   #haze{
@@ -108,7 +108,7 @@
   .panel .hand{font-family:var(--hand);font-size:16px;color:#a8c8db;
     text-align:center;display:block;margin:-8px 0 16px}
 
-  /* ---- 日历 ---- 蓝色水彩包一圈，白纸嵌在中间 */
+  /* ---- 日历 ---- 毛玻璃外框，白纸嵌在中间 */
   :root{
     --sky:#6CC7E8;
     --ocean:#237FC5;
@@ -132,42 +132,26 @@
     --num:'Gaegu','Noteworthy','Chalkboard SE',var(--round);
   }
 
-  /* 外面那一圈水彩。多层渐变叠出深浅不匀的蓝，边缘留白发虚。 */
+  /* 外框：透明毛玻璃。糊的是它自己身下那层，也就是被板块虚化过的天。 */
   .cal-card{
     position:relative;
     font-family:var(--round);
     border-radius:26px;
     padding:0 12px 14px;
     transform:rotate(-0.6deg);
-    background:
-      radial-gradient(120px 80px at 12% 6%,  rgba(255,255,255,.55), transparent 60%),
-      radial-gradient(140px 90px at 88% 10%, rgba(255,255,255,.4),  transparent 62%),
-      radial-gradient(160px 110px at 78% 96%,rgba(255,255,255,.42), transparent 64%),
-      radial-gradient(130px 90px at 8% 92%,  rgba(255,255,255,.35), transparent 62%),
-      linear-gradient(168deg,#a9dcf2 0%,#bfe6f6 38%,#a4d8ef 72%,#c6e9f8 100%);
+    background:linear-gradient(160deg,rgba(255,255,255,.34),rgba(226,242,252,.22));
+    border:1px solid rgba(255,255,255,.5);
+    backdrop-filter:blur(16px) saturate(1.12);
+    -webkit-backdrop-filter:blur(16px) saturate(1.12);
     box-shadow:
-      0 18px 38px rgba(65,140,180,.22),
-      0 3px 10px rgba(70,130,170,.14);
+      0 16px 34px rgba(65,140,180,.2),
+      inset 0 1px 0 rgba(255,255,255,.55);
     overflow:visible;
   }
 
-  /* 水彩往外洇出来的那一层，压在卡片底下 */
-  .cal-card::before{
-    content:"";
-    position:absolute;
-    inset:-9px;
-    border-radius:32px;
-    z-index:-1;
-    background:
-      radial-gradient(90px 50px at 10% 6%,  rgba(108,199,232,.5), transparent 70%),
-      radial-gradient(100px 65px at 92% 12%,rgba(141,216,208,.4), transparent 70%),
-      radial-gradient(100px 75px at 82% 96%,rgba(108,199,232,.42),transparent 70%),
-      radial-gradient(90px 60px at 8% 94%,  rgba(255,216,90,.22), transparent 70%);
-    filter:blur(7px);
-  }
 
 
-  /* 顶部月份区域，坐在水彩上，字是白的 */
+  /* 顶部月份区域 */
   .cal-top{
     position:relative;
     padding:18px 56px 16px;
@@ -177,25 +161,25 @@
   .cal-men{
     font-family:var(--num);
     font-size:26px;
-    color:#fff;
+    color:var(--ocean);
     letter-spacing:5px;
     line-height:1.1;
-    text-shadow:0 2px 10px rgba(60,130,175,.32);
+    text-shadow:0 1px 0 rgba(255,255,255,.6);
   }
   .cal-mon{
     font-family:var(--num);
     font-size:62px;
     line-height:.95;
-    color:#fff;
+    color:var(--ocean);
     font-weight:700;
     letter-spacing:2px;
-    text-shadow:0 3px 12px rgba(60,130,175,.35);
+    text-shadow:0 2px 0 rgba(255,255,255,.55);
   }
   .cal-myear{
     margin-top:2px;
     font-family:var(--num);
     font-size:15px;
-    color:rgba(255,255,255,.85);
+    color:#6f9fc4;
     letter-spacing:4px;
   }
 
@@ -301,11 +285,11 @@
     font-size:16px;
     font-weight:600;
   }
-  .cal-cell.today .cal-num{
-    background:linear-gradient(145deg,var(--sky),#8ed8ef);
-    color:#fff;
-    box-shadow:0 4px 8px rgba(108,199,232,.35);
+  /* 今天：整格浅蓝，不是给数字套个圈 */
+  .cal-cell.today{
+    background:linear-gradient(160deg,rgba(150,214,240,.46),rgba(190,231,247,.32));
   }
+  .cal-cell.today .cal-num{color:#1f6ea8;font-weight:700}
   .cal-cell.period .cal-num{
     color:#cc8794;
     box-shadow:inset 0 0 0 2px rgba(243,183,199,.8);
@@ -360,10 +344,10 @@
     align-items:center;
     margin-top:1px;
   }
-  /* 心情缩到左上角 */
+  /* 心情在左上角，之前 14 太小认不出画的是什么 */
   .cal-mood{
-    position:absolute;top:1px;left:2px;z-index:3;
-    width:14px;height:14px;object-fit:contain;
+    position:absolute;top:0;left:1px;z-index:3;
+    width:21px;height:21px;object-fit:contain;
     pointer-events:none;
   }
 
@@ -469,7 +453,7 @@
     display:flex;align-items:center;gap:10px;
     width:100%;aspect-ratio:1000/322;text-align:left;
     border:0;border-radius:20px;overflow:hidden;
-    background:url('./assets/pack/frame.webp?v=64') center/100% 100% no-repeat;
+    background:url('./assets/pack/frame.webp?v=65') center/100% 100% no-repeat;
     padding:0 8%;cursor:pointer;
     box-shadow:0 6px 16px rgba(40,90,140,.18);
   }
@@ -779,7 +763,7 @@
      不用动图 WebP —— iOS 上它时灵时不灵，这个到处都能播。 */
   #angSprite{
     width:100%;aspect-ratio:1/1;
-    background-image:url('./assets/ride_sheet.webp?v=64');
+    background-image:url('./assets/ride_sheet.webp?v=65');
     background-repeat:no-repeat;
     background-size:500% 100%;
     /* jump-none 才会取到 0/25/50/75/100 这五个位置。
@@ -843,7 +827,7 @@
 
   <div id="deco"></div>
 
-  <img id="title" src="./assets/title.webp?v=64" alt="直到大地变成一颗酸橙">
+  <img id="title" src="./assets/title.webp?v=65" alt="直到大地变成一颗酸橙">
 
 
   <div id="ang"><div id="angFlip"><div id="angSprite" role="img" aria-label="安洁莉娜"></div></div></div>
@@ -862,20 +846,20 @@
 
 /* 存储走 dock 那一层，跟别的应用同一套。
    现在是本地实现，以后换成接口版，这里一行都不用改。 */
-import { LocalStore } from '../../core/storage.js?v=64';
+import { LocalStore } from '../../core/storage.js?v=65';
 const store = new LocalStore();
 
 /* 有 config.local.js 就用它，没有就用公开那份。
    缺哪个字段就补哪个，不用整份照抄。 */
-import baseConfig from './config.js?v=64';
-import { mountCalendar } from './calendar.js?v=64';
-import { mountDates } from './dates.js?v=64';
-import { mountDeco } from './deco.js?v=64';
-import { mountLedger } from './ledger.js?v=64';
-import { mountNotes } from './notes.js?v=64';
+import baseConfig from './config.js?v=65';
+import { mountCalendar } from './calendar.js?v=65';
+import { mountDates } from './dates.js?v=65';
+import { mountDeco } from './deco.js?v=65';
+import { mountLedger } from './ledger.js?v=65';
+import { mountNotes } from './notes.js?v=65';
 let CFG = baseConfig;
 try {
-  const local = (await import('./config.local.js?v=64')).default;
+  const local = (await import('./config.local.js?v=65')).default;
   CFG = { ...baseConfig, ...local };
 } catch { /* 没有本地配置，用公开版 */ }
 
@@ -952,7 +936,7 @@ function makeLetters() {
     const el = document.createElement('div');
     el.className = 'letter';
     const icon = (CFG.stopIcons && CFG.stopIcons[i]) || 'letter.webp';
-    el.innerHTML = `<img src="./assets/${icon}?v=64" alt="">`;
+    el.innerHTML = `<img src="./assets/${icon}?v=65" alt="">`;
     el.style.setProperty('--i', i);
     el.addEventListener('click', () => onLetter(i));
     stage.appendChild(el);
@@ -1103,7 +1087,7 @@ CFG.panels.forEach((p, i) => {
    不然改了它浏览器可能还在跑旧的。 */
 if ('serviceWorker' in navigator) {
   addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js?v=64', { updateViaCache: 'none' })
+    navigator.serviceWorker.register('./sw.js?v=65', { updateViaCache: 'none' })
       .catch(e => console.warn('sw register failed', e));
   });
 }

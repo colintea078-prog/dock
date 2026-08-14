@@ -1,4 +1,4 @@
-import { makeFab } from './fab.js?v=67';
+import { makeFab } from './fab.js?v=68';
 /* 账本。只记支出。
  *
  * 记账最大的敌人是麻烦：多一步选择就会有一天懒得记，断一次就断了。
@@ -44,7 +44,7 @@ function compare(now, prev) {
 export function mountLedger(root, { cfg, store }) {
   const CATS = cfg.ledgerCats || [{ id: 'other', name: '其他', en: 'Others', icon: 'other' }];
   const catOf = id => CATS.find(c => c.id === id) || CATS[CATS.length - 1];
-  const catIcon = c => `<img class="led-ico" src="./assets/cat/${c.icon}.webp?v=67" alt="">`;
+  const catIcon = c => `<img class="led-ico" src="./assets/cat/${c.icon}.webp?v=68" alt="">`;
 
   let items = [];
   let cursor = new Date();          // 当前看的是哪个月

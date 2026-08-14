@@ -5,12 +5,12 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <title>直到大地变成一颗酸橙</title>
 <meta name="theme-color" content="#5b8ed6">
-<link rel="manifest" href="./manifest.json?v=69">
+<link rel="manifest" href="./manifest.json?v=70">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="酸橙">
-<link rel="apple-touch-icon" href="./assets/icons/icon-192.png?v=69">
+<link rel="apple-touch-icon" href="./assets/icons/icon-192.png?v=70">
 <style>
   /* 拉丁字体自带，两个系统才长一样。中文仍旧交给系统。
      四款都在仓库里，换一个只用改下面 --num 里的第一个名字：
@@ -48,7 +48,7 @@
   /* 背景图：等比裁剪填满，横图放到竖屏上会裁掉左右两边 */
   #bg{
     position:absolute;inset:0;z-index:-2;
-    background:url('./assets/bg.webp?v=69') center center / cover no-repeat;
+    background:url('./assets/bg.webp?v=70') center center / cover no-repeat;
   }
   /* 底部压一层淡雾，让白色的路和信封不至于糊在水面的碎光里 */
   #haze{
@@ -435,7 +435,7 @@
     display:flex;align-items:center;gap:10px;
     width:100%;aspect-ratio:1000/322;text-align:left;
     border:0;border-radius:20px;overflow:hidden;
-    background:url('./assets/pack/frame.webp?v=69') center/100% 100% no-repeat;
+    background:url('./assets/pack/frame.webp?v=70') center/100% 100% no-repeat;
     padding:0 8%;cursor:pointer;
     box-shadow:0 6px 16px rgba(40,90,140,.18);
   }
@@ -745,7 +745,7 @@
      不用动图 WebP —— iOS 上它时灵时不灵，这个到处都能播。 */
   #angSprite{
     width:100%;aspect-ratio:1/1;
-    background-image:url('./assets/ride_sheet.webp?v=69');
+    background-image:url('./assets/ride_sheet.webp?v=70');
     background-repeat:no-repeat;
     background-size:500% 100%;
     /* jump-none 才会取到 0/25/50/75/100 这五个位置。
@@ -772,17 +772,19 @@
     filter:drop-shadow(0 3px 5px rgba(30,60,110,.25));
   }
   .letter img{width:100%;display:block;pointer-events:none}
-  /* 板块名字：平时不在，选中了才浮出来 */
+  /* 板块名字：平时不在，选中了才淡进来。
+     它不跟着信封飘 —— 名字晃着看不清，而且飘的是信封，名字只是个标签。 */
   .letter-name{
-    position:absolute;top:100%;left:50%;
-    transform:translateX(-50%) translateY(2px);
-    margin-top:5px;white-space:nowrap;pointer-events:none;
+    position:absolute;top:56px;left:50%;
+    transform:translateX(-50%);
+    white-space:nowrap;pointer-events:none;
     font-family:var(--round);font-size:12.5px;letter-spacing:2px;
-    color:#2f5f88;
-    text-shadow:0 1px 3px rgba(255,255,255,.9),0 0 8px rgba(255,255,255,.85);
-    opacity:0;transition:opacity .28s ease,transform .28s ease;
+    color:#fff;
+    text-shadow:0 1px 4px rgba(30,70,120,.55),0 0 10px rgba(30,70,120,.35);
+    opacity:0;transition:opacity .28s ease;
+    animation:none;
   }
-  .letter.up .letter-name{opacity:1;transform:translateX(-50%) translateY(0)}
+  .letter.up .letter-name{opacity:1}
   .letter.up{
     animation:float 2.6s ease-in-out infinite;
     filter:drop-shadow(0 10px 14px rgba(30,60,110,.3));
@@ -790,6 +792,12 @@
   @keyframes float{
     0%,100%{transform:translateY(-26px) rotate(-3deg)}
     50%{transform:translateY(-36px) rotate(3deg)}
+  }
+  /* 信封在飘，名字不飘：反着抵消掉外层的位移和旋转 */
+  .letter.up .letter-name{animation:steady 2.6s ease-in-out infinite}
+  @keyframes steady{
+    0%,100%{transform:translateX(-50%) translateY(26px) rotate(3deg)}
+    50%{transform:translateX(-50%) translateY(36px) rotate(-3deg)}
   }
 </style>
 </head>
@@ -820,7 +828,7 @@
 
   <div id="deco"></div>
 
-  <img id="title" src="./assets/title.webp?v=69" alt="直到大地变成一颗酸橙">
+  <img id="title" src="./assets/title.webp?v=70" alt="直到大地变成一颗酸橙">
 
 
   <div id="ang"><div id="angFlip"><div id="angSprite" role="img" aria-label="安洁莉娜"></div></div></div>
@@ -839,20 +847,20 @@
 
 /* 存储走 dock 那一层，跟别的应用同一套。
    现在是本地实现，以后换成接口版，这里一行都不用改。 */
-import { LocalStore } from '../../core/storage.js?v=69';
+import { LocalStore } from '../../core/storage.js?v=70';
 const store = new LocalStore();
 
 /* 有 config.local.js 就用它，没有就用公开那份。
    缺哪个字段就补哪个，不用整份照抄。 */
-import baseConfig from './config.js?v=69';
-import { mountCalendar } from './calendar.js?v=69';
-import { mountDates } from './dates.js?v=69';
-import { mountDeco } from './deco.js?v=69';
-import { mountLedger } from './ledger.js?v=69';
-import { mountNotes } from './notes.js?v=69';
+import baseConfig from './config.js?v=70';
+import { mountCalendar } from './calendar.js?v=70';
+import { mountDates } from './dates.js?v=70';
+import { mountDeco } from './deco.js?v=70';
+import { mountLedger } from './ledger.js?v=70';
+import { mountNotes } from './notes.js?v=70';
 let CFG = baseConfig;
 try {
-  const local = (await import('./config.local.js?v=69')).default;
+  const local = (await import('./config.local.js?v=70')).default;
   CFG = { ...baseConfig, ...local };
 } catch { /* 没有本地配置，用公开版 */ }
 
@@ -932,7 +940,7 @@ function makeLetters() {
     const name = (CFG.panels[i] && CFG.panels[i].name) || '';
     /* 名字挂在信封底下。信封浮起来时它才露出来，
        正好落在信封和公路之间那道缝里。 */
-    el.innerHTML = `<img src="./assets/${icon}?v=69" alt="${name}">` +
+    el.innerHTML = `<img src="./assets/${icon}?v=70" alt="${name}">` +
       `<span class="letter-name">${name}</span>`;
     el.style.setProperty('--i', i);
     el.addEventListener('click', () => onLetter(i));
@@ -1086,7 +1094,7 @@ CFG.panels.forEach((p, i) => {
    不然改了它浏览器可能还在跑旧的。 */
 if ('serviceWorker' in navigator) {
   addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js?v=69', { updateViaCache: 'none' })
+    navigator.serviceWorker.register('./sw.js?v=70', { updateViaCache: 'none' })
       .catch(e => console.warn('sw register failed', e));
   });
 }

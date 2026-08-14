@@ -9,7 +9,7 @@
  * 不需要它的人不用先被问一句"你要不要关掉这个"。
  */
 
-import { occursOn } from './dates.js?v=69';
+import { occursOn } from './dates.js?v=70';
 
 const WEEK_EN = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
 const MONTH_EN = ['January', 'February', 'March', 'April', 'May', 'June',
@@ -224,14 +224,14 @@ export function mountCalendar(root, { cfg, store }) {
         const tag = (hits[0].tags || [])[0];
         const st = TAGSTYLE[tag];
         flag = st && st.img
-          ? `<img class="cal-ev" src="./assets/pack/${st.img}.webp?v=69" alt="">`
+          ? `<img class="cal-ev" src="./assets/pack/${st.img}.webp?v=70" alt="">`
           : '<i class="cal-ev dot"></i>';
       }
 
       /* 心情缩到左上角，数字下面那一条留给标签 —— 标签是横的，
          占满格宽才认得出写的什么。 */
       const moodPip = rec.mood
-        ? `<img class="cal-mood" src="./assets/mood/${rec.mood}.webp?v=69" alt="">`
+        ? `<img class="cal-mood" src="./assets/mood/${rec.mood}.webp?v=70" alt="">`
         : '';
       cell.innerHTML = `
         ${moodPip}
@@ -256,7 +256,7 @@ export function mountCalendar(root, { cfg, store }) {
     return `<div class="cal-evline">${hits.map(h => {
       const st = TAGSTYLE[(h.tags || [])[0]];
       const pic = st && st.img
-        ? `<img src="./assets/pack/${st.img}.webp?v=69" alt="">` : '';
+        ? `<img src="./assets/pack/${st.img}.webp?v=70" alt="">` : '';
       return `<span>${pic}${h.name}</span>`;
     }).join('')}</div>`;
   }
@@ -271,7 +271,7 @@ export function mountCalendar(root, { cfg, store }) {
         <div class="sheet-moods">
           ${MOODS.map(mo => `
             <button class="mood-pick ${picked === mo.id ? 'on' : ''}" data-mood="${mo.id}">
-              <img src="./assets/mood/${mo.id}.webp?v=69" alt="">
+              <img src="./assets/mood/${mo.id}.webp?v=70" alt="">
               <span>${mo.name}</span>
             </button>`).join('')}
         </div>

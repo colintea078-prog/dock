@@ -18,7 +18,7 @@ export default {
     { id: 'calendar', name: '日历',  en: 'CALENDAR' },
     { id: 'dates',    name: '倒计时', en: 'COUNTDOWN' },
     { id: 'ledger',   name: '账本',  en: 'LEDGER' },
-    { id: 'notes',    name: '备忘录', en: 'MEMO' }
+    { id: 'notes',    name: '备忘',  en: 'MEMO' }
   ],
 
   /* 四个站点各用哪张图，对应 assets/ 下的文件名 */

@@ -127,7 +127,18 @@ core/
   ui.js         DOM helpers shared by every app
 apps/
   fx.js         reference app
+skins/
+  orange/       a complete skin: its own home screen and four panels
+                (calendar, countdown, ledger, checklist)
+docs/
+  push.md       what the server side of due reminders has to do
+  架构.md        full architecture, in Chinese
 ```
+
+The skin under `skins/orange/` is a second front end over the same core, not a newer
+version of the first. Pick whichever one suits you.
+
+中文说明见 [docs/架构.md](docs/架构.md)。
 
 ## License
 

@@ -18,28 +18,20 @@ export default {
     { id: 'calendar', name: '日历',  en: 'CALENDAR' },
     { id: 'dates',    name: '倒计时', en: 'COUNTDOWN' },
     { id: 'ledger',   name: '账本',  en: 'LEDGER' },
-    { id: 'notes',    name: '备忘',  en: 'MEMO' }
+    { id: 'todo',     name: '清单',  en: 'CHECKLIST' }
   ],
 
   /* 四个站点各用哪张图，对应 assets/ 下的文件名 */
   stopIcons: ['letter.webp', 'stop6.webp', 'stop5.webp', 'stop4.webp'],
 
-  /* 备忘录的来源。
-     填上接口地址 = 读你自己的备忘；留空 = 用下面这几张示例便签。 */
-  memoApi: null,
-
-  /* 公开版看到的示例便签。第一行是标题。 */
-  sampleNotes: [
-    { date: '2026-08-01', tags: ['出门'], text:
-      '【出门前】\n钥匙、伞、充电宝。\n伞是最常忘的那个，因为出门时天还没下。' },
-    { date: '2026-07-28', tags: ['身体'], text:
-      '【累的时候先查这三样】\n水喝够了吗。\n上一顿是什么时候。\n昨晚几点睡的。\n三样都对还累，才是真的要休息。' },
-    { date: '2026-07-20', tags: ['做事'], text:
-      '【卡住的时候】\n先做不依赖那个答案的部分。\n卡住的往往只是一小块，\n但停下来的是全部。' },
-    { date: '2026-07-11', tags: ['安全'], text:
-      '【陌生消息】\n越是催你马上办的，越要先停。\n真的急事不怕你多问一句。' },
-    { date: '2026-07-02', tags: ['做事'], text:
-      '【记账这件事】\n记不全没关系，断了也没关系。\n第二天接着记，比记得完整重要。' }
+  /* 头一次打开时自带的几项，删掉就是空的。
+     daily 为真 = 每天都出现；为假 = 只在记下的那天。 */
+  sampleTodos: [
+    { text: '吃早饭',           time: '09:00', daily: true },
+    { text: '喝够水',           time: '',      daily: true },
+    { text: '出门前检查钥匙和伞', time: '',      daily: true },
+    { text: '把今天的账记一下',   time: '22:00', daily: true },
+    { text: '给花浇水',          time: '',      daily: false }
   ],
 
   /* 账本的分类。icon 对应 assets/cat/ 下的文件名。

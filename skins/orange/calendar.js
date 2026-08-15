@@ -10,8 +10,8 @@
  * 不需要它的人不用先被问一句"你要不要关掉这个"。
  */
 
-import { occursOn } from './dates.js?v=79';
-import { todoForDay, todoIsDone, announceTodo } from './checklist.js?v=79';
+import { occursOn } from './dates.js?v=80';
+import { todoForDay, todoIsDone, announceTodo } from './checklist.js?v=80';
 
 const WEEK_EN = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
 const MONTH_EN = ['January', 'February', 'March', 'April', 'May', 'June',
@@ -264,17 +264,24 @@ export function mountCalendar(root, { cfg, store }) {
         const tag = (hits[0].tags || [])[0];
         const st = TAGSTYLE[tag];
         flag = st && st.img
-          ? `<img class="cal-ev" src="./assets/pack/${st.img}.webp?v=79" alt="">`
+          ? `<img class="cal-ev" src="./assets/pack/${st.img}.webp?v=80" alt="">`
           : '<i class="cal-ev dot"></i>';
       }
 
       /* 左上角那枚是清单完成度，数字下面那一条留给标签 —— 标签是横的，
          占满格宽才认得出写的什么。 */
-      const list = todoForDay(todos, k);
-      const fin = list.filter(it => todoIsDone(todoDone, k, it.id)).length;
+      /* 只画到今天为止。「每天」的事项从记下那天起每天都成立，
+         往后的日子会一路排到月底 —— 一屏二十几个空圈，
+         看着像欠了一堆，其实那些日子还没到。 */
+      let rung = '';
+      if (d <= today) {
+        const list = todoForDay(todos, k);
+        const fin = list.filter(it => todoIsDone(todoDone, k, it.id)).length;
+        rung = ring(fin, list.length);
+      }
 
       cell.innerHTML = `
-        ${ring(fin, list.length)}
+        ${rung}
         ${back}
         <span class="cal-num">${d.getDate()}</span>
         <span class="cal-slot">${flag}</span>`;
@@ -333,7 +340,7 @@ export function mountCalendar(root, { cfg, store }) {
     return `<div class="cal-evline">${hits.map(h => {
       const st = TAGSTYLE[(h.tags || [])[0]];
       const pic = st && st.img
-        ? `<img src="./assets/pack/${st.img}.webp?v=79" alt="">` : '';
+        ? `<img src="./assets/pack/${st.img}.webp?v=80" alt="">` : '';
       return `<span>${pic}${h.name}</span>`;
     }).join('')}</div>`;
   }
@@ -373,7 +380,7 @@ export function mountCalendar(root, { cfg, store }) {
         <div class="sh-sec-h">花销<b>¥${money(total)}</b></div>
         ${rows.map(r => {
           const c = catOf(r.cat);
-          const icon = c ? `<img src="./assets/cat/${c.icon}.webp?v=79" alt="">` : '';
+          const icon = c ? `<img src="./assets/cat/${c.icon}.webp?v=80" alt="">` : '';
           return `
             <div class="sh-led">
               ${icon}

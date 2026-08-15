@@ -1,5 +1,5 @@
-import { escapeHtml } from './util.js?v=79';
-import { makeFab } from './fab.js?v=79';
+import { escapeHtml } from './util.js?v=80';
+import { makeFab } from './fab.js?v=80';
 
 /* 清单。按天看，打钩划掉。
  *

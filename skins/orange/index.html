@@ -5,12 +5,12 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <title>直到大地变成一颗酸橙</title>
 <meta name="theme-color" content="#5b8ed6">
-<link rel="manifest" href="./manifest.json?v=75">
+<link rel="manifest" href="./manifest.json?v=76">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="酸橙">
-<link rel="apple-touch-icon" href="./assets/icons/icon-192.png?v=75">
+<link rel="apple-touch-icon" href="./assets/icons/icon-192.png?v=76">
 <style>
   /* 拉丁字体自带，两个系统才长一样。中文仍旧交给系统。
      四款都在仓库里，换一个只用改下面 --num 里的第一个名字：
@@ -48,7 +48,7 @@
   /* 背景图：等比裁剪填满，横图放到竖屏上会裁掉左右两边 */
   #bg{
     position:absolute;inset:0;z-index:-2;
-    background:url('./assets/bg.webp?v=75') center center / cover no-repeat;
+    background:url('./assets/bg.webp?v=76') center center / cover no-repeat;
   }
   /* 底部压一层淡雾，让白色的路和信封不至于糊在水面的碎光里 */
   #haze{
@@ -419,8 +419,8 @@
     opacity:1;transform:translateY(-5px) scale(1.04);
     filter:drop-shadow(0 6px 10px rgba(30,80,130,.38));
   }
-  .dt-tag.pic img{height:38px;width:auto;display:block}
-  .dt-tag.pic img.round{height:44px}
+  .dt-tag.pic img{height:30px;width:auto;display:block}
+  .dt-tag.pic img.round{height:35px}
   /* 底框跟着内容长高：切成九宫格，四角保持原样，四边拉伸。
      整张图直接拉伸的话，角上那些小星星会被扯歪。 */
   /* 底框。这张图左右是宽水彩带、上下只有一条细线，四边不对称，
@@ -446,7 +446,7 @@
   }
   .dt-card::before{
     content:"";position:absolute;inset:0;z-index:0;
-    background:url('./assets/pack/frame.webp?v=75') center/100% 100% no-repeat;
+    background:url('./assets/pack/frame.webp?v=76') center/100% 100% no-repeat;
     opacity:.6;
   }
   .dt-main,.dt-chips,.dt-days{position:relative;z-index:1}
@@ -529,8 +529,8 @@
 
   /* ---- 账本 ---- */
   .led-card{
-    background:linear-gradient(160deg,rgba(255,255,255,.34),rgba(226,242,252,.22));
-    border:1px solid rgba(255,255,255,.5);
+    background:linear-gradient(160deg,rgba(255,255,255,.56),rgba(232,245,253,.44));
+    border:1px solid rgba(255,255,255,.6);
     border-radius:22px;padding:16px 18px 18px;margin-bottom:16px;
     backdrop-filter:blur(16px) saturate(1.12);
     -webkit-backdrop-filter:blur(16px) saturate(1.12);
@@ -813,7 +813,7 @@
      不用动图 WebP —— iOS 上它时灵时不灵，这个到处都能播。 */
   #angSprite{
     width:100%;aspect-ratio:1/1;
-    background-image:url('./assets/ride_sheet.webp?v=75');
+    background-image:url('./assets/ride_sheet.webp?v=76');
     background-repeat:no-repeat;
     background-size:500% 100%;
     /* jump-none 才会取到 0/25/50/75/100 这五个位置。
@@ -919,7 +919,7 @@
 
   <div id="deco"></div>
 
-  <img id="title" src="./assets/title.webp?v=75" alt="直到大地变成一颗酸橙">
+  <img id="title" src="./assets/title.webp?v=76" alt="直到大地变成一颗酸橙">
 
 
   <div id="ang"><div id="angFlip"><div id="angSprite" role="img" aria-label="安洁莉娜"></div></div></div>
@@ -938,20 +938,20 @@
 
 /* 存储走 dock 那一层，跟别的应用同一套。
    现在是本地实现，以后换成接口版，这里一行都不用改。 */
-import { LocalStore } from '../../core/storage.js?v=75';
+import { LocalStore } from '../../core/storage.js?v=76';
 const store = new LocalStore();
 
 /* 有 config.local.js 就用它，没有就用公开那份。
    缺哪个字段就补哪个，不用整份照抄。 */
-import baseConfig from './config.js?v=75';
-import { mountCalendar } from './calendar.js?v=75';
-import { mountDates } from './dates.js?v=75';
-import { mountDeco } from './deco.js?v=75';
-import { mountLedger } from './ledger.js?v=75';
-import { mountChecklist } from './checklist.js?v=75';
+import baseConfig from './config.js?v=76';
+import { mountCalendar } from './calendar.js?v=76';
+import { mountDates } from './dates.js?v=76';
+import { mountDeco } from './deco.js?v=76';
+import { mountLedger } from './ledger.js?v=76';
+import { mountChecklist } from './checklist.js?v=76';
 let CFG = baseConfig;
 try {
-  const local = (await import('./config.local.js?v=75')).default;
+  const local = (await import('./config.local.js?v=76')).default;
   CFG = { ...baseConfig, ...local };
 } catch { /* 没有本地配置，用公开版 */ }
 
@@ -1034,7 +1034,7 @@ function makeLetters() {
     el.className = 'letter';
     const icon = (CFG.stopIcons && CFG.stopIcons[i]) || 'letter.webp';
     const name = (CFG.panels[i] && CFG.panels[i].name) || '';
-    el.innerHTML = `<img src="./assets/${icon}?v=75" alt="${name}">`;
+    el.innerHTML = `<img src="./assets/${icon}?v=76" alt="${name}">`;
 
     /* 名字单独一层，钉在站点上，不放进信封里 ——
        信封一直在飘，装在里面的东西会被一起带着走，
@@ -1199,7 +1199,7 @@ CFG.panels.forEach((p, i) => {
    不然改了它浏览器可能还在跑旧的。 */
 if ('serviceWorker' in navigator) {
   addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js?v=75', { updateViaCache: 'none' })
+    navigator.serviceWorker.register('./sw.js?v=76', { updateViaCache: 'none' })
       .catch(e => console.warn('sw register failed', e));
   });
 }

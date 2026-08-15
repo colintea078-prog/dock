@@ -1,4 +1,4 @@
-import { makeFab } from './fab.js?v=71';
+import { makeFab } from './fab.js?v=72';
 /* 日期备忘录。
  *
  * 每条记一件事：名字、发生那天的阳历日期、按阳历还是阴历过、一个标签。
@@ -89,7 +89,7 @@ export function mountDates(root, { cfg, store }) {
   const col = t => (STYLE[t] && STYLE[t].color) || 'rgba(255,255,255,.6)';
   /* 有贴纸就贴贴纸 —— 贴纸上写着字，不用再写一遍。没有就退回带底色的文字。 */
   const sticker = (t, cls) => img(t)
-    ? `<img class="${cls} pic" src="./assets/pack/${img(t)}.webp?v=71" alt="${escapeHtml(t)}">`
+    ? `<img class="${cls} pic" src="./assets/pack/${img(t)}.webp?v=72" alt="${escapeHtml(t)}">`
     : `<span class="${cls}" style="--c:${col(t)}">${escapeHtml(t)}</span>`;
   let filter = new Set();
   let items = [];
@@ -167,7 +167,7 @@ export function mountDates(root, { cfg, store }) {
         b.className = 'dt-tag' + (filter.has(t) ? ' on' : '');
         if (img(t)) {
           b.classList.add('pic');
-          b.innerHTML = `<img src="./assets/pack/${img(t)}.webp?v=71" alt="${escapeHtml(t)}">`;
+          b.innerHTML = `<img src="./assets/pack/${img(t)}.webp?v=72" alt="${escapeHtml(t)}">`;
         } else {
           b.style.setProperty('--c', col(t));
           b.textContent = t;
@@ -267,7 +267,7 @@ export function mountDates(root, { cfg, store }) {
               const on = (it.tags || []).includes(t) ? 'on' : '';
               return img(t)
                 ? `<button class="dt-opt pic ${on}" data-tag="${t}">
-                     <img src="./assets/pack/${img(t)}.webp?v=71" alt="${escapeHtml(t)}"></button>`
+                     <img src="./assets/pack/${img(t)}.webp?v=72" alt="${escapeHtml(t)}"></button>`
                 : `<button class="dt-opt ${on}" data-tag="${t}" style="--c:${col(t)}">${escapeHtml(t)}</button>`;
             }).join('')}
           </div>

@@ -1,5 +1,5 @@
-import { escapeHtml } from './util.js?v=71';
-import { makeFab } from './fab.js?v=71';
+import { escapeHtml } from './util.js?v=72';
+import { makeFab } from './fab.js?v=72';
 
 /* 备忘录。一列便签纸。
  *
@@ -174,8 +174,6 @@ export function mountNotes(root, { cfg, store }) {
     rows.forEach((n, i) => {
       const card = document.createElement('button');
       card.className = 'nt-card p' + (i % PAPER);
-      /* 歪的角度按序号定死。随机的话，筛一下标签整墙纸都会重新抖一遍。 */
-      card.style.setProperty('--tilt', ((i % 5) - 2) * 0.5 + 'deg');
       card.innerHTML = `
         <span class="nt-title">${escapeHtml(titleOf(n.text))}</span>
         <span class="nt-peek">${escapeHtml(bodyOf(n.text).slice(0, 46))}</span>

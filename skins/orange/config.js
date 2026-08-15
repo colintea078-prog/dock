@@ -94,6 +94,14 @@ export default {
   pushKey: null,
   pushToken: null,
 
+  /* 另一条路：你已经有一个到点会响的东西（Bark、企业微信机器人、
+     自己的定时任务……），那就不用 Web Push 了。
+     填上地址，前端会把未来一年该响的时刻整批算好交给它 ——
+     农历留在这边算，那头只当一个闹钟队列，什么都不用懂。
+     协议：POST {token, rows:[{content, remind_at:'YYYY-MM-DD HH:MM'}]}，整批替换。 */
+  queueApi: null,
+  queueToken: null,
+
   /* 日历的数据来源。
      留空 = 存在这台设备上，clone 下来不用配任何东西就能用。
      填上地址 = 走你自己的接口，字段跟着 moodPerson / moodToken。 */

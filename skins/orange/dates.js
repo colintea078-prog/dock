@@ -1,5 +1,5 @@
-import { makeFab } from './fab.js?v=85';
-import { pushState, enablePush, disablePush, syncDates } from './push.js?v=85';
+import { makeFab } from './fab.js?v=86';
+import { pushState, enablePush, disablePush, syncDates } from './push.js?v=86';
 /* 日期备忘录。
  *
  * 每条记一件事：名字、发生那天的阳历日期、按阳历还是阴历过、一个标签。
@@ -20,6 +20,11 @@ const REMIND = [
   { d: 1,  t: '一天' },
   { d: 0,  t: '当天' }
 ];
+
+/* 提醒推送到几点。早上九点，不是零点 —— 半夜响的提醒等于没提醒。 */
+const REMIND_AT = '09:00';
+/* 往后算多久的提醒。一年多一点，够覆盖到下一次同一个日子。 */
+const HORIZON = 400;
 
 const pad = n => String(n).padStart(2, '0');
 const key = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
@@ -101,14 +106,14 @@ export function mountDates(root, { cfg, store }) {
   const col = t => (STYLE[t] && STYLE[t].color) || 'rgba(255,255,255,.6)';
   /* 有贴纸就贴贴纸 —— 贴纸上写着字，不用再写一遍。没有就退回带底色的文字。 */
   const sticker = (t, cls) => img(t)
-    ? `<img class="${cls} pic" src="./assets/pack/${img(t)}.webp?v=85" alt="${escapeHtml(t)}">`
+    ? `<img class="${cls} pic" src="./assets/pack/${img(t)}.webp?v=86" alt="${escapeHtml(t)}">`
     : `<span class="${cls}" style="--c:${col(t)}">${escapeHtml(t)}</span>`;
   let filter = new Set();
   let items = [];
 
   /* 推送还没接上时说实话：选了先存着，别让人以为已经会响了。 */
-  const remindHint = cfg.pushApi
-    ? '到那天会推到你手机上。'
+  const remindHint = (cfg.pushApi || cfg.queueApi)
+    ? '那天早上九点提醒你。'
     : '先存着 —— 推送还没接上，接上之后就按这里选的发。';
 
   root.innerHTML = `
@@ -162,6 +167,9 @@ export function mountDates(root, { cfg, store }) {
     if (migrated) await store.set('dates', 'items', items);
     draw();
     drawPush();
+    /* 每次打开都重排一次。日子会一年年往后走，只在改动时写的话，
+       今年的提醒发完，明年那批就没人写了。 */
+    syncQueue().catch(e => console.warn('提醒队列同步失败：', e));
   }
 
   async function persist() {
@@ -171,6 +179,47 @@ export function mountDates(root, { cfg, store }) {
     dispatchEvent(new CustomEvent('dock:dates'));
     /* 开了提醒的话，让服务器那份也跟上。推送失败不该拦住存东西，所以只记一句。 */
     syncDates(cfg, items).catch(e => console.warn('提醒同步失败：', e));
+    syncQueue().catch(e => console.warn('提醒队列同步失败：', e));
+  }
+
+  /* ------------------------------------------------------------- 提醒队列 */
+
+  /* 把未来一年里该响的时刻算好，整批交给服务器 —— 它只当一个闹钟队列，
+     到点了自己推。
+     为什么由这边算：农历。浏览器内置了中国农历，服务器那边要算得额外装库，
+     还得自己处理闰月。判断某天是不是这条日子，用的是 occursOn，
+     跟日历上标记事件、跟卡片上倒数，是同一份规则。 */
+  async function syncQueue() {
+    if (!cfg.queueApi) return;
+    const today = midnight(new Date());
+    const rows = [];
+
+    for (const it of items) {
+      const ds = Array.isArray(it.remind) ? it.remind : [];
+      if (!ds.length || !it.name) continue;
+
+      for (let i = 0; i <= HORIZON; i++) {
+        const day = addDays(today, i);
+        if (!occursOn(it, day)) continue;
+        const on = `${day.getMonth() + 1}月${day.getDate()}日`;
+        for (const d of ds) {
+          const when = addDays(day, -d);
+          if (when < today) continue;              // 已经过去的时刻服务器会丢掉，这里先不发
+          rows.push({
+            content: d === 0 ? `就是今天 · ${it.name}` : `还有 ${d} 天 · ${it.name}（${on}）`,
+            remind_at: `${key(when)} ${REMIND_AT}`
+          });
+        }
+        if (!it.repeat) break;                     // 只过一次的，找到那天就不用再往后翻了
+      }
+    }
+
+    rows.sort((a, b) => a.remind_at < b.remind_at ? -1 : 1);
+    await fetch(cfg.queueApi, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: cfg.queueToken || '', rows: rows.slice(0, 200) })
+    });
   }
 
   /* --------------------------------------------------------------- 提醒开关 */
@@ -228,7 +277,7 @@ export function mountDates(root, { cfg, store }) {
         b.className = 'dt-tag' + (filter.has(t) ? ' on' : '');
         if (img(t)) {
           b.classList.add('pic');
-          b.innerHTML = `<img src="./assets/pack/${img(t)}.webp?v=85" alt="${escapeHtml(t)}">`;
+          b.innerHTML = `<img src="./assets/pack/${img(t)}.webp?v=86" alt="${escapeHtml(t)}">`;
         } else {
           b.style.setProperty('--c', col(t));
           b.textContent = t;
@@ -333,7 +382,7 @@ export function mountDates(root, { cfg, store }) {
               const on = (it.tags || []).includes(t) ? 'on' : '';
               return img(t)
                 ? `<button class="dt-opt pic ${on}" data-tag="${t}">
-                     <img src="./assets/pack/${img(t)}.webp?v=85" alt="${escapeHtml(t)}"></button>`
+                     <img src="./assets/pack/${img(t)}.webp?v=86" alt="${escapeHtml(t)}"></button>`
                 : `<button class="dt-opt ${on}" data-tag="${t}" style="--c:${col(t)}">${escapeHtml(t)}</button>`;
             }).join('')}
           </div>

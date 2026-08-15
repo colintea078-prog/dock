@@ -1,4 +1,4 @@
-import { makeFab } from './fab.js?v=83';
+import { makeFab } from './fab.js?v=84';
 /* 日期备忘录。
  *
  * 每条记一件事：名字、发生那天的阳历日期、按阳历还是阴历过、一个标签。
@@ -8,6 +8,17 @@ import { makeFab } from './fab.js?v=83';
  * 直接问它"这天农历是几月几"，比手抄两百年的数据可靠。
  * 找下一个农历同日，就是从明天开始一天天往前问，问到对上为止。
  */
+
+/* 提前多少天提醒。一条可以选好几个 —— 提前一周知道，前一天再说一次。
+   存的是天数，跟用什么方式提醒无关：以后接推送也好、换别的也好，
+   这份数据都不用动。 */
+const REMIND = [
+  { d: 30, t: '一个月' },
+  { d: 7,  t: '一周' },
+  { d: 3,  t: '三天' },
+  { d: 1,  t: '一天' },
+  { d: 0,  t: '当天' }
+];
 
 const pad = n => String(n).padStart(2, '0');
 const key = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
@@ -89,10 +100,15 @@ export function mountDates(root, { cfg, store }) {
   const col = t => (STYLE[t] && STYLE[t].color) || 'rgba(255,255,255,.6)';
   /* 有贴纸就贴贴纸 —— 贴纸上写着字，不用再写一遍。没有就退回带底色的文字。 */
   const sticker = (t, cls) => img(t)
-    ? `<img class="${cls} pic" src="./assets/pack/${img(t)}.webp?v=83" alt="${escapeHtml(t)}">`
+    ? `<img class="${cls} pic" src="./assets/pack/${img(t)}.webp?v=84" alt="${escapeHtml(t)}">`
     : `<span class="${cls}" style="--c:${col(t)}">${escapeHtml(t)}</span>`;
   let filter = new Set();
   let items = [];
+
+  /* 推送还没接上时说实话：选了先存着，别让人以为已经会响了。 */
+  const remindHint = cfg.pushApi
+    ? '到那天会推到你手机上。'
+    : '先存着 —— 推送还没接上，接上之后就按这里选的发。';
 
   root.innerHTML = `
     <div class="dt-tags"></div>
@@ -167,7 +183,7 @@ export function mountDates(root, { cfg, store }) {
         b.className = 'dt-tag' + (filter.has(t) ? ' on' : '');
         if (img(t)) {
           b.classList.add('pic');
-          b.innerHTML = `<img src="./assets/pack/${img(t)}.webp?v=83" alt="${escapeHtml(t)}">`;
+          b.innerHTML = `<img src="./assets/pack/${img(t)}.webp?v=84" alt="${escapeHtml(t)}">`;
         } else {
           b.style.setProperty('--c', col(t));
           b.textContent = t;
@@ -272,7 +288,7 @@ export function mountDates(root, { cfg, store }) {
               const on = (it.tags || []).includes(t) ? 'on' : '';
               return img(t)
                 ? `<button class="dt-opt pic ${on}" data-tag="${t}">
-                     <img src="./assets/pack/${img(t)}.webp?v=83" alt="${escapeHtml(t)}"></button>`
+                     <img src="./assets/pack/${img(t)}.webp?v=84" alt="${escapeHtml(t)}"></button>`
                 : `<button class="dt-opt ${on}" data-tag="${t}" style="--c:${col(t)}">${escapeHtml(t)}</button>`;
             }).join('')}
           </div>
@@ -283,6 +299,16 @@ export function mountDates(root, { cfg, store }) {
           <span>每年都过（关掉就是只有那一天，比如一趟旅行）</span>
         </label>
 
+        <div class="sheet-field">
+          <span>提前几天提醒</span>
+          <div class="dt-seg wrap">
+            ${REMIND.map(r => `
+              <button class="dt-opt ${(it.remind || []).includes(r.d) ? 'on' : ''}"
+                      data-remind="${r.d}">${r.t}</button>`).join('')}
+          </div>
+          <p class="dt-hint">${remindHint}</p>
+        </div>
+
         <div class="sheet-row">
           ${existing ? '<button class="sheet-btn ghost" id="dtDel">删掉</button>' : ''}
           <button class="sheet-btn ghost" id="dtCancel">关掉</button>
@@ -292,6 +318,7 @@ export function mountDates(root, { cfg, store }) {
 
     let cal = it.calendar;
     const tags = new Set(it.tags || []);
+    const remind = new Set(it.remind || []);
     const hint = elSheet.querySelector('#dtLunarHint');
 
     function refreshHint() {
@@ -316,6 +343,13 @@ export function mountDates(root, { cfg, store }) {
         b.classList.toggle('on', tags.has(t));
       };
     });
+    elSheet.querySelectorAll('[data-remind]').forEach(b => {
+      b.onclick = () => {
+        const d = Number(b.dataset.remind);
+        remind.has(d) ? remind.delete(d) : remind.add(d);
+        b.classList.toggle('on', remind.has(d));
+      };
+    });
     elSheet.querySelector('#dtDate').oninput = refreshHint;
     refreshHint();
 
@@ -338,7 +372,8 @@ export function mountDates(root, { cfg, store }) {
         date: elSheet.querySelector('#dtDate').value,
         calendar: cal,
         tags: [...tags],
-        repeat: elSheet.querySelector('#dtRepeat').checked
+        repeat: elSheet.querySelector('#dtRepeat').checked,
+        remind: [...remind].sort((a, b) => b - a)
       };
       const i = items.findIndex(x => x.id === rec.id);
       if (i >= 0) items[i] = rec; else items.push(rec);

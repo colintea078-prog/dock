@@ -5,12 +5,12 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <title>直到大地变成一颗酸橙</title>
 <meta name="theme-color" content="#5b8ed6">
-<link rel="manifest" href="./manifest.json?v=76">
+<link rel="manifest" href="./manifest.json?v=77">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="酸橙">
-<link rel="apple-touch-icon" href="./assets/icons/icon-192.png?v=76">
+<link rel="apple-touch-icon" href="./assets/icons/icon-192.png?v=77">
 <style>
   /* 拉丁字体自带，两个系统才长一样。中文仍旧交给系统。
      四款都在仓库里，换一个只用改下面 --num 里的第一个名字：
@@ -48,7 +48,7 @@
   /* 背景图：等比裁剪填满，横图放到竖屏上会裁掉左右两边 */
   #bg{
     position:absolute;inset:0;z-index:-2;
-    background:url('./assets/bg.webp?v=76') center center / cover no-repeat;
+    background:url('./assets/bg.webp?v=77') center center / cover no-repeat;
   }
   /* 底部压一层淡雾，让白色的路和信封不至于糊在水面的碎光里 */
   #haze{
@@ -446,7 +446,7 @@
   }
   .dt-card::before{
     content:"";position:absolute;inset:0;z-index:0;
-    background:url('./assets/pack/frame.webp?v=76') center/100% 100% no-repeat;
+    background:url('./assets/pack/frame.webp?v=77') center/100% 100% no-repeat;
     opacity:.6;
   }
   .dt-main,.dt-chips,.dt-days{position:relative;z-index:1}
@@ -620,18 +620,28 @@
     color:#fff;text-shadow:0 1px 4px rgba(30,70,120,.45);
   }
   .ck-sub{font-size:12px;color:rgba(255,255,255,.85);flex:1;text-align:right}
+  .ck-back{
+    border:0;cursor:pointer;font-family:var(--round);
+    font-size:11.5px;letter-spacing:1px;color:#3d7ba8;
+    background:rgba(255,255,255,.72);border-radius:20px;padding:4px 12px;
+    box-shadow:0 2px 8px rgba(50,110,160,.2);
+  }
+  .ck-back[hidden]{display:none}
 
   /* 日期球。滑到正中间的那颗就是当天 —— 不用点。
-     两边的球越远越小、越淡、越虚，像镜头对在中间那颗上。
-     左右各垫半个屏幕的空白，第一天和最后一天才推得到中间。 */
+     两边的球越远越小、越淡、越虚，像镜头对在中间那颗上。 */
   .ck-days{
+    position:relative;                    /* 球的 offsetLeft 要以这里为准 */
     display:flex;gap:8px;overflow-x:auto;
     padding:8px 0 16px;margin:0 -6px;
     scroll-snap-type:x mandatory;
     scrollbar-width:none;-webkit-overflow-scrolling:touch;
     overscroll-behavior-x:contain;
   }
-  .ck-days::before,.ck-days::after{content:"";flex:none;width:calc(50% - 29px)}
+  /* 首尾各垫半屏空白，第一天和最后一天才推得到中间。
+     宽度由 JS 按像素给 —— 百分比在横向滚动的弹性容器里，
+     各家浏览器参照的宽度不一样（可见宽还是内容总宽），撑歪了整排球就停不到正中间。 */
+  .ck-pad{flex:none;display:block;height:1px}
   .ck-days::-webkit-scrollbar{display:none}
   .ck-day{
     position:relative;flex:none;
@@ -813,7 +823,7 @@
      不用动图 WebP —— iOS 上它时灵时不灵，这个到处都能播。 */
   #angSprite{
     width:100%;aspect-ratio:1/1;
-    background-image:url('./assets/ride_sheet.webp?v=76');
+    background-image:url('./assets/ride_sheet.webp?v=77');
     background-repeat:no-repeat;
     background-size:500% 100%;
     /* jump-none 才会取到 0/25/50/75/100 这五个位置。
@@ -919,7 +929,7 @@
 
   <div id="deco"></div>
 
-  <img id="title" src="./assets/title.webp?v=76" alt="直到大地变成一颗酸橙">
+  <img id="title" src="./assets/title.webp?v=77" alt="直到大地变成一颗酸橙">
 
 
   <div id="ang"><div id="angFlip"><div id="angSprite" role="img" aria-label="安洁莉娜"></div></div></div>
@@ -938,20 +948,20 @@
 
 /* 存储走 dock 那一层，跟别的应用同一套。
    现在是本地实现，以后换成接口版，这里一行都不用改。 */
-import { LocalStore } from '../../core/storage.js?v=76';
+import { LocalStore } from '../../core/storage.js?v=77';
 const store = new LocalStore();
 
 /* 有 config.local.js 就用它，没有就用公开那份。
    缺哪个字段就补哪个，不用整份照抄。 */
-import baseConfig from './config.js?v=76';
-import { mountCalendar } from './calendar.js?v=76';
-import { mountDates } from './dates.js?v=76';
-import { mountDeco } from './deco.js?v=76';
-import { mountLedger } from './ledger.js?v=76';
-import { mountChecklist } from './checklist.js?v=76';
+import baseConfig from './config.js?v=77';
+import { mountCalendar } from './calendar.js?v=77';
+import { mountDates } from './dates.js?v=77';
+import { mountDeco } from './deco.js?v=77';
+import { mountLedger } from './ledger.js?v=77';
+import { mountChecklist } from './checklist.js?v=77';
 let CFG = baseConfig;
 try {
-  const local = (await import('./config.local.js?v=76')).default;
+  const local = (await import('./config.local.js?v=77')).default;
   CFG = { ...baseConfig, ...local };
 } catch { /* 没有本地配置，用公开版 */ }
 
@@ -1034,7 +1044,7 @@ function makeLetters() {
     el.className = 'letter';
     const icon = (CFG.stopIcons && CFG.stopIcons[i]) || 'letter.webp';
     const name = (CFG.panels[i] && CFG.panels[i].name) || '';
-    el.innerHTML = `<img src="./assets/${icon}?v=76" alt="${name}">`;
+    el.innerHTML = `<img src="./assets/${icon}?v=77" alt="${name}">`;
 
     /* 名字单独一层，钉在站点上，不放进信封里 ——
        信封一直在飘，装在里面的东西会被一起带着走，
@@ -1199,7 +1209,7 @@ CFG.panels.forEach((p, i) => {
    不然改了它浏览器可能还在跑旧的。 */
 if ('serviceWorker' in navigator) {
   addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js?v=76', { updateViaCache: 'none' })
+    navigator.serviceWorker.register('./sw.js?v=77', { updateViaCache: 'none' })
       .catch(e => console.warn('sw register failed', e));
   });
 }

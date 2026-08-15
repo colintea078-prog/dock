@@ -1,5 +1,5 @@
-import { escapeHtml } from './util.js?v=76';
-import { makeFab } from './fab.js?v=76';
+import { escapeHtml } from './util.js?v=77';
+import { makeFab } from './fab.js?v=77';
 
 /* 清单。按天看，打钩划掉。
  *
@@ -25,11 +25,15 @@ export function mountChecklist(root, { cfg, store }) {
   let done = {};                       // { 'YYYY-MM-DD': [id, ...] }
   let picked = key(new Date());        // 当前看的是哪天
   let balls = [];                      // 日期球，建一次就不再重建
+  /* 摆正之前不认「谁在中间」。一进来那排球还停在 0 的位置，
+     这时候来的滚动事件会把选中的日子改成最边上那天，然后一直留在那儿。 */
+  let ready = false;
 
   root.innerHTML = `
     <div class="ck-head">
       <div class="ck-title">清单</div>
       <div class="ck-sub"></div>
+      <button class="ck-back" hidden>回到今天</button>
     </div>
     <div class="ck-days"></div>
     <div class="ck-list"></div>
@@ -37,6 +41,17 @@ export function mountChecklist(root, { cfg, store }) {
   const elSub  = root.querySelector('.ck-sub');
   const elDays = root.querySelector('.ck-days');
   const elList = root.querySelector('.ck-list');
+  const elBack = root.querySelector('.ck-back');
+
+  /* 首尾两块留白，宽度按像素给（见 settle） */
+  const padL = document.createElement('i');
+  const padR = document.createElement('i');
+  padL.className = padR.className = 'ck-pad';
+
+  elBack.onclick = () => {
+    const b = balls.find(x => x.key === key(new Date()));
+    if (b) center(b.el, true);
+  };
 
   const elSheet = document.createElement('div');
   elSheet.className = 'sheet';
@@ -64,12 +79,13 @@ export function mountChecklist(root, { cfg, store }) {
     }
     buildDays();
     draw();
-    /* 一进来，今天停在正中间 */
-    requestAnimationFrame(() => {
-      const b = balls.find(x => x.key === picked);
-      if (b) center(b.el, false);
-      focus();
-    });
+    /* 一进来，今天停在正中间。这一步得等到量得到宽度 ——
+       挂载时板块多半还没打开，量出来是 0，摆不了。 */
+    let tries = 0;
+    (function place() {
+      if (settle() || ++tries > 30) return;
+      requestAnimationFrame(place);
+    })();
   }
 
   const saveItems = () => store.set('todo', 'items', items);
@@ -117,6 +133,7 @@ export function mountChecklist(root, { cfg, store }) {
     const today = midnight(new Date());
     elDays.innerHTML = '';
     balls = [];
+    elDays.appendChild(padL);
     for (let i = -SPAN; i <= SPAN; i++) {
       const d = addDays(today, i);
       const b = document.createElement('button');
@@ -130,15 +147,31 @@ export function mountChecklist(root, { cfg, store }) {
       elDays.appendChild(b);
       balls.push({ el: b, key: key(d) });
     }
+    elDays.appendChild(padR);
   }
 
+  /* 用 offsetLeft 直接算出该滚到哪儿，不靠 scrollBy 推。
+     推是相对的：位置本来就没摆对的时候，推完还是不对。 */
   function center(el, smooth) {
-    const box = elDays.getBoundingClientRect();
-    const r = el.getBoundingClientRect();
-    elDays.scrollBy({
-      left: (r.left + r.width / 2) - (box.left + box.width / 2),
+    elDays.scrollTo({
+      left: el.offsetLeft + el.offsetWidth / 2 - elDays.clientWidth / 2,
       behavior: smooth ? 'smooth' : 'auto'
     });
+  }
+
+  /* 把当前选中的那天摆回正中间。板块还没打开时量不到宽度，摆不了，
+     返回 false 让调用方过一帧再试。 */
+  function settle() {
+    const w = elDays.clientWidth;
+    if (!w) return false;
+    const pad = Math.max(0, (w - 46) / 2);      // 46 是一颗球的宽
+    padL.style.width = padR.style.width = pad + 'px';
+    const b = balls.find(x => x.key === picked);
+    if (!b) return false;
+    center(b.el, false);
+    focus();
+    ready = true;
+    return true;
   }
 
   /* 对焦：离屏幕中线越近的球越大越清楚，越远越小越虚。
@@ -164,7 +197,7 @@ export function mountChecklist(root, { cfg, store }) {
       b.el.classList.toggle('on', b === near);
     });
 
-    if (near && near.key !== picked) { picked = near.key; drawList(); }
+    if (ready && near && near.key !== picked) { picked = near.key; drawList(); }
   }
 
   /* 哪天的事做完了，球底下点个点 */
@@ -183,6 +216,7 @@ export function mountChecklist(root, { cfg, store }) {
     elSub.textContent = list.length
       ? `${d.getMonth() + 1}/${d.getDate()} ${WEEK[d.getDay()]} · 完成 ${ok}/${list.length}`
       : `${d.getMonth() + 1}/${d.getDate()} ${WEEK[d.getDay()]}`;
+    elBack.hidden = picked === key(new Date());
 
     if (!list.length) {
       elList.innerHTML = '<p class="dt-empty">这天没有事。<br>点右下角加一项。</p>';
@@ -218,17 +252,14 @@ export function mountChecklist(root, { cfg, store }) {
     tick = requestAnimationFrame(() => { tick = 0; focus(); });
   }, { passive: true });
 
-  addEventListener('resize', () => focus());
+  /* 屏幕宽度变了，两头的留白也得跟着变，不然中线就偏了 */
+  addEventListener('resize', () => settle());
 
-  /* 挂载时板块多半还没打开，量不到宽度。切回这一页时重新对一次焦，
-     顺便把中间那颗推回当前选中的日子。 */
+  /* 切回这一页时重新摆一次 —— 挂载那会儿多半还没量到宽度 */
   const panel = root.closest('.panel');
   if (panel) {
     new MutationObserver(() => {
-      if (!panel.classList.contains('on')) return;
-      const b = balls.find(x => x.key === picked);
-      if (b) center(b.el, false);
-      focus();
+      if (panel.classList.contains('on')) settle();
     }).observe(panel, { attributes: true, attributeFilter: ['class'] });
   }
 

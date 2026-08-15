@@ -9,7 +9,8 @@
  * 不需要它的人不用先被问一句"你要不要关掉这个"。
  */
 
-import { occursOn } from './dates.js?v=77';
+import { occursOn } from './dates.js?v=78';
+import { todoForDay, todoIsDone, announceTodo } from './checklist.js?v=78';
 
 const WEEK_EN = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
 const MONTH_EN = ['January', 'February', 'March', 'April', 'May', 'June',
@@ -109,13 +110,29 @@ function shape(name, cls, box) {
 
 const cloud = kind => shape('cloud', 'cal-cloud ' + kind, '30 20');
 
+const money = n => (Math.round(n * 100) / 100).toLocaleString(undefined, {
+  minimumFractionDigits: 2, maximumFractionDigits: 2
+});
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"]/g, c =>
+    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+}
+
 /* ------------------------------------------------------------------ 视图 */
 
 export function mountCalendar(root, { cfg, store }) {
   /* 倒计时那边记的日子，在日历上也标出来。
      两块用的是同一份数据，判断哪天命中的逻辑也是从那边借的。 */
   const TAGSTYLE = cfg.tagStyle || {};
+  const CATS = cfg.ledgerCats || [];
+  const catOf = id => CATS.find(c => c.id === id) || CATS[CATS.length - 1];
   let events = [];
+  /* 清单和账本也是按天存的。日历是这个工作台上唯一按时间铺开的地方，
+     所以点开一天就该看到那天的全部，而不是只有心情。 */
+  let todos = [];
+  let todoDone = {};
+  let spends = [];
   const src = cfg.moodApi ? new ApiSource(cfg) : new LocalSource(store);
 
   /* 抽屉挂在 body 上。放在板块里会被公路和洁哥那两层盖住 ——
@@ -144,6 +161,7 @@ export function mountCalendar(root, { cfg, store }) {
         <div class="cal-week"></div>
         <div class="cal-grid"></div>
       </div>
+      <div class="cal-recap"></div>
     </div>
   `;
 
@@ -152,12 +170,17 @@ export function mountCalendar(root, { cfg, store }) {
   const elYear   = root.querySelector('.cal-myear');
   const elWeek   = root.querySelector('.cal-week');
   const elGrid   = root.querySelector('.cal-grid');
+  const elRecap  = root.querySelector('.cal-recap');
 
   elWeek.innerHTML = WEEK_EN.map(w => `<span>${w}</span>`).join('');
 
   /* 倒计时那边改了就重画。另外切回这一页时也重读一次，
      数据万一是别处改的（比如换了台设备同步过来）也能跟上。 */
   addEventListener('dock:dates', () => draw());
+  addEventListener('dock:todo', e => {
+    if (e.detail && e.detail.src === 'calendar') return;
+    draw();
+  });
   const panel = root.closest('.panel');
   if (panel) {
     new MutationObserver(() => {
@@ -188,7 +211,10 @@ export function mountCalendar(root, { cfg, store }) {
     const start = addDays(first, -first.getDay());          // 补齐到周日
     const end = addDays(start, 41);                          // 六行
     const days = await src.range(start, end);
-    events = await store.get('dates', 'items', []);
+    events   = await store.get('dates', 'items', []);
+    todos    = await store.get('todo', 'items', []);
+    todoDone = await store.get('todo', 'done', {});
+    spends   = await store.get('ledger', 'items', []);
 
     /* 记过经期就一直显示这一层；一次都没记过的人（比如男生）看不到它。
        翻到没有数据的月份也不会闪一下就消失。 */
@@ -224,14 +250,14 @@ export function mountCalendar(root, { cfg, store }) {
         const tag = (hits[0].tags || [])[0];
         const st = TAGSTYLE[tag];
         flag = st && st.img
-          ? `<img class="cal-ev" src="./assets/pack/${st.img}.webp?v=77" alt="">`
+          ? `<img class="cal-ev" src="./assets/pack/${st.img}.webp?v=78" alt="">`
           : '<i class="cal-ev dot"></i>';
       }
 
       /* 心情缩到左上角，数字下面那一条留给标签 —— 标签是横的，
          占满格宽才认得出写的什么。 */
       const moodPip = rec.mood
-        ? `<img class="cal-mood" src="./assets/mood/${rec.mood}.webp?v=77" alt="">`
+        ? `<img class="cal-mood" src="./assets/mood/${rec.mood}.webp?v=78" alt="">`
         : '';
       cell.innerHTML = `
         ${moodPip}
@@ -242,6 +268,45 @@ export function mountCalendar(root, { cfg, store }) {
       elGrid.appendChild(cell);
     }
 
+    drawRecap(y, m, days);
+  }
+
+  /* ------------------------------------------------------- 这个月怎么样 */
+
+  /* 只统计这个月自己的日子，当月算到今天为止 ——
+     把还没到的日子算进完成率，看起来永远像是落下了一堆。 */
+  function drawRecap(y, m, days) {
+    const today = new Date();
+    const isNow = y === today.getFullYear() && m === today.getMonth();
+    const last = isNow ? today.getDate() : new Date(y, m + 1, 0).getDate();
+
+    let moodDays = 0, noteDays = 0, planned = 0, finished = 0;
+    for (let i = 1; i <= last; i++) {
+      const k = key(new Date(y, m, i));
+      const rec = days[k];
+      if (rec && rec.mood) moodDays++;
+      if (rec && rec.note) noteDays++;
+      const list = todoForDay(todos, k);
+      planned += list.length;
+      finished += list.filter(it => todoIsDone(todoDone, k, it.id)).length;
+    }
+
+    const spent = spends
+      .filter(r => {
+        const d = new Date(r.date + 'T00:00:00');
+        return d.getFullYear() === y && d.getMonth() === m;
+      })
+      .reduce((t, r) => t + (Number(r.amount) || 0), 0);
+
+    const bits = [];
+    if (moodDays) bits.push(`心情 <b>${moodDays}</b> 天`);
+    if (noteDays) bits.push(`写了 <b>${noteDays}</b> 天`);
+    if (planned)  bits.push(`清单 <b>${finished}/${planned}</b>`);
+    if (spent)    bits.push(`花了 <b>¥${money(spent)}</b>`);
+
+    elRecap.innerHTML = bits.length
+      ? bits.map(b => `<span>${b}</span>`).join('')
+      : '<span class="cal-recap-none">这个月还没记什么</span>';
   }
 
   /* --------------------------------------------------------- 当天的抽屉 */
@@ -256,55 +321,135 @@ export function mountCalendar(root, { cfg, store }) {
     return `<div class="cal-evline">${hits.map(h => {
       const st = TAGSTYLE[(h.tags || [])[0]];
       const pic = st && st.img
-        ? `<img src="./assets/pack/${st.img}.webp?v=77" alt="">` : '';
+        ? `<img src="./assets/pack/${st.img}.webp?v=78" alt="">` : '';
       return `<span>${pic}${h.name}</span>`;
     }).join('')}</div>`;
   }
 
-  function openSheet(k, rec) {
-    const picked = rec.mood || '';
-    elSheet.hidden = false;
-    elSheet.innerHTML = `
-      <div class="sheet-card">
-        <div class="sheet-date">${k}</div>
-        ${evLine(k)}
-        <div class="sheet-moods">
-          ${MOODS.map(mo => `
-            <button class="mood-pick ${picked === mo.id ? 'on' : ''}" data-mood="${mo.id}">
-              <img src="./assets/mood/${mo.id}.webp?v=77" alt="">
-              <span>${mo.name}</span>
-            </button>`).join('')}
-        </div>
-        <label class="sheet-field">
-          <span>这天</span>
-          <textarea id="sheetNote" rows="4" placeholder="想写就写，不写也行">${rec.note || ''}</textarea>
-        </label>
-        <div class="sheet-row">
-          <button class="sheet-btn ghost" id="sheetCancel">关掉</button>
-          <button class="sheet-btn" id="sheetSave">存下来</button>
+  /* 这天的清单。勾和加都在这儿就地生效 —— 只能看的话，
+     还是得退出去开另一块，那日历就仍旧只是一张画。 */
+  function todoBlock(k) {
+    const list = todoForDay(todos, k);
+    const ok = list.filter(it => todoIsDone(todoDone, k, it.id)).length;
+    return `
+      <div class="sh-sec">
+        <div class="sh-sec-h">清单${list.length ? `<b>${ok}/${list.length}</b>` : ''}</div>
+        ${list.map(it => {
+          const fin = todoIsDone(todoDone, k, it.id);
+          return `
+            <div class="sh-todo ${fin ? 'done' : ''}" data-todo="${it.id}">
+              <span class="sh-box"></span>
+              <span class="sh-t">${escapeHtml(it.text)}</span>
+              ${it.time ? `<span class="sh-time">${it.time}</span>` : ''}
+            </div>`;
+        }).join('') || '<p class="sh-none">这天没有事</p>'}
+        <div class="sh-add">
+          <input id="shAdd" type="text" placeholder="给这天加一项">
+          <button class="sh-add-btn" id="shAddBtn">加</button>
         </div>
       </div>`;
+  }
 
-    let mood = picked;
-    elSheet.querySelectorAll('.mood-pick').forEach(b => {
-      b.onclick = () => {
-        mood = mood === b.dataset.mood ? '' : b.dataset.mood;   // 再点一次取消
-        elSheet.querySelectorAll('.mood-pick').forEach(x =>
-          x.classList.toggle('on', x.dataset.mood === mood));
-      };
-    });
+  /* 这天花了什么。只显示，不在这儿改 —— 改一笔要挑分类、改日期，
+     那是账本表单的事，塞进来会把这个抽屉撑成第二个账本。 */
+  function spendBlock(k) {
+    const rows = spends.filter(r => r.date === k);
+    if (!rows.length) return '';
+    const total = rows.reduce((t, r) => t + (Number(r.amount) || 0), 0);
+    return `
+      <div class="sh-sec">
+        <div class="sh-sec-h">花销<b>¥${money(total)}</b></div>
+        ${rows.map(r => {
+          const c = catOf(r.cat);
+          const icon = c ? `<img src="./assets/cat/${c.icon}.webp?v=78" alt="">` : '';
+          return `
+            <div class="sh-led">
+              ${icon}
+              <span class="sh-t">${escapeHtml(r.note || (c ? c.name : ''))}</span>
+              <span class="sh-amt">¥ ${money(r.amount)}</span>
+            </div>`;
+        }).join('')}
+      </div>`;
+  }
 
-    elSheet.querySelector('#sheetCancel').onclick = () => { elSheet.hidden = true; };
-    elSheet.onclick = e => { if (e.target === elSheet) elSheet.hidden = true; };
+  function openSheet(k, rec) {
+    let mood = rec.mood || '';
+    let note = rec.note || '';
 
-    elSheet.querySelector('#sheetSave').onclick = async () => {
-      await src.save(k, {
-        mood: mood || null,
-        note: elSheet.querySelector('#sheetNote').value.trim() || null
+    elSheet.hidden = false;
+
+    function render() {
+      elSheet.innerHTML = `
+        <div class="sheet-card">
+          <div class="sheet-date">${k}</div>
+          ${evLine(k)}
+          ${todoBlock(k)}
+          ${spendBlock(k)}
+          <div class="sheet-moods">
+            ${MOODS.map(mo => `
+              <button class="mood-pick ${mood === mo.id ? 'on' : ''}" data-mood="${mo.id}">
+                <img src="./assets/mood/${mo.id}.webp?v=78" alt="">
+                <span>${mo.name}</span>
+              </button>`).join('')}
+          </div>
+          <label class="sheet-field">
+            <span>这天</span>
+            <textarea id="sheetNote" rows="4" placeholder="想写就写，不写也行">${escapeHtml(note)}</textarea>
+          </label>
+          <div class="sheet-row">
+            <button class="sheet-btn ghost" id="sheetCancel">关掉</button>
+            <button class="sheet-btn" id="sheetSave">存下来</button>
+          </div>
+        </div>`;
+
+      /* 写到一半勾了个清单，重画之后那段字得还在 */
+      const area = elSheet.querySelector('#sheetNote');
+      area.oninput = () => { note = area.value; };
+
+      elSheet.querySelectorAll('.mood-pick').forEach(b => {
+        b.onclick = () => {
+          mood = mood === b.dataset.mood ? '' : b.dataset.mood;   // 再点一次取消
+          elSheet.querySelectorAll('.mood-pick').forEach(x =>
+            x.classList.toggle('on', x.dataset.mood === mood));
+        };
       });
-      elSheet.hidden = true;
-      draw();
-    };
+
+      elSheet.querySelectorAll('[data-todo]').forEach(row => {
+        row.onclick = () => toggleTodo(k, Number(row.dataset.todo)).then(render);
+      });
+
+      const input = elSheet.querySelector('#shAdd');
+      const add = async () => {
+        const t = input.value.trim();
+        if (!t) return;
+        todos.push({ id: Date.now(), text: t, time: '', daily: false, date: k });
+        await store.set('todo', 'items', todos);
+        announceTodo('calendar');
+        render();
+      };
+      elSheet.querySelector('#shAddBtn').onclick = add;
+      input.onkeydown = e => { if (e.key === 'Enter') add(); };
+
+      elSheet.querySelector('#sheetCancel').onclick = () => { elSheet.hidden = true; draw(); };
+
+      elSheet.querySelector('#sheetSave').onclick = async () => {
+        await src.save(k, { mood: mood || null, note: note.trim() || null });
+        elSheet.hidden = true;
+        draw();
+      };
+    }
+
+    elSheet.onclick = e => { if (e.target === elSheet) { elSheet.hidden = true; draw(); } };
+    render();
+  }
+
+  async function toggleTodo(k, id) {
+    const list = todoDone[k] || (todoDone[k] = []);
+    const i = list.indexOf(id);
+    if (i >= 0) list.splice(i, 1); else list.push(id);
+    if (!list.length) delete todoDone[k];
+    await store.set('todo', 'done', todoDone);
+    announceTodo('calendar');
   }
 
   draw();

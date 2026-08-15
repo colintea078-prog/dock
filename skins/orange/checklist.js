@@ -1,5 +1,5 @@
-import { escapeHtml } from './util.js?v=77';
-import { makeFab } from './fab.js?v=77';
+import { escapeHtml } from './util.js?v=78';
+import { makeFab } from './fab.js?v=78';
 
 /* 清单。按天看，打钩划掉。
  *
@@ -19,6 +19,26 @@ const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); r
 const midnight = d => new Date(d.getFullYear(), d.getMonth(), d.getDate());
 
 const SPAN = 7;                        // 前后各看几天
+
+/* 这两个是「某天该做什么、做完没有」的唯一说法。日历那边也要问同样的问题，
+   所以从这里导出去 —— 两处各写一遍的话，早晚有一处会漏掉「每天」这种情况。 */
+export function todoForDay(items, dayKey) {
+  return items
+    .filter(it => it.daily ? it.date <= dayKey : it.date === dayKey)
+    .sort((a, b) => {
+      /* 有时间的排前面并按时间走，没时间的按记的先后 */
+      if (a.time && b.time) return a.time < b.time ? -1 : 1;
+      if (a.time) return -1;
+      if (b.time) return 1;
+      return a.id - b.id;
+    });
+}
+
+export const todoIsDone = (done, dayKey, id) => (done[dayKey] || []).includes(id);
+
+/* 清单被谁改了都喊一声，另一块跟着重读。detail.src 是为了不把自己喊醒。 */
+export const announceTodo = src =>
+  dispatchEvent(new CustomEvent('dock:todo', { detail: { src } }));
 
 export function mountChecklist(root, { cfg, store }) {
   let items = [];
@@ -88,23 +108,19 @@ export function mountChecklist(root, { cfg, store }) {
     })();
   }
 
-  const saveItems = () => store.set('todo', 'items', items);
-  const saveDone  = () => store.set('todo', 'done', done);
+  const saveItems = async () => { await store.set('todo', 'items', items); announceTodo('checklist'); };
+  const saveDone  = async () => { await store.set('todo', 'done', done);   announceTodo('checklist'); };
 
-  /* 这一天该出现哪些条目 */
-  function forDay(dayKey) {
-    return items
-      .filter(it => it.daily ? it.date <= dayKey : it.date === dayKey)
-      .sort((a, b) => {
-        /* 有时间的排前面并按时间走，没时间的按记的先后 */
-        if (a.time && b.time) return a.time < b.time ? -1 : 1;
-        if (a.time) return -1;
-        if (b.time) return 1;
-        return a.id - b.id;
-      });
-  }
+  const forDay = dayKey => todoForDay(items, dayKey);
+  const isDone = (dayKey, id) => todoIsDone(done, dayKey, id);
 
-  const isDone = (dayKey, id) => (done[dayKey] || []).includes(id);
+  /* 日历那边也能勾、也能加。改完了这里重读一遍，两块不会各说各的。 */
+  addEventListener('dock:todo', async e => {
+    if (e.detail && e.detail.src === 'checklist') return;
+    items = await store.get('todo', 'items', []);
+    done  = await store.get('todo', 'done', {});
+    draw();
+  });
 
   async function toggle(dayKey, id) {
     const list = done[dayKey] || (done[dayKey] = []);

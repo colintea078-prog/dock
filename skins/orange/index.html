@@ -5,12 +5,12 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <title>直到大地变成一颗酸橙</title>
 <meta name="theme-color" content="#5b8ed6">
-<link rel="manifest" href="./manifest.json?v=84">
+<link rel="manifest" href="./manifest.json?v=85">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="酸橙">
-<link rel="apple-touch-icon" href="./assets/icons/icon-180.png?v=84">
+<link rel="apple-touch-icon" href="./assets/icons/icon-180.png?v=85">
 <style>
   /* 拉丁字体自带，两个系统才长一样。中文仍旧交给系统。
      四款都在仓库里，换一个只用改下面 --num 里的第一个名字：
@@ -48,7 +48,7 @@
   /* 背景图：等比裁剪填满，横图放到竖屏上会裁掉左右两边 */
   #bg{
     position:absolute;inset:0;z-index:-2;
-    background:url('./assets/bg.webp?v=84') center center / cover no-repeat;
+    background:url('./assets/bg.webp?v=85') center center / cover no-repeat;
   }
   /* 底部压一层淡雾，让白色的路和信封不至于糊在水面的碎光里 */
   #haze{
@@ -441,6 +441,23 @@
   .sheet-btn.ghost{background:rgba(120,160,200,.18);color:#4a6b90}
 
   /* ---- 日期备忘录 ---- */
+  /* 提醒开关。没配服务器的时候整行不存在，公开版看不到。 */
+  .dt-push{
+    display:flex;align-items:center;gap:10px;
+    margin-bottom:10px;padding:9px 14px;border-radius:16px;
+    background:rgba(255,255,255,.3);border:1px solid rgba(255,255,255,.45);
+    backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+    font-family:var(--round);
+  }
+  .dt-push[hidden]{display:none}
+  .dt-push-say{flex:1;font-size:12.5px;color:#2f4a6d;line-height:1.6}
+  .dt-push-btn{
+    flex:none;border:0;cursor:pointer;font:inherit;font-size:12.5px;
+    color:#fff;background:var(--sky);border-radius:20px;padding:6px 16px;
+  }
+  .dt-push-btn.off{background:rgba(120,160,200,.3);color:#3d6b8c}
+  .dt-push-btn:disabled{opacity:.5}
+
   .dt-tags{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 16px;padding-top:4px}
   .dt-tag{
     font-family:var(--round);font-size:12.5px;padding:6px 14px;border-radius:20px;
@@ -487,7 +504,7 @@
   }
   .dt-card::before{
     content:"";position:absolute;inset:0;z-index:0;
-    background:url('./assets/pack/frame.webp?v=84') center/100% 100% no-repeat;
+    background:url('./assets/pack/frame.webp?v=85') center/100% 100% no-repeat;
     opacity:.6;
   }
   .dt-main,.dt-right{position:relative;z-index:1}
@@ -870,7 +887,7 @@
      不用动图 WebP —— iOS 上它时灵时不灵，这个到处都能播。 */
   #angSprite{
     width:100%;aspect-ratio:1/1;
-    background-image:url('./assets/ride_sheet.webp?v=84');
+    background-image:url('./assets/ride_sheet.webp?v=85');
     background-repeat:no-repeat;
     background-size:500% 100%;
     /* jump-none 才会取到 0/25/50/75/100 这五个位置。
@@ -976,7 +993,7 @@
 
   <div id="deco"></div>
 
-  <img id="title" src="./assets/title.webp?v=84" alt="直到大地变成一颗酸橙">
+  <img id="title" src="./assets/title.webp?v=85" alt="直到大地变成一颗酸橙">
 
 
   <div id="ang"><div id="angFlip"><div id="angSprite" role="img" aria-label="安洁莉娜"></div></div></div>
@@ -995,20 +1012,20 @@
 
 /* 存储走 dock 那一层，跟别的应用同一套。
    现在是本地实现，以后换成接口版，这里一行都不用改。 */
-import { LocalStore } from '../../core/storage.js?v=84';
+import { LocalStore } from '../../core/storage.js?v=85';
 const store = new LocalStore();
 
 /* 有 config.local.js 就用它，没有就用公开那份。
    缺哪个字段就补哪个，不用整份照抄。 */
-import baseConfig from './config.js?v=84';
-import { mountCalendar } from './calendar.js?v=84';
-import { mountDates } from './dates.js?v=84';
-import { mountDeco } from './deco.js?v=84';
-import { mountLedger } from './ledger.js?v=84';
-import { mountChecklist } from './checklist.js?v=84';
+import baseConfig from './config.js?v=85';
+import { mountCalendar } from './calendar.js?v=85';
+import { mountDates } from './dates.js?v=85';
+import { mountDeco } from './deco.js?v=85';
+import { mountLedger } from './ledger.js?v=85';
+import { mountChecklist } from './checklist.js?v=85';
 let CFG = baseConfig;
 try {
-  const local = (await import('./config.local.js?v=84')).default;
+  const local = (await import('./config.local.js?v=85')).default;
   CFG = { ...baseConfig, ...local };
 } catch { /* 没有本地配置，用公开版 */ }
 
@@ -1091,7 +1108,7 @@ function makeLetters() {
     el.className = 'letter';
     const icon = (CFG.stopIcons && CFG.stopIcons[i]) || 'letter.webp';
     const name = (CFG.panels[i] && CFG.panels[i].name) || '';
-    el.innerHTML = `<img src="./assets/${icon}?v=84" alt="${name}">`;
+    el.innerHTML = `<img src="./assets/${icon}?v=85" alt="${name}">`;
 
     /* 名字单独一层，钉在站点上，不放进信封里 ——
        信封一直在飘，装在里面的东西会被一起带着走，
@@ -1256,7 +1273,7 @@ CFG.panels.forEach((p, i) => {
    不然改了它浏览器可能还在跑旧的。 */
 if ('serviceWorker' in navigator) {
   addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js?v=84', { updateViaCache: 'none' })
+    navigator.serviceWorker.register('./sw.js?v=85', { updateViaCache: 'none' })
       .catch(e => console.warn('sw register failed', e));
   });
 }

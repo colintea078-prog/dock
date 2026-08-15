@@ -1,4 +1,5 @@
-import { makeFab } from './fab.js?v=84';
+import { makeFab } from './fab.js?v=85';
+import { pushState, enablePush, disablePush, syncDates } from './push.js?v=85';
 /* 日期备忘录。
  *
  * 每条记一件事：名字、发生那天的阳历日期、按阳历还是阴历过、一个标签。
@@ -100,7 +101,7 @@ export function mountDates(root, { cfg, store }) {
   const col = t => (STYLE[t] && STYLE[t].color) || 'rgba(255,255,255,.6)';
   /* 有贴纸就贴贴纸 —— 贴纸上写着字，不用再写一遍。没有就退回带底色的文字。 */
   const sticker = (t, cls) => img(t)
-    ? `<img class="${cls} pic" src="./assets/pack/${img(t)}.webp?v=84" alt="${escapeHtml(t)}">`
+    ? `<img class="${cls} pic" src="./assets/pack/${img(t)}.webp?v=85" alt="${escapeHtml(t)}">`
     : `<span class="${cls}" style="--c:${col(t)}">${escapeHtml(t)}</span>`;
   let filter = new Set();
   let items = [];
@@ -111,11 +112,13 @@ export function mountDates(root, { cfg, store }) {
     : '先存着 —— 推送还没接上，接上之后就按这里选的发。';
 
   root.innerHTML = `
+    <div class="dt-push" hidden></div>
     <div class="dt-tags"></div>
     <div class="dt-frame"><div class="dt-list"></div></div>
   `;
   const elTags = root.querySelector('.dt-tags');
   const elList = root.querySelector('.dt-list');
+  const elPush = root.querySelector('.dt-push');
 
   /* 表单和那个加号都挂到最外层。放在板块里会被公路和洁哥压住 ——
      板块自带 z-index，等于给自己画了个圈，里面再高也跳不出去。 */
@@ -158,6 +161,7 @@ export function mountDates(root, { cfg, store }) {
     }
     if (migrated) await store.set('dates', 'items', items);
     draw();
+    drawPush();
   }
 
   async function persist() {
@@ -165,6 +169,47 @@ export function mountDates(root, { cfg, store }) {
     draw();
     /* 日历那边也在用这份数据，存完喊一声，省得要刷新页面才看得到 */
     dispatchEvent(new CustomEvent('dock:dates'));
+    /* 开了提醒的话，让服务器那份也跟上。推送失败不该拦住存东西，所以只记一句。 */
+    syncDates(cfg, items).catch(e => console.warn('提醒同步失败：', e));
+  }
+
+  /* --------------------------------------------------------------- 提醒开关 */
+
+  /* 没配服务器就整行不存在 —— 公开版不该一进来就问"允许通知吗"。 */
+  async function drawPush() {
+    const st = await pushState(cfg);
+    if (st === 'unsupported') { elPush.hidden = true; return; }
+    elPush.hidden = false;
+
+    if (st === 'need-install') {
+      elPush.innerHTML = '<span class="dt-push-say">想要到期提醒的话，' +
+        '先把这个页面添加到主屏幕，再从主屏打开 —— iOS 只给装到主屏的那份发通知。</span>';
+      return;
+    }
+    if (st === 'denied') {
+      elPush.innerHTML = '<span class="dt-push-say">通知被挡住了。' +
+        '去系统设置里把这个应用的通知打开，再回来。</span>';
+      return;
+    }
+
+    const on = st === 'on';
+    elPush.innerHTML = `
+      <span class="dt-push-say">${on ? '到期提醒开着' : '到期提醒还没开'}</span>
+      <button class="dt-push-btn ${on ? 'off' : ''}">${on ? '关掉' : '打开'}</button>`;
+
+    /* 权限必须在一次真实点击里要 —— 页面自己弹的会被直接拒掉，而且不再问第二次。 */
+    elPush.querySelector('.dt-push-btn').onclick = async e => {
+      const b = e.currentTarget;
+      b.disabled = true;
+      try {
+        if (on) await disablePush(cfg);
+        else { await enablePush(cfg); await syncDates(cfg, items); }
+      } catch (err) {
+        elPush.innerHTML = `<span class="dt-push-say">没能打开：${escapeHtml(err.message)}</span>`;
+        return;
+      }
+      drawPush();
+    };
   }
 
   function draw() {
@@ -183,7 +228,7 @@ export function mountDates(root, { cfg, store }) {
         b.className = 'dt-tag' + (filter.has(t) ? ' on' : '');
         if (img(t)) {
           b.classList.add('pic');
-          b.innerHTML = `<img src="./assets/pack/${img(t)}.webp?v=84" alt="${escapeHtml(t)}">`;
+          b.innerHTML = `<img src="./assets/pack/${img(t)}.webp?v=85" alt="${escapeHtml(t)}">`;
         } else {
           b.style.setProperty('--c', col(t));
           b.textContent = t;
@@ -288,7 +333,7 @@ export function mountDates(root, { cfg, store }) {
               const on = (it.tags || []).includes(t) ? 'on' : '';
               return img(t)
                 ? `<button class="dt-opt pic ${on}" data-tag="${t}">
-                     <img src="./assets/pack/${img(t)}.webp?v=84" alt="${escapeHtml(t)}"></button>`
+                     <img src="./assets/pack/${img(t)}.webp?v=85" alt="${escapeHtml(t)}"></button>`
                 : `<button class="dt-opt ${on}" data-tag="${t}" style="--c:${col(t)}">${escapeHtml(t)}</button>`;
             }).join('')}
           </div>

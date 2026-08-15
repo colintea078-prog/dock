@@ -3,7 +3,7 @@
  * 改这个文件必须动 VERSION，否则浏览器认不出有新版本，
  * 会一直用旧缓存桶里的东西。
  */
-const VERSION = 'orange-v1';
+const VERSION = 'orange-v2';
 const CACHE = VERSION;
 
 /* 装的时候先存下外壳。逐个 add，某一个 404 不至于让整次安装失败。 */
@@ -14,8 +14,11 @@ const SHELL = [
   './calendar.js',
   './dates.js',
   './ledger.js',
+  './checklist.js',
   './deco.js',
   './fab.js',
+  './push.js',
+  './util.js',
   './manifest.json',
   '../../core/storage.js',
   './assets/bg.webp',
@@ -54,6 +57,39 @@ function keep(req, res) {
   }
   return res;
 }
+
+/* ------------------------------------------------------------------ 推送 */
+
+/* 页面关着的时候，能被叫醒的只有这里。服务器发什么就显示什么，
+   内容一律当数据看，不往 innerHTML 之类的地方送。 */
+self.addEventListener('push', e => {
+  let d = {};
+  try { d = e.data ? e.data.json() : {}; } catch { d = { body: e.data && e.data.text() }; }
+
+  const title = d.title || '该看一眼了';
+  e.waitUntil(self.registration.showNotification(title, {
+    body: d.body || '',
+    icon: './assets/icons/icon-192.png',
+    badge: './assets/icons/icon-192.png',
+    tag: d.tag || 'dock',            // 同一条日子重复推时就地替换，不堆一叠
+    data: { url: d.url || './' }
+  }));
+});
+
+/* 点通知：已经开着就切过去，没开着才新开一个 */
+self.addEventListener('notificationclick', e => {
+  e.notification.close();
+  const target = new URL((e.notification.data && e.notification.data.url) || './',
+                         self.location.href).href;
+  e.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
+      for (const c of list) {
+        if (c.url.startsWith(self.registration.scope) && 'focus' in c) return c.focus();
+      }
+      return self.clients.openWindow(target);
+    })
+  );
+});
 
 self.addEventListener('fetch', e => {
   const req = e.request;

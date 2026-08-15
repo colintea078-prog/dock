@@ -1,4 +1,4 @@
-import { makeFab } from './fab.js?v=82';
+import { makeFab } from './fab.js?v=83';
 /* 日期备忘录。
  *
  * 每条记一件事：名字、发生那天的阳历日期、按阳历还是阴历过、一个标签。
@@ -89,7 +89,7 @@ export function mountDates(root, { cfg, store }) {
   const col = t => (STYLE[t] && STYLE[t].color) || 'rgba(255,255,255,.6)';
   /* 有贴纸就贴贴纸 —— 贴纸上写着字，不用再写一遍。没有就退回带底色的文字。 */
   const sticker = (t, cls) => img(t)
-    ? `<img class="${cls} pic" src="./assets/pack/${img(t)}.webp?v=82" alt="${escapeHtml(t)}">`
+    ? `<img class="${cls} pic" src="./assets/pack/${img(t)}.webp?v=83" alt="${escapeHtml(t)}">`
     : `<span class="${cls}" style="--c:${col(t)}">${escapeHtml(t)}</span>`;
   let filter = new Set();
   let items = [];
@@ -167,7 +167,7 @@ export function mountDates(root, { cfg, store }) {
         b.className = 'dt-tag' + (filter.has(t) ? ' on' : '');
         if (img(t)) {
           b.classList.add('pic');
-          b.innerHTML = `<img src="./assets/pack/${img(t)}.webp?v=82" alt="${escapeHtml(t)}">`;
+          b.innerHTML = `<img src="./assets/pack/${img(t)}.webp?v=83" alt="${escapeHtml(t)}">`;
         } else {
           b.style.setProperty('--c', col(t));
           b.textContent = t;
@@ -220,7 +220,10 @@ export function mountDates(root, { cfg, store }) {
           <span class="dt-sub">${escapeHtml(sub)}</span>
         </span>
         <span class="dt-right">
-          <span class="dt-chips">${(it.tags || []).map(t => sticker(t, 'dt-chip')).join('')}</span>
+          <!-- 卡片上只贴第一张。每张贴纸六十来像素宽，挂两张就是一百二，
+               名字那边一行只剩十个字 —— 上下叠也救不了，宽度是由最宽的那张定的。
+               其余的标签点开这条就能看到，筛选也照样用得上。 -->
+          <span class="dt-chips">${(it.tags || []).slice(0, 1).map(t => sticker(t, 'dt-chip')).join('')}</span>
           <span class="dt-days">${countdownText(days)}</span>
         </span>`;
       card.onclick = () => openForm(it);
@@ -269,7 +272,7 @@ export function mountDates(root, { cfg, store }) {
               const on = (it.tags || []).includes(t) ? 'on' : '';
               return img(t)
                 ? `<button class="dt-opt pic ${on}" data-tag="${t}">
-                     <img src="./assets/pack/${img(t)}.webp?v=82" alt="${escapeHtml(t)}"></button>`
+                     <img src="./assets/pack/${img(t)}.webp?v=83" alt="${escapeHtml(t)}"></button>`
                 : `<button class="dt-opt ${on}" data-tag="${t}" style="--c:${col(t)}">${escapeHtml(t)}</button>`;
             }).join('')}
           </div>

@@ -4,9 +4,13 @@
  *   { a:'u23', x:0.12, y:0.18, w:64, o:.85, r:-4 }
  *   a 素材名，x/y 是中心点占屏幕宽高的比例，w 宽度像素，o 透明度，r 旋转
  *
- * 按住铅笔进编辑模式：拖着挪、加、删、改大小和角度，随手就存。
+ * 编辑模式：拖着挪、加、删、改大小和角度，随手就存。
  * 存在这台设备上，所以每个人的首页可以长得不一样。
  * 「复制排版」会把当前这份 JSON 拷走，想写死进配置就用它。
+ *
+ * 那支铅笔平时不出现 —— 排版是布置一次的事，按钮却要一直占着首页。
+ * 要用的时候长按标题一秒半，跟开着一个按钮的效果一样，只是不摆在明面上。
+ * cfg.decoEdit 为真才把铅笔显示出来。
  */
 
 const ALL = [
@@ -94,25 +98,39 @@ export function mountDeco(box, { cfg, store }) {
     <button data-do="done" class="prim">完成</button>`;
   document.body.appendChild(bar);
 
-  const pen = document.createElement('button');
-  pen.className = 'dc-pen';
-  pen.textContent = '✎';
-  pen.setAttribute('aria-label', '排版');
-  document.body.appendChild(pen);
+  let pen = null;
+  if (cfg && cfg.decoEdit === true) {
+    pen = document.createElement('button');
+    pen.className = 'dc-pen';
+    pen.textContent = '✎';
+    pen.setAttribute('aria-label', '排版');
+    pen.onclick = () => setEditing(true);
+    document.body.appendChild(pen);
+  }
+
+  /* 没有铅笔的时候的入口：长按标题。手机上也够得着，首页上又看不见。 */
+  const title = document.getElementById('title');
+  if (title) {
+    let timer = null;
+    const stop = () => { clearTimeout(timer); timer = null; };
+    title.addEventListener('pointerdown', () => {
+      timer = setTimeout(() => { stop(); setEditing(true); }, 1500);
+    });
+    ['pointerup', 'pointercancel', 'pointerleave'].forEach(t =>
+      title.addEventListener(t, stop));
+  }
 
   const picker = document.createElement('div');
   picker.className = 'sheet';
   picker.hidden = true;
   document.body.appendChild(picker);
 
-  pen.onclick = () => setEditing(true);
-
   function setEditing(on) {
     editing = on;
     picked = -1;
     document.body.classList.toggle('editing', on);
     bar.hidden = !on;
-    pen.hidden = on;
+    if (pen) pen.hidden = on;
     render();
   }
 
@@ -181,7 +199,7 @@ export function mountDeco(box, { cfg, store }) {
   /* 进板块时铅笔跟着拼贴一起藏起来 */
   return {
     setVisible(v) {
-      pen.hidden = !v || editing;
+      if (pen) pen.hidden = !v || editing;
       if (!v && editing) setEditing(false);
     }
   };

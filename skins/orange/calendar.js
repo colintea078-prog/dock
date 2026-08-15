@@ -10,8 +10,8 @@
  * 不需要它的人不用先被问一句"你要不要关掉这个"。
  */
 
-import { occursOn } from './dates.js?v=80';
-import { todoForDay, todoIsDone, announceTodo } from './checklist.js?v=80';
+import { occursOn } from './dates.js?v=81';
+import { todoForDay, todoIsDone, announceTodo } from './checklist.js?v=81';
 
 const WEEK_EN = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
 const MONTH_EN = ['January', 'February', 'March', 'April', 'May', 'June',
@@ -264,7 +264,7 @@ export function mountCalendar(root, { cfg, store }) {
         const tag = (hits[0].tags || [])[0];
         const st = TAGSTYLE[tag];
         flag = st && st.img
-          ? `<img class="cal-ev" src="./assets/pack/${st.img}.webp?v=80" alt="">`
+          ? `<img class="cal-ev" src="./assets/pack/${st.img}.webp?v=81" alt="">`
           : '<i class="cal-ev dot"></i>';
       }
 
@@ -340,7 +340,7 @@ export function mountCalendar(root, { cfg, store }) {
     return `<div class="cal-evline">${hits.map(h => {
       const st = TAGSTYLE[(h.tags || [])[0]];
       const pic = st && st.img
-        ? `<img src="./assets/pack/${st.img}.webp?v=80" alt="">` : '';
+        ? `<img src="./assets/pack/${st.img}.webp?v=81" alt="">` : '';
       return `<span>${pic}${h.name}</span>`;
     }).join('')}</div>`;
   }
@@ -380,7 +380,7 @@ export function mountCalendar(root, { cfg, store }) {
         <div class="sh-sec-h">花销<b>¥${money(total)}</b></div>
         ${rows.map(r => {
           const c = catOf(r.cat);
-          const icon = c ? `<img src="./assets/cat/${c.icon}.webp?v=80" alt="">` : '';
+          const icon = c ? `<img src="./assets/cat/${c.icon}.webp?v=81" alt="">` : '';
           return `
             <div class="sh-led">
               ${icon}

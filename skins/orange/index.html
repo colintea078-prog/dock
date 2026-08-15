@@ -5,12 +5,12 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <title>直到大地变成一颗酸橙</title>
 <meta name="theme-color" content="#5b8ed6">
-<link rel="manifest" href="./manifest.json?v=70">
+<link rel="manifest" href="./manifest.json?v=71">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="酸橙">
-<link rel="apple-touch-icon" href="./assets/icons/icon-192.png?v=70">
+<link rel="apple-touch-icon" href="./assets/icons/icon-192.png?v=71">
 <style>
   /* 拉丁字体自带，两个系统才长一样。中文仍旧交给系统。
      四款都在仓库里，换一个只用改下面 --num 里的第一个名字：
@@ -48,7 +48,7 @@
   /* 背景图：等比裁剪填满，横图放到竖屏上会裁掉左右两边 */
   #bg{
     position:absolute;inset:0;z-index:-2;
-    background:url('./assets/bg.webp?v=70') center center / cover no-repeat;
+    background:url('./assets/bg.webp?v=71') center center / cover no-repeat;
   }
   /* 底部压一层淡雾，让白色的路和信封不至于糊在水面的碎光里 */
   #haze{
@@ -435,7 +435,7 @@
     display:flex;align-items:center;gap:10px;
     width:100%;aspect-ratio:1000/322;text-align:left;
     border:0;border-radius:20px;overflow:hidden;
-    background:url('./assets/pack/frame.webp?v=70') center/100% 100% no-repeat;
+    background:url('./assets/pack/frame.webp?v=71') center/100% 100% no-repeat;
     padding:0 8%;cursor:pointer;
     box-shadow:0 6px 16px rgba(40,90,140,.18);
   }
@@ -745,7 +745,7 @@
      不用动图 WebP —— iOS 上它时灵时不灵，这个到处都能播。 */
   #angSprite{
     width:100%;aspect-ratio:1/1;
-    background-image:url('./assets/ride_sheet.webp?v=70');
+    background-image:url('./assets/ride_sheet.webp?v=71');
     background-repeat:no-repeat;
     background-size:500% 100%;
     /* jump-none 才会取到 0/25/50/75/100 这五个位置。
@@ -754,6 +754,35 @@
     animation:ride 1s steps(5,jump-none) infinite;
   }
   @keyframes ride{from{background-position-x:0%}to{background-position-x:100%}}
+
+  /* 公路 */
+  /* 贴着屏幕底边，只给 iPhone 那道home横条让出位置 */
+  #roadWrap{position:absolute;left:0;right:0;z-index:5;bottom:calc(env(safe-area-inset-bottom) + 4px);height:30%;pointer-events:none}
+  #road{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+  .road-line{fill:none;stroke:#fff;stroke-linecap:round}
+  .road-glow{stroke-width:11;opacity:.28;filter:blur(5px)}
+  .road-main{stroke-width:3.2;opacity:.95}
+  .road-dash{stroke-width:2;opacity:.55;stroke-dasharray:2 15}
+
+  /* 信封 */
+  .letter{
+    position:absolute;z-index:6;width:56px;margin-left:-28px;margin-top:-52px;
+    cursor:pointer;will-change:transform;
+    transition:transform .45s cubic-bezier(.34,1.4,.5,1),filter .3s ease;
+    filter:drop-shadow(0 3px 5px rgba(30,60,110,.25));
+  }
+  .letter img{width:100%;display:block;pointer-events:none}
+  /* 板块名字。独立一层，钉在站点上，跟信封无关，所以它不动。 */
+  .letter-name{
+    position:absolute;z-index:6;
+    transform:translateX(-50%);
+    margin-top:6px;white-space:nowrap;pointer-events:none;
+    font-family:var(--round);font-size:12.5px;letter-spacing:2px;
+    color:#fff;
+    text-shadow:0 1px 4px rgba(30,70,120,.6),0 0 10px rgba(30,70,120,.4);
+    opacity:0;transition:opacity .28s ease;
+  }
+  .letter-name.on{opacity:1}
 
   /* 公路 */
   /* 贴着屏幕底边，只给 iPhone 那道home横条让出位置 */
@@ -793,12 +822,6 @@
     0%,100%{transform:translateY(-26px) rotate(-3deg)}
     50%{transform:translateY(-36px) rotate(3deg)}
   }
-  /* 信封在飘，名字不飘：反着抵消掉外层的位移和旋转 */
-  .letter.up .letter-name{animation:steady 2.6s ease-in-out infinite}
-  @keyframes steady{
-    0%,100%{transform:translateX(-50%) translateY(26px) rotate(3deg)}
-    50%{transform:translateX(-50%) translateY(36px) rotate(-3deg)}
-  }
 </style>
 </head>
 <body>
@@ -828,7 +851,7 @@
 
   <div id="deco"></div>
 
-  <img id="title" src="./assets/title.webp?v=70" alt="直到大地变成一颗酸橙">
+  <img id="title" src="./assets/title.webp?v=71" alt="直到大地变成一颗酸橙">
 
 
   <div id="ang"><div id="angFlip"><div id="angSprite" role="img" aria-label="安洁莉娜"></div></div></div>
@@ -847,20 +870,20 @@
 
 /* 存储走 dock 那一层，跟别的应用同一套。
    现在是本地实现，以后换成接口版，这里一行都不用改。 */
-import { LocalStore } from '../../core/storage.js?v=70';
+import { LocalStore } from '../../core/storage.js?v=71';
 const store = new LocalStore();
 
 /* 有 config.local.js 就用它，没有就用公开那份。
    缺哪个字段就补哪个，不用整份照抄。 */
-import baseConfig from './config.js?v=70';
-import { mountCalendar } from './calendar.js?v=70';
-import { mountDates } from './dates.js?v=70';
-import { mountDeco } from './deco.js?v=70';
-import { mountLedger } from './ledger.js?v=70';
-import { mountNotes } from './notes.js?v=70';
+import baseConfig from './config.js?v=71';
+import { mountCalendar } from './calendar.js?v=71';
+import { mountDates } from './dates.js?v=71';
+import { mountDeco } from './deco.js?v=71';
+import { mountLedger } from './ledger.js?v=71';
+import { mountNotes } from './notes.js?v=71';
 let CFG = baseConfig;
 try {
-  const local = (await import('./config.local.js?v=70')).default;
+  const local = (await import('./config.local.js?v=71')).default;
   CFG = { ...baseConfig, ...local };
 } catch { /* 没有本地配置，用公开版 */ }
 
@@ -873,6 +896,7 @@ const pMain = document.getElementById('pMain');
 
 const STOPS = [0.13, 0.38, 0.63, 0.88];   // 四个站点在路上的位置
 const letters = [];
+const names = [];
 let stopPts = [];
 let active = -1;
 let busy = false;
@@ -915,6 +939,10 @@ function buildRoad() {
     el.style.left = stopPts[i].x + 'px';
     el.style.top  = stopPts[i].y + 'px';
   });
+  names.forEach((el, i) => {
+    el.style.left = stopPts[i].x + 'px';
+    el.style.top  = stopPts[i].y + 'px';
+  });
 }
 
 /* -1 表示回主页 */
@@ -938,10 +966,17 @@ function makeLetters() {
     el.className = 'letter';
     const icon = (CFG.stopIcons && CFG.stopIcons[i]) || 'letter.webp';
     const name = (CFG.panels[i] && CFG.panels[i].name) || '';
-    /* 名字挂在信封底下。信封浮起来时它才露出来，
-       正好落在信封和公路之间那道缝里。 */
-    el.innerHTML = `<img src="./assets/${icon}?v=70" alt="${name}">` +
-      `<span class="letter-name">${name}</span>`;
+    el.innerHTML = `<img src="./assets/${icon}?v=71" alt="${name}">`;
+
+    /* 名字单独一层，钉在站点上，不放进信封里 ——
+       信封一直在飘，装在里面的东西会被一起带着走，
+       而外层是绕自己中心转的，子元素在偏移位置上划的是一段弧，
+       靠反向动画补不回来。拿出来就彻底不动了。 */
+    const tag = document.createElement('span');
+    tag.className = 'letter-name';
+    tag.textContent = name;
+    stage.appendChild(tag);
+    names.push(tag);
     el.style.setProperty('--i', i);
     el.addEventListener('click', () => onLetter(i));
     stage.appendChild(el);
@@ -1046,9 +1081,11 @@ async function onLetter(i) {
   if (goingHome) {
     active = -1;
     letters[i].classList.remove('up');
+    names.forEach(el => el.classList.remove('on'));
   } else {
     letters.forEach(el => el.classList.remove('up'));
     letters[i].classList.add('up');
+    names.forEach((el, k) => el.classList.toggle('on', k === i));
     active = i;
   }
 
@@ -1094,7 +1131,7 @@ CFG.panels.forEach((p, i) => {
    不然改了它浏览器可能还在跑旧的。 */
 if ('serviceWorker' in navigator) {
   addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js?v=70', { updateViaCache: 'none' })
+    navigator.serviceWorker.register('./sw.js?v=71', { updateViaCache: 'none' })
       .catch(e => console.warn('sw register failed', e));
   });
 }

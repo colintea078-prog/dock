@@ -5,12 +5,12 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <title>直到大地变成一颗酸橙</title>
 <meta name="theme-color" content="#5b8ed6">
-<link rel="manifest" href="./manifest.json?v=78">
+<link rel="manifest" href="./manifest.json?v=79">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="酸橙">
-<link rel="apple-touch-icon" href="./assets/icons/icon-192.png?v=78">
+<link rel="apple-touch-icon" href="./assets/icons/icon-192.png?v=79">
 <style>
   /* 拉丁字体自带，两个系统才长一样。中文仍旧交给系统。
      四款都在仓库里，换一个只用改下面 --num 里的第一个名字：
@@ -48,7 +48,7 @@
   /* 背景图：等比裁剪填满，横图放到竖屏上会裁掉左右两边 */
   #bg{
     position:absolute;inset:0;z-index:-2;
-    background:url('./assets/bg.webp?v=78') center center / cover no-repeat;
+    background:url('./assets/bg.webp?v=79') center center / cover no-repeat;
   }
   /* 底部压一层淡雾，让白色的路和信封不至于糊在水面的碎光里 */
   #haze{
@@ -357,11 +357,11 @@
     align-items:center;
     margin-top:1px;
   }
-  /* 心情在左上角，之前 14 太小认不出画的是什么 */
-  .cal-mood{
-    position:absolute;top:0;left:1px;z-index:3;
-    width:21px;height:21px;object-fit:contain;
-    pointer-events:none;
+  /* 清单完成度，占的是心情图标腾出来的左上角。
+     没有清单的日子整个不画 —— 42 格里每格都有东西才是真的满。 */
+  .cal-ring{
+    position:absolute;top:2px;left:3px;z-index:3;
+    width:13px;height:13px;pointer-events:none;
   }
 
 
@@ -383,15 +383,6 @@
   }
   @keyframes rise{from{transform:scale(.96);opacity:.3}to{transform:none;opacity:1}}
   .sheet-date{font-size:13px;color:#5b7a9d;letter-spacing:1px;margin-bottom:14px}
-  .sheet-moods{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-bottom:16px}
-  .mood-pick{
-    border:1px solid transparent;background:transparent;border-radius:12px;
-    padding:6px 2px;cursor:pointer;display:flex;flex-direction:column;
-    align-items:center;gap:3px;font:inherit;
-  }
-  .mood-pick img{width:28px}
-  .mood-pick span{font-size:10px;color:#5b7a9d}
-  .mood-pick.on{background:#fff;border-color:rgba(120,160,200,.45)}
   /* 抽屉里的分段：这一天的清单和花销 */
   .sh-sec{margin-bottom:16px}
   .sh-sec-h{
@@ -496,7 +487,7 @@
   }
   .dt-card::before{
     content:"";position:absolute;inset:0;z-index:0;
-    background:url('./assets/pack/frame.webp?v=78') center/100% 100% no-repeat;
+    background:url('./assets/pack/frame.webp?v=79') center/100% 100% no-repeat;
     opacity:.6;
   }
   .dt-main,.dt-chips,.dt-days{position:relative;z-index:1}
@@ -873,7 +864,7 @@
      不用动图 WebP —— iOS 上它时灵时不灵，这个到处都能播。 */
   #angSprite{
     width:100%;aspect-ratio:1/1;
-    background-image:url('./assets/ride_sheet.webp?v=78');
+    background-image:url('./assets/ride_sheet.webp?v=79');
     background-repeat:no-repeat;
     background-size:500% 100%;
     /* jump-none 才会取到 0/25/50/75/100 这五个位置。
@@ -979,7 +970,7 @@
 
   <div id="deco"></div>
 
-  <img id="title" src="./assets/title.webp?v=78" alt="直到大地变成一颗酸橙">
+  <img id="title" src="./assets/title.webp?v=79" alt="直到大地变成一颗酸橙">
 
 
   <div id="ang"><div id="angFlip"><div id="angSprite" role="img" aria-label="安洁莉娜"></div></div></div>
@@ -998,20 +989,20 @@
 
 /* 存储走 dock 那一层，跟别的应用同一套。
    现在是本地实现，以后换成接口版，这里一行都不用改。 */
-import { LocalStore } from '../../core/storage.js?v=78';
+import { LocalStore } from '../../core/storage.js?v=79';
 const store = new LocalStore();
 
 /* 有 config.local.js 就用它，没有就用公开那份。
    缺哪个字段就补哪个，不用整份照抄。 */
-import baseConfig from './config.js?v=78';
-import { mountCalendar } from './calendar.js?v=78';
-import { mountDates } from './dates.js?v=78';
-import { mountDeco } from './deco.js?v=78';
-import { mountLedger } from './ledger.js?v=78';
-import { mountChecklist } from './checklist.js?v=78';
+import baseConfig from './config.js?v=79';
+import { mountCalendar } from './calendar.js?v=79';
+import { mountDates } from './dates.js?v=79';
+import { mountDeco } from './deco.js?v=79';
+import { mountLedger } from './ledger.js?v=79';
+import { mountChecklist } from './checklist.js?v=79';
 let CFG = baseConfig;
 try {
-  const local = (await import('./config.local.js?v=78')).default;
+  const local = (await import('./config.local.js?v=79')).default;
   CFG = { ...baseConfig, ...local };
 } catch { /* 没有本地配置，用公开版 */ }
 
@@ -1094,7 +1085,7 @@ function makeLetters() {
     el.className = 'letter';
     const icon = (CFG.stopIcons && CFG.stopIcons[i]) || 'letter.webp';
     const name = (CFG.panels[i] && CFG.panels[i].name) || '';
-    el.innerHTML = `<img src="./assets/${icon}?v=78" alt="${name}">`;
+    el.innerHTML = `<img src="./assets/${icon}?v=79" alt="${name}">`;
 
     /* 名字单独一层，钉在站点上，不放进信封里 ——
        信封一直在飘，装在里面的东西会被一起带着走，
@@ -1259,7 +1250,7 @@ CFG.panels.forEach((p, i) => {
    不然改了它浏览器可能还在跑旧的。 */
 if ('serviceWorker' in navigator) {
   addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js?v=78', { updateViaCache: 'none' })
+    navigator.serviceWorker.register('./sw.js?v=79', { updateViaCache: 'none' })
       .catch(e => console.warn('sw register failed', e));
   });
 }

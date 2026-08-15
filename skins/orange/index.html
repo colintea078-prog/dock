@@ -5,12 +5,12 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <title>直到大地变成一颗酸橙</title>
 <meta name="theme-color" content="#5b8ed6">
-<link rel="manifest" href="./manifest.json?v=73">
+<link rel="manifest" href="./manifest.json?v=74">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="酸橙">
-<link rel="apple-touch-icon" href="./assets/icons/icon-192.png?v=73">
+<link rel="apple-touch-icon" href="./assets/icons/icon-192.png?v=74">
 <style>
   /* 拉丁字体自带，两个系统才长一样。中文仍旧交给系统。
      四款都在仓库里，换一个只用改下面 --num 里的第一个名字：
@@ -48,7 +48,7 @@
   /* 背景图：等比裁剪填满，横图放到竖屏上会裁掉左右两边 */
   #bg{
     position:absolute;inset:0;z-index:-2;
-    background:url('./assets/bg.webp?v=73') center center / cover no-repeat;
+    background:url('./assets/bg.webp?v=74') center center / cover no-repeat;
   }
   /* 底部压一层淡雾，让白色的路和信封不至于糊在水面的碎光里 */
   #haze{
@@ -430,19 +430,34 @@
   .dt-list{display:flex;flex-direction:column;gap:10px}
   /* 每一条就是那张卡片本身。图是不透明的，中间本来就有奶白的芯，
      不用再补填充。四角圆一下，把图外面那点白边裁掉。 */
+  /* 画框单独放在一层伪元素上。透明度要拉低就得动这张图，
+     直接给卡片设 opacity 会把上面的字一起冲淡。
+     min-height 是给名字换行留的：名字占两行时框跟着长一点，
+     不然多出来的那行会被 aspect-ratio 锁死的高度裁掉。 */
   .dt-card{
+    position:relative;
     font-family:var(--round);
     display:flex;align-items:center;gap:10px;
-    width:100%;aspect-ratio:1000/322;text-align:left;
+    width:100%;aspect-ratio:1000/322;min-height:min-content;text-align:left;
     border:0;border-radius:20px;overflow:hidden;
-    background:url('./assets/pack/frame.webp?v=73') center/100% 100% no-repeat;
-    padding:0 8%;cursor:pointer;
-    box-shadow:0 6px 16px rgba(40,90,140,.18);
+    background:none;
+    padding:12px 8%;cursor:pointer;
+    box-shadow:0 5px 14px rgba(40,90,140,.13);
   }
-  .dt-card.now{filter:brightness(1.06) saturate(1.1)}
+  .dt-card::before{
+    content:"";position:absolute;inset:0;z-index:0;
+    background:url('./assets/pack/frame.webp?v=74') center/100% 100% no-repeat;
+    opacity:.6;
+  }
+  .dt-main,.dt-chips,.dt-days{position:relative;z-index:1}
+  .dt-card.now::before{filter:brightness(1.06) saturate(1.1);opacity:.72}
   .dt-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
-  .dt-name{font-size:15px;color:#2f4a6d;font-weight:600;
-    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  /* 名字长了就换行，最多两行 */
+  .dt-name{
+    font-size:15px;color:#2f4a6d;font-weight:600;line-height:1.35;
+    white-space:normal;word-break:break-word;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  }
   .dt-sub{font-size:11.5px;color:#5b7a9d}
   .dt-chips{display:flex;gap:4px;flex:none}
   .dt-chip{
@@ -513,39 +528,42 @@
 
   /* ---- 账本 ---- */
   .led-card{
-    background:linear-gradient(160deg,rgba(255,255,255,.94),rgba(247,252,255,.86));
+    background:linear-gradient(160deg,rgba(255,255,255,.34),rgba(226,242,252,.22));
+    border:1px solid rgba(255,255,255,.5);
     border-radius:22px;padding:16px 18px 18px;margin-bottom:16px;
-    box-shadow:0 10px 26px rgba(65,140,180,.2);
+    backdrop-filter:blur(16px) saturate(1.12);
+    -webkit-backdrop-filter:blur(16px) saturate(1.12);
+    box-shadow:0 16px 34px rgba(65,140,180,.2),inset 0 1px 0 rgba(255,255,255,.55);
     font-family:var(--round);
   }
   .led-head{display:flex;align-items:center;gap:8px;margin-bottom:6px}
-  .led-title{flex:1;text-align:center;font-size:13px;color:#7fa8c4;letter-spacing:2px}
+  .led-title{flex:1;text-align:center;font-size:13px;color:#5d88a8;letter-spacing:2px}
   .led-nav{
     width:30px;height:30px;border:0;border-radius:50%;cursor:pointer;
     background:rgba(108,199,232,.16);color:var(--ocean);font-size:17px;line-height:1;
   }
   .led-total{display:flex;align-items:baseline;justify-content:center;gap:4px}
-  .led-cur{font-size:20px;color:#8fb8d2}
+  .led-cur{font-size:20px;color:#6494b3}
   .led-num{
     font-family:var(--num);font-size:44px;font-weight:700;color:var(--ocean);
     letter-spacing:1px;line-height:1.1;
   }
-  .led-cmp{text-align:center;font-size:12px;margin-top:4px;color:#8fb8d2}
+  .led-cmp{text-align:center;font-size:12px;margin-top:4px;color:#5f8aa8}
   .led-cmp.up{color:#d08a92}
   .led-cmp.down{color:#5aa697}
   .led-facts{
     display:flex;justify-content:center;gap:18px;margin-top:10px;
-    font-size:12px;color:#8fb8d2;
+    font-size:12px;color:#5f8aa8;
   }
   /* 分类小结 */
   .led-cats{
     margin-top:14px;padding-top:12px;
-    border-top:1px dashed rgba(140,185,215,.4);
+    border-top:1px dashed rgba(120,170,205,.55);
     display:flex;flex-direction:column;gap:10px;
   }
   .led-cat{display:flex;align-items:center;gap:10px}
   .led-ico{width:26px;height:26px;object-fit:contain;flex:none}
-  .led-cat-name{flex:1;font-size:14px;color:#5b7a9d}
+  .led-cat-name{flex:1;font-size:14px;color:#41648a}
   .led-cat-num{font-family:var(--num);font-size:15px;color:var(--ocean);font-weight:600}
 
   /* 表单里挑分类 */
@@ -566,12 +584,12 @@
   }
 
   .led-week{
-    margin-top:14px;padding-top:12px;border-top:1px dashed rgba(140,185,215,.4);
+    margin-top:14px;padding-top:12px;border-top:1px dashed rgba(120,170,205,.55);
   }
   .led-wk-top{display:flex;align-items:baseline;justify-content:space-between}
-  .led-wk-label{font-size:12.5px;color:#7fa8c4;letter-spacing:1px}
+  .led-wk-label{font-size:12.5px;color:#5d88a8;letter-spacing:1px}
   .led-wk-num{font-family:var(--num);font-size:22px;color:var(--ocean);font-weight:600}
-  .led-wk-range{font-size:11px;color:#a8c8db;margin-top:2px}
+  .led-wk-range{font-size:11px;color:#7ea3bd;margin-top:2px}
   .led-week .led-cmp{text-align:left;margin-top:2px}
 
   .led-day{margin-bottom:14px}
@@ -602,22 +620,29 @@
   }
   .ck-sub{font-size:12px;color:rgba(255,255,255,.85);flex:1;text-align:right}
 
-  /* 日期球。一排横着滑，选中的那颗自己滚到中间。 */
+  /* 日期球。滑到正中间的那颗就是当天 —— 不用点。
+     两边的球越远越小、越淡、越虚，像镜头对在中间那颗上。
+     左右各垫半个屏幕的空白，第一天和最后一天才推得到中间。 */
   .ck-days{
     display:flex;gap:8px;overflow-x:auto;
-    padding:4px 6px 14px;margin:0 -6px;
+    padding:8px 0 16px;margin:0 -6px;
+    scroll-snap-type:x mandatory;
     scrollbar-width:none;-webkit-overflow-scrolling:touch;
+    overscroll-behavior-x:contain;
   }
+  .ck-days::before,.ck-days::after{content:"";flex:none;width:calc(50% - 29px)}
   .ck-days::-webkit-scrollbar{display:none}
   .ck-day{
     position:relative;flex:none;
     width:46px;height:58px;
+    scroll-snap-align:center;
     display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
     font-family:var(--round);cursor:pointer;
     border:1px solid rgba(255,255,255,.45);border-radius:23px;
     background:rgba(255,255,255,.26);
     backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
-    transition:background .18s ease,box-shadow .18s ease,transform .18s ease;
+    will-change:transform;                /* 缩放每帧都在动，别让它排在主线程后面 */
+    transition:background .18s ease,box-shadow .18s ease,border-color .18s ease;
   }
   .ck-w{font-size:10.5px;color:#5b7a9d}
   .ck-d{font-family:var(--num);font-size:17px;font-weight:600;color:#2f4a6d}
@@ -625,7 +650,7 @@
   .ck-day.today{border-color:rgba(255,255,255,.9)}
   .ck-day.on{
     background:rgba(108,199,232,.88);border-color:#fff;
-    box-shadow:0 6px 16px rgba(50,110,160,.28);transform:translateY(-2px);
+    box-shadow:0 8px 20px rgba(50,110,160,.3);
   }
   .ck-day.on .ck-w,.ck-day.on .ck-d{color:#fff}
   /* 那天的事全做完了，球底下点一个点 */
@@ -787,7 +812,7 @@
      不用动图 WebP —— iOS 上它时灵时不灵，这个到处都能播。 */
   #angSprite{
     width:100%;aspect-ratio:1/1;
-    background-image:url('./assets/ride_sheet.webp?v=73');
+    background-image:url('./assets/ride_sheet.webp?v=74');
     background-repeat:no-repeat;
     background-size:500% 100%;
     /* jump-none 才会取到 0/25/50/75/100 这五个位置。
@@ -893,7 +918,7 @@
 
   <div id="deco"></div>
 
-  <img id="title" src="./assets/title.webp?v=73" alt="直到大地变成一颗酸橙">
+  <img id="title" src="./assets/title.webp?v=74" alt="直到大地变成一颗酸橙">
 
 
   <div id="ang"><div id="angFlip"><div id="angSprite" role="img" aria-label="安洁莉娜"></div></div></div>
@@ -912,20 +937,20 @@
 
 /* 存储走 dock 那一层，跟别的应用同一套。
    现在是本地实现，以后换成接口版，这里一行都不用改。 */
-import { LocalStore } from '../../core/storage.js?v=73';
+import { LocalStore } from '../../core/storage.js?v=74';
 const store = new LocalStore();
 
 /* 有 config.local.js 就用它，没有就用公开那份。
    缺哪个字段就补哪个，不用整份照抄。 */
-import baseConfig from './config.js?v=73';
-import { mountCalendar } from './calendar.js?v=73';
-import { mountDates } from './dates.js?v=73';
-import { mountDeco } from './deco.js?v=73';
-import { mountLedger } from './ledger.js?v=73';
-import { mountChecklist } from './checklist.js?v=73';
+import baseConfig from './config.js?v=74';
+import { mountCalendar } from './calendar.js?v=74';
+import { mountDates } from './dates.js?v=74';
+import { mountDeco } from './deco.js?v=74';
+import { mountLedger } from './ledger.js?v=74';
+import { mountChecklist } from './checklist.js?v=74';
 let CFG = baseConfig;
 try {
-  const local = (await import('./config.local.js?v=73')).default;
+  const local = (await import('./config.local.js?v=74')).default;
   CFG = { ...baseConfig, ...local };
 } catch { /* 没有本地配置，用公开版 */ }
 
@@ -1008,7 +1033,7 @@ function makeLetters() {
     el.className = 'letter';
     const icon = (CFG.stopIcons && CFG.stopIcons[i]) || 'letter.webp';
     const name = (CFG.panels[i] && CFG.panels[i].name) || '';
-    el.innerHTML = `<img src="./assets/${icon}?v=73" alt="${name}">`;
+    el.innerHTML = `<img src="./assets/${icon}?v=74" alt="${name}">`;
 
     /* 名字单独一层，钉在站点上，不放进信封里 ——
        信封一直在飘，装在里面的东西会被一起带着走，
@@ -1173,7 +1198,7 @@ CFG.panels.forEach((p, i) => {
    不然改了它浏览器可能还在跑旧的。 */
 if ('serviceWorker' in navigator) {
   addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js?v=73', { updateViaCache: 'none' })
+    navigator.serviceWorker.register('./sw.js?v=74', { updateViaCache: 'none' })
       .catch(e => console.warn('sw register failed', e));
   });
 }

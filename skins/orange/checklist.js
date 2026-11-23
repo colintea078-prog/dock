@@ -36,6 +36,54 @@ export function todoForDay(items, dayKey) {
 
 export const todoIsDone = (done, dayKey, id) => (done[dayKey] || []).includes(id);
 
+/* ------------------------------------------------------- 存到手机日历 */
+
+/* 清单上的时间原本只是个标签 —— 网页关掉就没人值班，到点不会响。
+   把带时间的条目导成一个 .ics，手机日历收下后由系统在那个时间提醒。
+   每天的写成每日循环；单次的只导还没到的那天。 */
+function icsText(s) {
+  return String(s).replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\n/g, '\\n');
+}
+const icsDay = d => `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}`;
+const icsTime = d => `${pad(d.getHours())}${pad(d.getMinutes())}00`;
+
+function buildTodoIcs(items) {
+  const today = key(new Date());
+  const now = new Date();
+  const stamp = `${now.getUTCFullYear()}${pad(now.getUTCMonth() + 1)}${pad(now.getUTCDate())}T${pad(now.getUTCHours())}${pad(now.getUTCMinutes())}${pad(now.getUTCSeconds())}Z`;
+  const lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//dock orange//todo//ZH'];
+  for (const it of items) {
+    if (!it.time) continue;
+    const startDay = it.daily && it.date < today ? today : it.date;
+    if (!it.daily && it.date < today) continue;      // 单次的已经过了，导了也不会响
+    const [h, m] = it.time.split(':').map(Number);
+    const start = new Date(startDay + 'T00:00:00'); start.setHours(h, m, 0, 0);
+    const end = new Date(start.getTime() + 15 * 60000);
+    lines.push('BEGIN:VEVENT',
+      `UID:todo-${it.id}@dock-orange`,
+      `DTSTAMP:${stamp}`,
+      `DTSTART:${icsDay(start)}T${icsTime(start)}`,
+      `DTEND:${icsDay(end)}T${icsTime(end)}`,
+      `SUMMARY:${icsText(it.text)}`);
+    if (it.daily) lines.push('RRULE:FREQ=DAILY');
+    lines.push('BEGIN:VALARM', 'ACTION:DISPLAY', `DESCRIPTION:${icsText(it.text)}`, 'TRIGGER:PT0M', 'END:VALARM');
+    lines.push('END:VEVENT');
+  }
+  lines.push('END:VCALENDAR');
+  return lines.join('\r\n');
+}
+
+function downloadTodoIcs(items) {
+  const blob = new Blob([buildTodoIcs(items)], { type: 'text/calendar;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = '清单提醒.ics';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+}
+
 /* 清单被谁改了都喊一声，另一块跟着重读。detail.src 是为了不把自己喊醒。 */
 export const announceTodo = src =>
   dispatchEvent(new CustomEvent('dock:todo', { detail: { src } }));
@@ -54,6 +102,7 @@ export function mountChecklist(root, { cfg, store }) {
       <div class="ck-title">清单</div>
       <div class="ck-sub"></div>
       <button class="ck-back" hidden>回到今天</button>
+      <button class="ck-cal" hidden>把带时间的存到手机日历（到点让手机提醒）</button>
     </div>
     <div class="ck-days"></div>
     <div class="ck-list"></div>
@@ -62,6 +111,8 @@ export function mountChecklist(root, { cfg, store }) {
   const elDays = root.querySelector('.ck-days');
   const elList = root.querySelector('.ck-list');
   const elBack = root.querySelector('.ck-back');
+  const elCal = root.querySelector('.ck-cal');
+  elCal.onclick = () => downloadTodoIcs(items);
 
   /* 首尾两块留白，宽度按像素给（见 settle） */
   const padL = document.createElement('i');
@@ -259,7 +310,7 @@ export function mountChecklist(root, { cfg, store }) {
     });
   }
 
-  function draw() { markClear(); drawList(); }
+  function draw() { markClear(); drawList(); elCal.hidden = !items.some(it => it.time); }
 
   /* 滑动时每帧最多对焦一次 */
   let tick = 0;

@@ -107,6 +107,8 @@ function icsText(s) {
   return String(s).replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\n/g, '\\n');
 }
 const icsDay = d => `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}`;
+/* 时间换算成 UTC 写死，免得各家日历猜时区猜错、把日子挪几个小时。 */
+const icsUtc = dt => `${dt.getUTCFullYear()}${pad(dt.getUTCMonth() + 1)}${pad(dt.getUTCDate())}T${pad(dt.getUTCHours())}${pad(dt.getUTCMinutes())}${pad(dt.getUTCSeconds())}Z`;
 
 function buildIcs(item) {
   const { when } = nextOccurrence(item, midnight(new Date()));
@@ -121,8 +123,8 @@ function buildIcs(item) {
     'BEGIN:VEVENT',
     `UID:${item.id || Date.now()}-${icsDay(day)}@dock-orange`,
     `DTSTAMP:${stamp}`,
-    `DTSTART:${icsDay(day)}T090000`,
-    `DTEND:${icsDay(day)}T093000`,
+    `DTSTART:${icsUtc(new Date(day.getFullYear(), day.getMonth(), day.getDate(), 9, 0))}`,
+    `DTEND:${icsUtc(new Date(day.getFullYear(), day.getMonth(), day.getDate(), 9, 30))}`,
     `SUMMARY:${icsText(item.name)}`
   ];
   if (item.repeat && item.calendar !== 'lunar') lines.push('RRULE:FREQ=YEARLY');

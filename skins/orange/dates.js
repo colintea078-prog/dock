@@ -97,6 +97,54 @@ export function occursOn(item, day) {
   return day.getMonth() === src.getMonth() && day.getDate() === src.getDate();
 }
 
+/* ------------------------------------------------------- 存到手机日历 */
+
+/* 推送没接上时的另一条路：把日子导成一个 .ics 文件，手机自带日历
+   收下之后，到点由系统提醒 —— 系统是常驻的，不用谁在外面值班。
+   阳历每年重复的写成每年循环，手机那边自己往后推；
+   农历的换算只有浏览器会，导出的只是下一次的那一天。 */
+function icsText(s) {
+  return String(s).replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\n/g, '\\n');
+}
+const icsDay = d => `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}`;
+
+function buildIcs(item) {
+  const { when } = nextOccurrence(item, midnight(new Date()));
+  const day = when || new Date(item.date + 'T00:00:00');
+  const now = new Date();
+  const stamp = `${now.getUTCFullYear()}${pad(now.getUTCMonth() + 1)}${pad(now.getUTCDate())}T${pad(now.getUTCHours())}${pad(now.getUTCMinutes())}${pad(now.getUTCSeconds())}Z`;
+  const ds = (Array.isArray(item.remind) && item.remind.length) ? item.remind : [0];
+  const lines = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//dock orange//dates//ZH',
+    'BEGIN:VEVENT',
+    `UID:${item.id || Date.now()}-${icsDay(day)}@dock-orange`,
+    `DTSTAMP:${stamp}`,
+    `DTSTART:${icsDay(day)}T090000`,
+    `DTEND:${icsDay(day)}T093000`,
+    `SUMMARY:${icsText(item.name)}`
+  ];
+  if (item.repeat && item.calendar !== 'lunar') lines.push('RRULE:FREQ=YEARLY');
+  for (const d of ds) {
+    lines.push('BEGIN:VALARM', 'ACTION:DISPLAY', `DESCRIPTION:${icsText(item.name)}`,
+      d === 0 ? 'TRIGGER:PT0M' : `TRIGGER:-P${d}D`, 'END:VALARM');
+  }
+  lines.push('END:VEVENT', 'END:VCALENDAR');
+  return lines.join('\r\n');
+}
+
+function downloadIcs(item) {
+  const blob = new Blob([buildIcs(item)], { type: 'text/calendar;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `${item.name || '日子'}.ics`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+}
+
 /* ------------------------------------------------------------------ 视图 */
 
 export function mountDates(root, { cfg, store }) {
@@ -114,7 +162,7 @@ export function mountDates(root, { cfg, store }) {
   /* 推送还没接上时说实话：选了先存着，别让人以为已经会响了。 */
   const remindHint = (cfg.pushApi || cfg.queueApi)
     ? '那天早上九点提醒你。'
-    : '先存着 —— 推送还没接上，接上之后就按这里选的发。';
+    : '先存着 —— 推送还没接上。存好后重新点开这条，点「存到手机日历」，到点手机会替你响。';
 
   root.innerHTML = `
     <div class="dt-push" hidden></div>
@@ -403,6 +451,8 @@ export function mountDates(root, { cfg, store }) {
           <p class="dt-hint">${remindHint}</p>
         </div>
 
+        ${existing ? '<button class="sheet-btn ghost" id="dtIcs" style="width:100%;margin-bottom:10px">存到手机日历（到点让手机提醒）</button>' : ''}
+
         <div class="sheet-row">
           ${existing ? '<button class="sheet-btn ghost" id="dtDel">删掉</button>' : ''}
           <button class="sheet-btn ghost" id="dtCancel">关掉</button>
@@ -455,6 +505,18 @@ export function mountDates(root, { cfg, store }) {
       items = items.filter(x => x.id !== it.id);
       elSheet.hidden = true;
       await persist();
+    };
+
+    const icsBtn = elSheet.querySelector('#dtIcs');
+    if (icsBtn) icsBtn.onclick = () => {
+      downloadIcs({
+        id: it.id,
+        name: elSheet.querySelector('#dtName').value.trim() || it.name,
+        date: elSheet.querySelector('#dtDate').value || it.date,
+        calendar: cal,
+        repeat: elSheet.querySelector('#dtRepeat').checked,
+        remind: [...remind]
+      });
     };
 
     elSheet.querySelector('#dtSave').onclick = async () => {

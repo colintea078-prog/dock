@@ -1,4 +1,16 @@
-# dock
+# 直到大地变成一颗酸橙
+
+一款装在手机主屏幕上的个人 PWA：日历、倒计时、账本、清单四件，离线可用，数据存在自己的设备里。
+
+在线试用：https://colintea078-prog.github.io/dock/ （打开就是它）
+
+界面素材来自《明日方舟》2026 年夏季活动「直到大地变成一颗酸橙」官方公开素材。本项目是非商业同人作品，与鹰角网络无关；素材版权归上海鹰角网络科技有限公司所有，细则见 [skins/orange/NOTICE.md](skins/orange/NOTICE.md)。代码部分为 MIT 许可证。
+
+这个仓库同时包含它底下的框架 dock —— 酸橙是跑在 dock 上的一套皮肤，皮肤本体在 `skins/orange/`。下面是框架的说明。
+
+---
+
+## 底座：dock 框架
 
 **A small pluggable home screen for your own tools.** Installable as a PWA, works offline,
 no build step, no dependencies, no backend required.

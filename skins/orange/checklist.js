@@ -76,9 +76,18 @@ function buildTodoIcs(items) {
 }
 
 function downloadTodoIcs(items) {
-  const blob = new Blob([buildTodoIcs(items)], { type: 'text/calendar;charset=utf-8' });
+  const text = buildTodoIcs(items);
+  const blob = new Blob([text], { type: 'text/calendar;charset=utf-8' });
+  /* iOS 装到主屏的那份里，下载和跳 blob 都经常没反应；走系统分享，
+     把文件递出去，再由她点那个文件加到日历。 */
+  if (/iP(hone|ad|od)/.test(navigator.userAgent)) {
+    const file = new File([blob], '清单提醒.ics', { type: 'text/calendar' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      navigator.share({ files: [file] }).catch(() => {});
+      return;
+    }
+  }
   const url = URL.createObjectURL(blob);
-  /* iOS 不认脚本替它点的下载：直接把文件交给系统，它会弹「加到日历」。 */
   if (/iP(hone|ad|od)/.test(navigator.userAgent)) {
     location.href = url;
   } else {

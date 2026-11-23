@@ -75,13 +75,19 @@ function buildTodoIcs(items) {
 
 function downloadTodoIcs(items) {
   const blob = new Blob([buildTodoIcs(items)], { type: 'text/calendar;charset=utf-8' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = '清单提醒.ics';
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  const url = URL.createObjectURL(blob);
+  /* iOS 不认脚本替它点的下载：直接把文件交给系统，它会弹「加到日历」。 */
+  if (/iP(hone|ad|od)/.test(navigator.userAgent)) {
+    location.href = url;
+  } else {
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = '清单提醒.ics';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
+  setTimeout(() => URL.revokeObjectURL(url), 60000);
 }
 
 /* 清单被谁改了都喊一声，另一块跟着重读。detail.src 是为了不把自己喊醒。 */
@@ -102,7 +108,7 @@ export function mountChecklist(root, { cfg, store }) {
       <div class="ck-title">清单</div>
       <div class="ck-sub"></div>
       <button class="ck-back" hidden>回到今天</button>
-      <button class="ck-cal" hidden>把带时间的存到手机日历（到点让手机提醒）</button>
+      <button class="ck-cal" hidden>存到手机日历 · 到点提醒</button>
     </div>
     <div class="ck-days"></div>
     <div class="ck-list"></div>

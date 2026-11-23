@@ -44,8 +44,10 @@ export const todoIsDone = (done, dayKey, id) => (done[dayKey] || []).includes(id
 function icsText(s) {
   return String(s).replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\n/g, '\\n');
 }
-const icsDay = d => `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}`;
-const icsTime = d => `${pad(d.getHours())}${pad(d.getMinutes())}00`;
+/* 时间一律换算成 UTC 写死。裸时间（不带时区）各家日历会自己猜，
+   猜错就漂几个小时；钉成 UTC，谁读都不会错。（国内无夏令时，
+   每日/每年循环换算完也不会慢慢漂。） */
+const icsUtc = d => `${d.getUTCFullYear()}${pad(d.getUTCMonth() + 1)}${pad(d.getUTCDate())}T${pad(d.getUTCHours())}${pad(d.getUTCMinutes())}${pad(d.getUTCSeconds())}Z`;
 
 function buildTodoIcs(items) {
   const today = key(new Date());
@@ -62,8 +64,8 @@ function buildTodoIcs(items) {
     lines.push('BEGIN:VEVENT',
       `UID:todo-${it.id}@dock-orange`,
       `DTSTAMP:${stamp}`,
-      `DTSTART:${icsDay(start)}T${icsTime(start)}`,
-      `DTEND:${icsDay(end)}T${icsTime(end)}`,
+      `DTSTART:${icsUtc(start)}`,
+      `DTEND:${icsUtc(end)}`,
       `SUMMARY:${icsText(it.text)}`);
     if (it.daily) lines.push('RRULE:FREQ=DAILY');
     lines.push('BEGIN:VALARM', 'ACTION:DISPLAY', `DESCRIPTION:${icsText(it.text)}`, 'TRIGGER:PT0M', 'END:VALARM');

@@ -3,7 +3,7 @@
  * 改这个文件必须动 VERSION，否则浏览器认不出有新版本，
  * 会一直用旧缓存桶里的东西。
  */
-const VERSION = 'orange-v6';
+const VERSION = 'orange-v7';
 const CACHE = VERSION;
 
 /* 装的时候先存下外壳。逐个 add，某一个 404 不至于让整次安装失败。 */

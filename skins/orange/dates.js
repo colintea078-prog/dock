@@ -137,9 +137,16 @@ function buildIcs(item) {
 }
 
 function downloadIcs(item) {
-  const blob = new Blob([buildIcs(item)], { type: 'text/calendar;charset=utf-8' });
+  const text = buildIcs(item);
+  const blob = new Blob([text], { type: 'text/calendar;charset=utf-8' });
+  if (/iP(hone|ad|od)/.test(navigator.userAgent)) {
+    const file = new File([blob], `${item.name || '日子'}.ics`, { type: 'text/calendar' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      navigator.share({ files: [file] }).catch(() => {});
+      return;
+    }
+  }
   const url = URL.createObjectURL(blob);
-  /* iOS 不认脚本替它点的下载：直接把文件交给系统，它会弹「加到日历」。 */
   if (/iP(hone|ad|od)/.test(navigator.userAgent)) {
     location.href = url;
   } else {
